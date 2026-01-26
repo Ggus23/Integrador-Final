@@ -1,0 +1,119 @@
+from typing import Any, List
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app import models, schemas
+from app.api import deps
+from app.core.security import get_password_hash
+
+router = APIRouter()
+
+
+@router.post("/", response_model=schemas.user.User, status_code=status.HTTP_201_CREATED)
+def create_user(
+    *, db: Session = Depends(deps.get_db), user_in: schemas.user.UserCreate
+) -> Any:
+    """
+    Create a new user (Registration).
+
+    Academic Note: This endpoint is accessible without authentication to allow
+    new students/staff to join. Registration logic involves:
+    - Email domain validation (@gmail.com enforced via schema).
+    - Password hashing for security.
+    - Check for existing accounts to prevent duplicates (HTTP 409 Conflict).
+    """
+    # Check if user with this email already exists
+    # Academic Note: Returning 409 Conflict is more semantically accurate than 400
+    # for resource collisions.
+    user = (
+        db.query(models.user.User)
+        .filter(models.user.User.email == user_in.email)
+        .first()
+    )
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A user with this email already exists in the system.",
+        )
+
+    # Create user object, hashing the password
+    # Academic Note: Hashing is done using bcrypt via security helper.
+    # Managed fields like is_active, created_at, updated_at are handled by the model/DB.
+    db_obj = models.user.User(
+        email=user_in.email,
+        hashed_password=get_password_hash(user_in.password),
+        full_name=user_in.full_name,
+        role=user_in.role,
+    )
+    db.add(db_obj)
+    db.commit()
+    db.refresh(db_obj)
+
+    # Generate verification token and send email
+    from app.services.auth_service import auth_service
+
+    auth_service.create_verification_token(db, db_obj)
+
+    return db_obj
+
+
+@router.get("/me", response_model=schemas.user.User)
+def read_user_me(
+    current_user: models.user.User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Get current logged-in user profile.
+    This route is protected by the get_current_user dependency.
+    """
+    return current_user
+
+
+@router.put("/me", response_model=schemas.user.User)
+def update_user_me(
+    *,
+    db: Session = Depends(deps.get_db),
+    user_in: schemas.user.UserUpdate,
+    current_user: models.user.User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Update own user profile.
+    Currently supports full_name and password.
+    """
+    if user_in.full_name:
+        current_user.full_name = user_in.full_name
+
+    if user_in.password:
+        current_user.hashed_password = get_password_hash(user_in.password)
+
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.get("/", response_model=List[schemas.user.User])
+def read_users(
+    db: Session = Depends(deps.get_db),
+    skip: int = 0,
+    limit: int = 100,
+    # Only Admin users can list all system users
+    current_user: models.user.User = Depends(deps.get_admin_user),
+) -> Any:
+    """
+    Retrieve all users.
+    Role-protected: Only accesible by 'admin' role.
+    """
+    users = db.query(models.user.User).offset(skip).limit(limit).all()
+    return users
+
+
+@router.get("/psychologist-only", response_model=str)
+def psychologist_feature(
+    # Role-protected: Only accessible by 'psychologist' or 'admin' roles
+    current_user: models.user.User = Depends(deps.get_psychologist_user),
+) -> Any:
+    """
+    A dummy endpoint to demonstrate Psychologist role access control.
+    """
+    return f"Welcome, {current_user.full_name}. You have Psychologist/Admin privileges."

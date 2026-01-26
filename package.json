@@ -1,26 +1,17 @@
 {
-  "name": "menta-link",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "next": "16.1.1",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.1",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  }
+    "name": "mentalink-monorepo",
+    "private": true,
+    "workspaces": [
+        "frontend"
+    ],
+    "scripts": {
+        "dev:web": "npm run dev -w frontend",
+        "dev:api": "cd backend && ./venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
+        "predev": "kill-port 3000 3001 8000 && rm -f frontend/.next/dev/lock",
+        "dev": "concurrently -n web,api \"npm run dev:web\" \"npm run dev:api\""
+    },
+    "devDependencies": {
+        "concurrently": "^9.0.0",
+        "kill-port": "^2.0.1"
+    }
 }

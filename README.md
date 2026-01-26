@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MentaLink Monorepo
+
+Welcome to the MentaLink repository. This project is a monorepo containing both the Frontend (Next.js) and Backend (FastAPI).
+
+## Structure
+
+*   **frontend/**: Next.js + React + Tailwind CSS application.
+*   **backend/**: FastAPI + Python application.
+*   **documentacion/**: Project documentation.
+
+## Prerequisites
+
+*   **Node.js**: v18 or higher
+*   **Python**: v3.10 or higher
+*   **Git Bash** (on Windows) or standard terminal (Linux/Mac)
 
 ## Getting Started
 
-First, run the development server:
-
+### 1. Root Setup
+Install the root dependencies to manage the workspace:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Backend Setup
+Navigate to the backend directory and set up the virtual environment:
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+*Note: Make sure to create a `.env` file in `backend/` based on `.env.example`.*
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Frontend Setup
+The frontend dependencies are managed automatically by the root `npm install`, but you need to configure your environment variables:
+1.  Go to `frontend/`.
+2.  Copy `.env.local.example` to `.env.local` (if applicable) or create one.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Quality Control
+This project uses **pre-commit** to ensure code quality (formatting, linting) before every commit.
+Install the hooks once:
+```bash
+pre-commit install
+```
 
-## Learn More
+## Running the Application
 
-To learn more about Next.js, take a look at the following resources:
+To run **both** the Frontend and Backend simultaneously:
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+*   **Frontend**: [http://localhost:3000](http://localhost:3000) (or 3001 if occupied)
+*   **Backend API**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+    *   Docs: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Individual Commands
+*   `npm run dev:web`: Run only Frontend.
+*   `npm run dev:api`: Run only Backend.
 
-## Deploy on Vercel
+## Testing & Linting
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*   **Lint All**: `pre-commit run --all-files`
+*   **Frontend Tests**: `cd frontend && npm test`
+*   **Backend Tests**: `cd backend && pytest`
