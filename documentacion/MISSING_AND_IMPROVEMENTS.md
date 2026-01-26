@@ -3,17 +3,12 @@
 ## 1. Prioridad Alta: Infraestructura y Calidad de Código 🚨
 
 ### Backend (FastAPI)
-- **Recuperación de Contraseña**:
-  - Integración SMTP real pendiente (actualmente es un endpoint mock).
-  - Validar flujo completo con tokens de un solo uso.
-
-
-## 2. Funcionalidades Pendientes y Mejoras
+- **Optimización y Seguridad (Backend Core)**:
+  - **Base de Datos**: Definir índices para consultas frecuentes (ej. reportes históricos).
+  - **Auth**: Implementar *Refresh Tokens* para sesiones seguras de larga duración.
+  - **Logging**: Integrar logs estructurados o Sentry para monitoreo en producción.
 
 ### Backend
-- **Recuperación de Contraseña**:
-  - Integración SMTP real pendiente (actualmente es un endpoint mock).
-  - Validar flujo completo con tokens de un solo uso.
 - **Optimización y Seguridad (Backend Core)**:
   - **Base de Datos**: Definir índices para consultas frecuentes (ej. reportes históricos).
   - **Auth**: Implementar *Refresh Tokens* para sesiones seguras de larga duración.
@@ -66,3 +61,6 @@ Actualmente, el sistema utiliza un **Modelo de Caja Blanca** basado en reglas po
 - **Arquitectura Simplificada**:
   - Eliminación de roles ambiguos (Tutor) para centrarse en la relación Estudiante-Psicólogo (ODS 3).
   - Validación de roles en creación de usuarios (Admin bloqueado en signup público).
+- **Recuperación de Contraseña**:
+  - Lógica de SMTP implementada (con fallback a Mock si no hay credenciales).
+  - Tokens de un solo uso con expiración configurados y validados.
