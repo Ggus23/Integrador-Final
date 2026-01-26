@@ -20,6 +20,13 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     role: UserRole = UserRole.STUDENT
+    
+    @field_validator("role")
+    @classmethod
+    def role_must_valid(cls, v: UserRole) -> UserRole:
+        if v == UserRole.ADMIN:
+             raise ValueError("Admin users cannot be created via public signup")
+        return v
 
     @field_validator("email")
     @classmethod

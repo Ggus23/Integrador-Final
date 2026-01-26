@@ -149,7 +149,7 @@ export default function SignupPage() {
                   required
                 >
                   <option value="student">Estudiante</option>
-                  <option value="psychologist">Psicólogo / Tutor</option>
+                  <option value="psychologist">Psicólogo</option>
                 </select>
                 <div className="text-muted-foreground pointer-events-none absolute top-1/2 right-4 -translate-y-1/2">
                   <svg

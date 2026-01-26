@@ -3,12 +3,10 @@
 ## 1. Prioridad Alta: Infraestructura y Calidad de Código 🚨
 
 ### Backend (FastAPI)
+- **Recuperación de Contraseña**:
+  - Integración SMTP real pendiente (actualmente es un endpoint mock).
+  - Validar flujo completo con tokens de un solo uso.
 
-### DevOps & General
-- **CI/CD**: No existen flujos de trabajo de GitHub Actions (o similar).
-  - *Acción*: Crear workflows para Linting, Testing y Build check en cada Push/PR.
-- **Hooks de Pre-commit**: No configurados.
-  - *Acción*: Implementar `husky` (frontend) o `pre-commit` (backend) para evitar commits con errores obvios.
 
 ## 2. Funcionalidades Pendientes y Mejoras
 
@@ -61,3 +59,10 @@ Actualmente, el sistema utiliza un **Modelo de Caja Blanca** basado en reglas po
 - **Servicios Backend**: Implementados (con placeholders funcionales) `NotificationService`, `ScoreService`, `RiskService`, `AlertService`, `CheckinService`.
 - **Nuevas Pruebas**: Agregados `test_checkins.py`, `test_assessments.py`, `test_alerts.py`, `test_errors.py` (Manejo de errores globales 404/500).
 - **Manejo de Errores**: Implementados handlers centralizados en `app/core/errors.py` para respuestas JSON consistentes.
+- **DevOps Completado**:
+  - Configuración de Monorepo unificado.
+  - CI/CD Implementado con GitHub Actions (Frontend y Backend separados).
+  - Pre-commit hooks configurados para limpieza automatizada de código.
+- **Arquitectura Simplificada**:
+  - Eliminación de roles ambiguos (Tutor) para centrarse en la relación Estudiante-Psicólogo (ODS 3).
+  - Validación de roles en creación de usuarios (Admin bloqueado en signup público).
