@@ -4,9 +4,9 @@ services:
   db:
     image: postgres:16
     container_name: mentalink-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
+    restart: unless-stopped                                               
+    environment:                                                                                        
+      POSTGRES_USER: postgres                   
       POSTGRES_PASSWORD: postgresql
       POSTGRES_DB: mentalink
     ports:
@@ -20,12 +20,12 @@ services:
       timeout: 5s
       retries: 5
 
-  api:
+  api:                      
     build:
       context: .
       dockerfile: ./docker/api.Dockerfile
     container_name: mentalink-api
-    restart: unless-stopped
+    restart: unless-stopped     
     depends_on:
       db:
         condition: service_healthy

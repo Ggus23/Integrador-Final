@@ -8,6 +8,15 @@ from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.errors import general_exception_handler, http_exception_handler, not_found_handler
 from app.core.limiter import limiter
+import sentry_sdk
+
+if settings.SENTRY_DSN and settings.SENTRY_DSN.strip().startswith("http"):
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        traces_sample_rate=1.0,
+    )
 
 # Initialize the FastAPI application
 app = FastAPI(

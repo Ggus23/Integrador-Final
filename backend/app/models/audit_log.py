@@ -1,4 +1,5 @@
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.db.base_class import Base
@@ -21,3 +22,6 @@ class AuditLog(Base):
     details = Column(Text, nullable=True)  # JSON or text description
 
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationship back to the user (the actor)
+    actor = relationship("User", back_populates="audit_logs")

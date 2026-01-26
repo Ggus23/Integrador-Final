@@ -15,14 +15,18 @@ class EmotionalCheckin(Base):
     __tablename__ = "emotional_checkins"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
 
     # Mood score usually 1 to 5 (1: Very Bad, 5: Very Good)
     mood_score = Column(Integer, nullable=False)
+    # Energy level 1 to 5
+    energy_level = Column(Integer, nullable=True, default=3)
+    # Sleep hours
+    sleep_hours = Column(Integer, nullable=True)
     # Optional note from the user
     note = Column(Text, nullable=True)
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
 
     # Relationship back to the user
     user = relationship("User", back_populates="emotional_checkins")

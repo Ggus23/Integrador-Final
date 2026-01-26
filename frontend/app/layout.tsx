@@ -8,6 +8,10 @@ import {
   Space_Mono as V0_Font_Space_Mono,
   Source_Serif_4 as V0_Font_Source_Serif_4,
 } from 'next/font/google';
+import { Toaster } from '@/components/ui/sonner';
+import { ThemeProvider } from '@/components/theme-provider';
+
+import { LanguageProvider } from '@/context/LanguageContext';
 
 // Initialize fonts
 const _dmSans = V0_Font_DM_Sans({
@@ -49,10 +53,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
-        {children}
-        <Analytics />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <LanguageProvider>
+            {children}
+            <Toaster />
+            <Analytics />
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

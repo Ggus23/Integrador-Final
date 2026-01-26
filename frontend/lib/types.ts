@@ -39,6 +39,8 @@ export interface Checkin {
   id: string;
   user_id: string;
   mood_score: number;
+  energy_level?: number;
+  sleep_hours?: number;
   note?: string;
   created_at: string;
 }

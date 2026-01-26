@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -34,7 +34,7 @@ def create_user(
     if user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="A user with this email already exists in the system.",
+            detail="Ya existe un usuario con este correo electrónico en el sistema.",
         )
 
     # Create user object, hashing the password
@@ -110,10 +110,88 @@ def read_users(
 
 @router.get("/psychologist-only", response_model=str)
 def psychologist_feature(
-    # Role-protected: Only accessible by 'psychologist' or 'admin' roles
     current_user: models.user.User = Depends(deps.get_psychologist_user),
 ) -> Any:
     """
-    A dummy endpoint to demonstrate Psychologist role access control.
+    Endpoint de demostración para privilegios de Psicólogo/Admin.
     """
-    return f"Welcome, {current_user.full_name}. You have Psychologist/Admin privileges."
+    return f"Bienvenido, {current_user.full_name}. Tienes privilegios de Psicólogo/Admin."
+
+
+@router.patch("/{user_id}/role", response_model=schemas.user.User)
+def update_user_role(
+    user_id: int,
+    role: models.user.UserRole,
+    db: Session = Depends(deps.get_db),
+    current_user: models.user.User = Depends(deps.get_admin_user),
+) -> Any:
+    """
+    Cambiar el rol de un usuario.
+    Protegido: Solo accesible por 'admin'.
+    """
+    user = db.query(models.user.User).filter(models.user.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    user.role = role
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.patch("/{user_id}/status", response_model=schemas.user.User)
+def toggle_user_status(
+    user_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user: models.user.User = Depends(deps.get_admin_user),
+) -> Any:
+    """
+    Activar o desactivar una cuenta de usuario.
+    Si se desactiva, se resuelven automáticamente sus alertas pendientes.
+    Protegido: Solo accesible por 'admin'.
+    """
+    user = db.query(models.user.User).filter(models.user.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Toggle status
+    user.is_active = not user.is_active
+    
+    # Si se desactiva, resolver alertas
+    if not user.is_active:
+        from datetime import datetime, timezone
+        pending_alerts = db.query(models.Alert).filter(
+            models.Alert.user_id == user.id,
+            models.Alert.is_resolved == False
+        ).all()
+        for alert in pending_alerts:
+            alert.is_resolved = True
+            alert.resolved_at = datetime.now(timezone.utc)
+    
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(
+    user_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user: models.user.User = Depends(deps.get_admin_user),
+):
+    """
+    Eliminar un usuario del sistema de forma permanente.
+    Protegido: Solo accesible por 'admin'.
+    """
+    user = db.query(models.user.User).filter(models.user.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Prevenir que un admin se elimine a sí mismo
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="No puedes eliminar tu propia cuenta de administrador")
+
+    db.delete(user)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

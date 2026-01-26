@@ -24,8 +24,8 @@ class UserCreate(BaseModel):
     @field_validator("role")
     @classmethod
     def role_must_valid(cls, v: UserRole) -> UserRole:
-        if v == UserRole.ADMIN:
-             raise ValueError("Admin users cannot be created via public signup")
+        if v in [UserRole.ADMIN, UserRole.PSYCHOLOGIST]:
+             raise ValueError("Solo se permite el registro de estudiantes vía registro público")
         return v
 
     @field_validator("email")

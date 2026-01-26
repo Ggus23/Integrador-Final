@@ -62,7 +62,8 @@ class APIClient {
     return headers;
   }
 
-  private async request(method: string, endpoint: string, body?: unknown, isFormData = false) {
+  // Define public request for flexibility if needed, but keeping it mainly internal
+  async request(method: string, endpoint: string, body?: unknown, isFormData = false) {
     const url = `${this.baseURL}${endpoint}`;
 
     let requestBody: BodyInit | undefined;
@@ -92,12 +93,23 @@ class APIClient {
         }
       }
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.detail || `API error: ${response.status}`);
+      // Handle 204 No Content - Return null without parsing JSON
+      if (response.status === 204) {
+        return null;
       }
 
-      return response.json();
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.detail || `Error de API: ${response.status}`);
+      }
+
+      // Check if there is content before parsing
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        return response.json();
+      }
+      return null;
+
     } catch (error) {
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
         throw new Error(
@@ -111,19 +123,12 @@ class APIClient {
 
   // Auth endpoints
   async login(email: string, password: string) {
-    // FastAPI OAuth2PasswordRequestForm expects application/x-www-form-urlencoded
-    // and the fields must be 'username' and 'password'
     const response = await this.request('POST', '/auth/login', { username: email, password }, true);
     this.setToken(response.access_token);
     return response;
   }
 
   async register(userData: Record<string, any>) {
-    /**
-     * Users registration endpoint.
-     * Academic Note: This is an open endpoint. Validation is performed both
-     * at the schema level (domain check) and database level (uniqueness).
-     */
     return this.request('POST', '/users/', userData);
   }
 
@@ -179,12 +184,28 @@ class APIClient {
     return this.request('GET', '/students/');
   }
 
+  async getUsers() {
+    return this.request('GET', '/users/');
+  }
+
+  async updateUserRole(userId: string, role: string) {
+    return this.request('PATCH', `/users/${userId}/role?role=${role}`);
+  }
+
+  async toggleUserStatus(userId: string) {
+    return this.request('PATCH', `/users/${userId}/status`);
+  }
+
   async getStudentDetails(studentId: string) {
     return this.request('GET', `/students/${studentId}`);
   }
 
   async getAggregatedReports() {
     return this.request('GET', '/reports/aggregated');
+  }
+
+  async deleteUser(userId: string) {
+    return this.request('DELETE', `/users/${userId}`);
   }
 
   async acceptConsent() {

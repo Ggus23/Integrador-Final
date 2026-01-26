@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Union
 
 from jose import jwt
@@ -21,9 +21,9 @@ def create_access_token(
     efficient Role-Based Access Control (RBAC) at the gateway or middleware level.
     """
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(
+        expire = datetime.now(timezone.utc) + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
@@ -33,6 +33,32 @@ def create_access_token(
     to_encode = {"exp": expire, "sub": str(subject), "role": role}
 
     # Sign the token using the secret key and algorithm defined in config
+    encoded_jwt = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
+    return encoded_jwt
+
+
+def create_refresh_token(
+    subject: Union[str, Any], role: str, expires_delta: timedelta = None
+) -> str:
+    """
+    Generates a refresh token.
+    Refresh tokens have a longer lifespan and are used to obtain new access tokens.
+    """
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(
+            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+        )
+
+    to_encode = {
+        "exp": expire,
+        "sub": str(subject),
+        "role": role,
+        "type": "refresh",  # Distinguish from access tokens
+    }
     encoded_jwt = jwt.encode(
         to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )

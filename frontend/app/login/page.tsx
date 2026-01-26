@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { user, login } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
 
   useEffect(() => {
@@ -60,28 +62,34 @@ export default function LoginPage() {
             style={{ animationDelay: '0.1s' }}
           >
             <div className="space-y-2">
-              <label className="text-foreground text-sm font-medium">Correo Electrónico</label>
+              <label htmlFor="email" className="text-foreground text-sm font-medium">
+                {t('auth.email')}
+              </label>
               <input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="tu.correo@ejemplo.com"
                 className="border-input bg-background/50 text-foreground focus:border-primary focus:ring-primary/20 w-full rounded-lg border px-4 py-2.5 shadow-sm transition-all outline-none focus:ring-2"
                 required
-                aria-label="Correo Electrónico"
+                aria-label={t('auth.email')}
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-foreground text-sm font-medium">Contraseña</label>
+              <label htmlFor="password" className="text-foreground text-sm font-medium">
+                {t('auth.password')}
+              </label>
               <input
+                id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="border-input bg-background/50 text-foreground focus:border-primary focus:ring-primary/20 w-full rounded-lg border px-4 py-2.5 shadow-sm transition-all outline-none focus:ring-2"
                 required
-                aria-label="Contraseña"
+                aria-label={t('auth.password')}
               />
             </div>
 
@@ -90,13 +98,13 @@ export default function LoginPage() {
                 href="/forgot-password"
                 className="text-primary hover:text-accent text-sm font-medium transition-colors hover:underline"
               >
-                ¿Olvidaste tu contraseña?
+                {t('auth.forgot_password')}
               </Link>
             </div>
 
             {error && (
               <div className="border-destructive/20 bg-destructive/10 text-destructive flex items-center justify-center rounded-lg border p-3 text-sm font-medium">
-                {error}
+                {typeof error === 'string' ? error : JSON.stringify(error)}
               </div>
             )}
 
@@ -105,7 +113,7 @@ export default function LoginPage() {
               disabled={loading}
               className="from-primary to-accent w-full rounded-lg bg-gradient-to-r py-6 text-base font-semibold text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl"
             >
-              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              {loading ? t('auth.logging_in') : t('auth.login_title')}
             </Button>
           </form>
 

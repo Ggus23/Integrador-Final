@@ -13,15 +13,16 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    label: 'Panel Principal',
+    label: 'Inicio',
     href: '/dashboard',
     roles: ['student', 'psychologist', 'tutor', 'admin'],
   },
   { label: 'Evaluaciones', href: '/assessments', roles: ['student'] },
-  { label: 'Check-ins', href: '/checkins', roles: ['student'] },
+  { label: 'Mi Bienestar', href: '/checkins', roles: ['student'] },
   { label: 'Mis Alertas', href: '/alerts', roles: ['student'] },
   { label: 'Todas las Alertas', href: '/admin/alerts', roles: ['psychologist', 'tutor', 'admin'] },
   { label: 'Estudiantes', href: '/admin/students', roles: ['psychologist', 'tutor', 'admin'] },
+  { label: 'Usuarios', href: '/admin/users', roles: ['admin'] },
   { label: 'Reportes', href: '/admin/reports', roles: ['psychologist', 'tutor', 'admin'] },
 ];
 
@@ -41,10 +42,10 @@ export function Sidebar() {
             key={item.href}
             href={item.href}
             className={cn(
-              'block rounded px-4 py-2 text-sm font-medium transition-colors',
+              'block rounded px-4 py-2 text-sm font-medium transition-all',
               pathname === item.href
-                ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                : 'text-sidebar-foreground hover:bg-muted'
+                ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
+                : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
             )}
           >
             {item.label}

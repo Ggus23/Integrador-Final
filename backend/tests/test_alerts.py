@@ -16,7 +16,7 @@ async def test_process_risk_alert_high():
             "user@example.com", RiskLevel.HIGH, "Test Context"
         )
         mock_notify.assert_called_once_with(
-            "user@example.com", "high", "High risk detected during: Test Context"
+            "user@example.com", "high", "Alto Riesgo detectado durante: Test Context"
         )
 
 

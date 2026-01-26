@@ -34,16 +34,21 @@ class User(Base):
     is_active = Column(Boolean(), default=True)
     is_email_verified = Column(Boolean(), default=False)
 
-    # Relationships
-    consent = relationship("Consent", back_populates="user", uselist=False)
-    assessment_responses = relationship("AssessmentResponse", back_populates="user")
-    emotional_checkins = relationship("EmotionalCheckin", back_populates="user")
-    risk_summary = relationship("RiskSummary", back_populates="user", uselist=False)
-    alerts = relationship("Alert", back_populates="user")
+    # Relationships with Full Cascade Delete
+    # Academic Note: 'cascade="all, delete-orphan"' ensures that when a User is deleted,
+    # all related data is purged as well. This is crucial for privacy and DB integrity.
+    consent = relationship("Consent", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    assessment_responses = relationship("AssessmentResponse", back_populates="user", cascade="all, delete-orphan")
+    emotional_checkins = relationship("EmotionalCheckin", back_populates="user", cascade="all, delete-orphan")
+    risk_summary = relationship("RiskSummary", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    alerts = relationship("Alert", back_populates="user", cascade="all, delete-orphan")
 
     # Auth tokens relationships
-    verification_tokens = relationship("EmailVerificationToken", back_populates="user")
-    reset_tokens = relationship("PasswordResetToken", back_populates="user")
+    verification_tokens = relationship("EmailVerificationToken", back_populates="user", cascade="all, delete-orphan")
+    reset_tokens = relationship("PasswordResetToken", back_populates="user", cascade="all, delete-orphan")
+
+    # Audit related records
+    audit_logs = relationship("AuditLog", back_populates="actor", cascade="all, delete-orphan")
 
     # Audit timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())

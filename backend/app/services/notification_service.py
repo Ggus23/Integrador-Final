@@ -17,7 +17,7 @@ class NotificationService:
         """
         Sends a risk alert.
         """
-        await send_alert_email(user_email, f"Risk Level: {risk_level}. {details}")
+        await send_alert_email(user_email, f"Nivel de Riesgo: {risk_level}. {details}")
 
 
 notification_service = NotificationService()

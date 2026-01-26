@@ -96,5 +96,4 @@ class RoleChecker:
 # Common role check dependencies
 get_admin_user = RoleChecker([UserRole.ADMIN])
 get_psychologist_user = RoleChecker([UserRole.ADMIN, UserRole.PSYCHOLOGIST])
-get_tutor_user = RoleChecker([UserRole.ADMIN, UserRole.TUTOR])
-get_staff_user = RoleChecker([UserRole.ADMIN, UserRole.PSYCHOLOGIST, UserRole.TUTOR])
+get_staff_user = RoleChecker([UserRole.ADMIN, UserRole.PSYCHOLOGIST])

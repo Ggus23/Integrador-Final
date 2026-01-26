@@ -6,6 +6,7 @@ import { useProtected } from '@/hooks/useProtected';
 import { apiClient } from '@/lib/api';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import type { StudentSummary } from '@/lib/types';
 
 export default function AdminStudentsPage() {
@@ -22,7 +23,7 @@ export default function AdminStudentsPage() {
         const data = await apiClient.getStudents();
         setStudents(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load students');
+        setError(err instanceof Error ? err.message : 'Error al cargar estudiantes');
       } finally {
         setLoading(false);
       }
@@ -34,21 +35,34 @@ export default function AdminStudentsPage() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center py-12">Loading...</div>
+        <div className="flex items-center justify-center py-12">Cargando...</div>
       </Layout>
     );
   }
 
   const getRiskColor = (level: string) => {
     switch (level?.toLowerCase()) {
-      case 'low':
-        return 'bg-chart-4 text-background';
-      case 'medium':
-        return 'bg-secondary text-secondary-foreground';
-      case 'high':
-        return 'bg-primary text-primary-foreground';
+      case 'low': case 'bajo':
+        return 'bg-risk-low/10 text-risk-low border-risk-low/20';
+      case 'medium': case 'medio':
+        return 'bg-risk-medium/10 text-risk-medium border-risk-medium/20';
+      case 'high': case 'alto':
+        return 'bg-risk-high/10 text-risk-high border-risk-high/20';
       default:
         return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const translateRisk = (level?: string) => {
+    if (!level) return 'N/A';
+    switch (level.toLowerCase()) {
+      case 'high': return 'ALTO';
+      case 'medium': return 'MEDIO';
+      case 'low': return 'BAJO';
+      case 'alto': return 'ALTO';
+      case 'medio': return 'MEDIO';
+      case 'bajo': return 'BAJO';
+      default: return level.toUpperCase();
     }
   };
 
@@ -88,11 +102,11 @@ export default function AdminStudentsPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">Riesgo:</span>
+                      <span className="text-sm font-medium text-foreground">Riesgo:</span>
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${getRiskColor(student.risk_level)}`}
                       >
-                        {student.risk_level.toUpperCase()}
+                        {translateRisk(student.risk_level)}
                       </span>
                     </div>
 
@@ -100,9 +114,11 @@ export default function AdminStudentsPage() {
                       <span>Alertas Activas: {student.active_alerts}</span>
                     </div>
 
-                    <Button className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 mt-2 w-full">
-                      Ver Detalles
-                    </Button>
+                    <Link href={`/admin/students/${student.id}`}>
+                      <Button className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 mt-2 w-full">
+                        Ver Detalles
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </Card>

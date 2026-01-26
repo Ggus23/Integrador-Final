@@ -65,7 +65,7 @@ def read_checkin(
     )
 
     if not checkin:
-        raise HTTPException(status_code=404, detail="Check-in not found")
+        raise HTTPException(status_code=404, detail="Registro de bienestar no encontrado")
 
     # IDOR Check
     if (
@@ -77,6 +77,6 @@ def read_checkin(
             f"User {current_user.id} tried to access check-in {checkin_id} "
             f"belonging to user {checkin.user_id}",
         )
-        raise HTTPException(status_code=403, detail="Not enough permissions")
+        raise HTTPException(status_code=403, detail="No tiene permisos suficientes")
 
     return checkin

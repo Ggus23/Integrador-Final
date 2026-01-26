@@ -14,8 +14,8 @@ class AssessmentResponse(Base):
     __tablename__ = "assessment_responses"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    assessment_id = Column(Integer, ForeignKey("assessments.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    assessment_id = Column(Integer, ForeignKey("assessments.id"), nullable=False, index=True)
 
     # Store raw answers as JSON: {"1": 4, "2": 2, ...}
     answers = Column(JSON, nullable=False)
@@ -25,7 +25,7 @@ class AssessmentResponse(Base):
     # Risk Level: "Low", "Medium", "High"
     risk_level = Column(String, nullable=False)
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
 
     # Relationships
     user = relationship("User", back_populates="assessment_responses")

@@ -27,7 +27,7 @@ export default function AdminReportsPage() {
         const data = await apiClient.getAggregatedReports();
         setReport(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load reports');
+        setError(err instanceof Error ? err.message : 'Error al cargar los reportes');
       } finally {
         setLoading(false);
       }
@@ -39,7 +39,7 @@ export default function AdminReportsPage() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center py-12">Loading...</div>
+        <div className="flex items-center justify-center py-12">Cargando...</div>
       </Layout>
     );
   }
@@ -86,10 +86,12 @@ export default function AdminReportsPage() {
               <div className="space-y-3">
                 {Object.entries(report.risk_distribution).map(([level, count]) => (
                   <div key={level} className="flex items-center gap-2">
-                    <div className="w-20 text-sm capitalize">{level}</div>
+                    <div className="w-20 text-sm capitalize">
+                      {level === 'high' ? 'Alto' : level === 'medium' ? 'Medio' : 'Bajo'}
+                    </div>
                     <div className="bg-muted h-4 flex-1 overflow-hidden rounded-full">
                       <div
-                        className={`h-full ${level === 'High' ? 'bg-destructive' : level === 'Medium' ? 'bg-secondary' : 'bg-primary'}`}
+                        className={`h-full ${level.toLowerCase() === 'high' ? 'bg-risk-high' : level.toLowerCase() === 'medium' ? 'bg-risk-medium' : 'bg-risk-low'}`}
                         style={{ width: `${(count / report.total_population) * 100}%` }}
                       />
                     </div>

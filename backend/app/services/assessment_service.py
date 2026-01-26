@@ -151,7 +151,7 @@ class AssessmentService:
                 user_id=user_id,
                 severity="High",
                 message=(
-                    f"System detected High Risk. Source: {assessment.title} + ML Context."  # noqa: E501
+                    f"El sistema detectó un Riesgo Alto. Fuente: {assessment.title} + Contexto ML."  # noqa: E501
                 ),
             )
             db.add(alert)

@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     # Academic Note: Short-lived tokens (30-60 mins) are a security best practice
     # to limit the window of opportunity if a token is intercepted.
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # Sentry Configuration
+    SENTRY_DSN: str | None = None
 
     # Database Configuration
     POSTGRES_SERVER: str = "localhost"

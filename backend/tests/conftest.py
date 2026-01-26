@@ -47,3 +47,17 @@ def client(db_session):
     with TestClient(app) as c:
         yield c
     app.dependency_overrides = {}
+
+
+@pytest.fixture(scope="session", autouse=True)
+def mock_email():
+    """
+    Force the use of MockEmailService for all tests to prevent sending real emails.
+    """
+    from app.services.auth_service import auth_service
+    from app.services.email_service import MockEmailService
+
+    original_service = auth_service.mail
+    auth_service.mail = MockEmailService()
+    yield
+    auth_service.mail = original_service

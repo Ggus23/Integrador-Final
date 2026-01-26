@@ -20,13 +20,13 @@ async def send_email(
 
 
 async def send_reset_password_email(email_to: str, email: str, token: str) -> None:
-    subject = "Reset your password"
-    msg = f"Use this token to reset your password: {token}"
+    subject = "Restablecer tu contraseña"
+    msg = f"Usa este token para restablecer tu contraseña: {token}"
     await send_email([email_to], subject=subject, environment={"msg": msg})
 
 
 async def send_alert_email(email_to: str, alert_details: str) -> None:
-    subject = "MENTALINK Alert"
+    subject = "Alerta de MENTALINK"
     await send_email(
         [email_to], subject=subject, environment={"details": alert_details}
     )

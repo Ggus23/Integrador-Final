@@ -1,6 +1,9 @@
 from datetime import timedelta
 from typing import Any
 
+from jose import jwt
+from pydantic import ValidationError
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -52,7 +55,7 @@ def login_access_token(
         )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Correo electrónico o contraseña incorrectos",
         )
     elif not user.is_active:
         log_security_event(
@@ -60,7 +63,7 @@ def login_access_token(
         )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Inactive user",
+            detail="Usuario inactivo",
         )
 
     # If hash needs update (e.g. migration from bcrypt to argon2), save it now
@@ -78,6 +81,57 @@ def login_access_token(
     return {
         "access_token": security.create_access_token(
             user.id, role=user.role.value, expires_delta=access_token_expires
+        ),
+        "refresh_token": security.create_refresh_token(
+            user.id, role=user.role.value
+        ),
+        "token_type": "bearer",
+    }
+
+
+@router.post("/refresh", response_model=schemas.auth.Token)
+def refresh_token(
+    refresh_token: str,
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    """
+    Refresh access token using a valid refresh token.
+    Rotates the refresh token as well for better security.
+    """
+    try:
+        payload = jwt.decode(
+            refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        token_data = schemas.auth.TokenPayload(**payload)
+        
+        # Validate token type specifically
+        if payload.get("type") != "refresh":
+             raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token type",
+            )
+
+    except (jwt.JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+        
+    # Check if user exists and is active
+    user = db.query(models.user.User).filter(models.user.User.id == token_data.sub).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+        
+    # Generate new tokens
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return {
+        "access_token": security.create_access_token(
+            user.id, role=user.role.value, expires_delta=access_token_expires
+        ),
+        "refresh_token": security.create_refresh_token(
+             user.id, role=user.role.value
         ),
         "token_type": "bearer",
     }
@@ -113,7 +167,7 @@ def recover_password(
 
     auth_service.request_password_reset(db, email_in.email)
     # Always return 200 to prevent enumeration
-    return {"msg": "If the email exists, a recovery link has been sent."}
+    return {"msg": "Si el correo existe, se ha enviado un enlace de recuperación."}
 
 
 @router.post("/reset-password")
@@ -135,7 +189,7 @@ def reset_password(
         raise HTTPException(status_code=400, detail="Invalid or expired token")
 
     log_security_event("PASSWORD_RESET_SUCCESS", "Password reset successful via token")
-    return {"msg": "Password updated successfully"}
+    return {"msg": "Contraseña actualizada exitosamente"}
 
 
 @router.post("/test-token", response_model=schemas.user.User)

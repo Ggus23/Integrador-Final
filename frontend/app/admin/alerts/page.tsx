@@ -6,6 +6,7 @@ import { useProtected } from '@/hooks/useProtected';
 import { apiClient } from '@/lib/api';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import type { RiskAlert } from '@/lib/types';
 
 export default function AdminAlertsPage() {
@@ -26,7 +27,7 @@ export default function AdminAlertsPage() {
         const data = await apiClient.getAllAlerts(filters);
         setAlerts(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load alerts');
+        setError(err instanceof Error ? err.message : 'Error al cargar las alertas');
       } finally {
         setLoading(false);
       }
@@ -38,19 +39,19 @@ export default function AdminAlertsPage() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center py-12">Loading...</div>
+        <div className="flex items-center justify-center py-12">Cargando...</div>
       </Layout>
     );
   }
 
   const getRiskColor = (level: string) => {
-    switch (level) {
-      case 'low':
-        return 'bg-chart-4 text-background';
-      case 'medium':
-        return 'bg-secondary text-secondary-foreground';
-      case 'high':
-        return 'bg-primary text-primary-foreground';
+    switch (level?.toLowerCase()) {
+      case 'low': case 'bajo':
+        return 'bg-risk-low/10 text-risk-low border-risk-low/20';
+      case 'medium': case 'medio':
+        return 'bg-risk-medium/10 text-risk-medium border-risk-medium/20';
+      case 'high': case 'alto':
+        return 'bg-risk-high/10 text-risk-high border-risk-high/20';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -60,9 +61,9 @@ export default function AdminAlertsPage() {
     <Layout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-foreground font-serif text-4xl font-bold">Student Alerts</h1>
+          <h1 className="text-foreground font-serif text-4xl font-bold">Alertas de Estudiantes</h1>
           <p className="text-muted-foreground mt-2">
-            Monitor early warning indicators across students
+            Monitoreo de indicadores de alerta temprana en los estudiantes
           </p>
         </div>
 
@@ -73,10 +74,10 @@ export default function AdminAlertsPage() {
             onChange={(e) => setFilters({ ...filters, risk_level: e.target.value })}
             className="border-border bg-background text-foreground outline-ring/50 border px-3 py-2 text-sm"
           >
-            <option value="">All Risk Levels</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
+            <option value="">Todos los Niveles</option>
+            <option value="low">Bajo</option>
+            <option value="medium">Medio</option>
+            <option value="high">Alto</option>
           </select>
 
           <select
@@ -84,10 +85,10 @@ export default function AdminAlertsPage() {
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
             className="border-border bg-background text-foreground outline-ring/50 border px-3 py-2 text-sm"
           >
-            <option value="">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="reviewed">Reviewed</option>
-            <option value="resolved">Resolved</option>
+            <option value="">Todos los Estados</option>
+            <option value="pending">Pendiente</option>
+            <option value="reviewed">Revisado</option>
+            <option value="resolved">Resuelto</option>
           </select>
         </div>
 
@@ -99,7 +100,7 @@ export default function AdminAlertsPage() {
 
         {alerts.length === 0 ? (
           <Card className="border-border bg-card p-8 text-center">
-            <p className="text-muted-foreground">No alerts match your filters</p>
+            <p className="text-muted-foreground">No hay alertas que coincidan con los filtros</p>
           </Card>
         ) : (
           <div className="space-y-4">
@@ -118,11 +119,10 @@ export default function AdminAlertsPage() {
                             : 'BAJO'}
                       </span>
                       <span
-                        className={`rounded px-2 py-1 text-xs font-medium ${
-                          !alert.is_resolved
-                            ? 'bg-secondary text-secondary-foreground'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
+                        className={`rounded px-2 py-1 text-xs font-medium ${!alert.is_resolved
+                          ? 'bg-secondary text-secondary-foreground'
+                          : 'bg-muted text-muted-foreground'
+                          }`}
                       >
                         {alert.is_resolved ? 'RESUELTO' : 'PENDIENTE'}
                       </span>
@@ -132,9 +132,11 @@ export default function AdminAlertsPage() {
                     </div>
                     <p className="text-foreground mt-3 font-medium">{alert.message}</p>
                   </div>
-                  <Button className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90">
-                    Ver Estudiante
-                  </Button>
+                  <Link href={`/admin/students/${alert.user_id}`}>
+                    <Button className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90">
+                      Ver Estudiante
+                    </Button>
+                  </Link>
                 </div>
               </Card>
             ))}

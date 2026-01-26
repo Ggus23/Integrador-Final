@@ -30,7 +30,7 @@ export default function DashboardPage() {
           setLastAssessment(responses[0]);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load dashboard');
+        setError(err instanceof Error ? err.message : 'Error al cargar los reportes');
       } finally {
         setLoading(false);
       }
@@ -42,21 +42,44 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center py-12">Loading...</div>
+        <div className="flex items-center justify-center py-12">Cargando...</div>
       </Layout>
     );
   }
 
   const getRiskColor = (level: string) => {
-    switch (level) {
-      case 'low':
-        return 'bg-chart-4 text-background';
-      case 'medium':
-        return 'bg-secondary text-secondary-foreground';
-      case 'high':
-        return 'bg-primary text-primary-foreground';
+    switch (level.toLowerCase()) {
+      case 'low': case 'bajo':
+        return 'bg-risk-low/10 text-risk-low border-risk-low/20';
+      case 'medium': case 'medio':
+        return 'bg-risk-medium/10 text-risk-medium border-risk-medium/20';
+      case 'high': case 'alto':
+        return 'bg-risk-high/10 text-risk-high border-risk-high/20';
       default:
         return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const translateRisk = (level?: string) => {
+    if (!level) return 'N/A';
+    switch (level.toLowerCase()) {
+      case 'high': return 'ALTO';
+      case 'medium': return 'MEDIO';
+      case 'low': return 'BAJO';
+      case 'alto': return 'ALTO';
+      case 'medio': return 'MEDIO';
+      case 'bajo': return 'BAJO';
+      default: return level.toUpperCase();
+    }
+  };
+
+  const translateTrend = (trend?: string) => {
+    if (!trend) return 'ESTABLE';
+    switch (trend.toLowerCase()) {
+      case 'improving': return 'MEJORANDO';
+      case 'stable': return 'ESTABLE';
+      case 'declining': return 'DECAYENDO';
+      default: return trend.toUpperCase();
     }
   };
 
@@ -64,9 +87,13 @@ export default function DashboardPage() {
     <Layout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-foreground font-serif text-4xl font-bold">Dashboard</h1>
+          <h1 className="text-foreground font-serif text-4xl font-bold">Inicio</h1>
           <p className="text-muted-foreground mt-2">
-            ¡Hola de nuevo! Aquí tienes un resumen de tu bienestar.
+            {user?.role === 'student'
+              ? '¡Hola de nuevo! Aquí tienes un resumen de tu bienestar.'
+              : user?.role === 'psychologist'
+                ? `Bienvenido, ${user.full_name}. Tienes situaciones clínicas pendientes.`
+                : `Panel de Control Administrativo: ${user?.full_name}`}
           </p>
         </div>
 
@@ -76,49 +103,108 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Risk Summary */}
-        <div className="grid gap-4 md:grid-cols-3">
-          {riskSummary && (
-            <>
-              <Card
-                className="border-border bg-card animate-slide-up p-6 shadow-sm transition-all hover:shadow-md"
-                style={{ animationDelay: '0.1s' }}
-              >
-                <p className="text-muted-foreground text-sm">Nivel de Riesgo Actual</p>
-                <div className="mt-3 flex items-center gap-3">
-                  <div
-                    className={`rounded-full px-4 py-1.5 font-medium ${getRiskColor(riskSummary.current_risk_level)} shadow-sm`}
-                  >
-                    {riskSummary.current_risk_level.toUpperCase()}
+        {/* Admin Quick Actions */}
+        {user?.role === 'admin' && (
+          <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.1s' }}>
+            <h2 className="text-foreground font-serif text-xl font-bold">Gestión Administrativa</h2>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Link href="/admin/users">
+                <Card className="p-6 border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 border-l-purple-500">
+                  <h3 className="font-bold">Control de Usuarios</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Gestionar roles, psicólogos y cuentas.</p>
+                </Card>
+              </Link>
+              <Link href="/admin/students">
+                <Card className="p-6 border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 border-l-primary">
+                  <h3 className="font-bold">Base de Estudiantes</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Auditoría de perfiles y registros técnicos.</p>
+                </Card>
+              </Link>
+              <Link href="/admin/reports">
+                <Card className="p-6 border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 border-l-accent">
+                  <h3 className="font-bold">Métricas Globales</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Análisis institucional del rendimiento.</p>
+                </Card>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Psychologist Quick Actions */}
+        {user?.role === 'psychologist' && (
+          <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.1s' }}>
+            <h2 className="text-foreground font-serif text-xl font-bold">Panel Clínico Operativo</h2>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Link href="/admin/alerts">
+                <Card className="p-6 border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 border-l-risk-high">
+                  <h3 className="font-bold flex justify-between items-center">
+                    Alertas Críticas
+                    <span className="flex h-2 w-2 rounded-full bg-risk-high animate-pulse" />
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">Intervenir en casos de riesgo detectados por la IA.</p>
+                </Card>
+              </Link>
+              <Link href="/admin/students">
+                <Card className="p-6 border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 border-l-blue-500">
+                  <h3 className="font-bold">Seguimiento de Alumnos</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Revisar historial de bienestar y evoluciones.</p>
+                </Card>
+              </Link>
+              <Link href="/admin/reports">
+                <Card className="p-6 border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 border-l-green-500">
+                  <h3 className="font-bold">Análisis de Salud Mental</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Tendencias poblacionales y prevención.</p>
+                </Card>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Risk Summary (Only for Students) */}
+        {user?.role === 'student' && (
+          <div className="grid gap-4 md:grid-cols-3">
+            {riskSummary && (
+              <>
+                <Card
+                  className="border-border bg-card animate-slide-up p-6 shadow-sm transition-all hover:shadow-md"
+                  style={{ animationDelay: '0.1s' }}
+                >
+                  <p className="text-muted-foreground text-sm">Nivel de Riesgo Actual</p>
+                  <div className="mt-3 flex items-center gap-3">
+                    <div
+                      className={`rounded-full px-4 py-1.5 font-medium ${getRiskColor(riskSummary.current_risk_level)} shadow-sm`}
+                    >
+                      {translateRisk(riskSummary.current_risk_level)}
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
 
-              <Card
-                className="border-border bg-card animate-slide-up p-6 shadow-sm transition-all hover:shadow-md"
-                style={{ animationDelay: '0.2s' }}
-              >
-                <p className="text-muted-foreground text-sm">Tendencia</p>
-                <p className="text-foreground mt-3 text-2xl font-bold capitalize">
-                  {riskSummary.trend}
-                </p>
-              </Card>
+                <Card
+                  className="border-border bg-card animate-slide-up p-6 shadow-sm transition-all hover:shadow-md"
+                  style={{ animationDelay: '0.2s' }}
+                >
+                  <p className="text-muted-foreground text-sm">Tendencia</p>
+                  <p className="text-foreground mt-3 text-2xl font-bold">
+                    {translateTrend(riskSummary.trend)}
+                  </p>
+                </Card>
 
-              <Card
-                className="border-border bg-card animate-slide-up p-6 shadow-sm transition-all hover:shadow-md"
-                style={{ animationDelay: '0.3s' }}
-              >
-                <p className="text-muted-foreground text-sm">Alertas Activas</p>
-                <p className="text-foreground mt-3 text-2xl font-bold">
-                  {riskSummary.active_alerts}
-                </p>
-              </Card>
-            </>
-          )}
-        </div>
+                <Card
+                  className="border-border bg-card animate-slide-up p-6 shadow-sm transition-all hover:shadow-md"
+                  style={{ animationDelay: '0.3s' }}
+                >
+                  <p className="text-muted-foreground text-sm">Alertas Activas</p>
+                  <p className="text-foreground mt-3 text-2xl font-bold">
+                    {riskSummary.active_alerts}
+                  </p>
+                </Card>
+              </>
+            )}
+          </div>
+        )}
 
-        {/* Last Assessment */}
-        {lastAssessment && (
+        {/* Last Assessment (Only for Students) */}
+        {user?.role === 'student' && lastAssessment && (
           <Card
             className="border-border bg-card animate-slide-up p-6 shadow-sm"
             style={{ animationDelay: '0.4s' }}
@@ -132,7 +218,7 @@ export default function DashboardPage() {
                 Puntaje Total: {lastAssessment.total_score}
               </p>
               <p className="text-muted-foreground mt-3 text-sm">
-                Nivel de Riesgo: {lastAssessment.risk_level}
+                Nivel de Riesgo: {translateRisk(lastAssessment.risk_level)}
               </p>
               <p className="text-muted-foreground text-xs">
                 {new Date(lastAssessment.created_at).toLocaleDateString()}
@@ -141,7 +227,7 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        {/* Quick Access */}
+        {/* Quick Access (Check-ins for Students) */}
         {user?.role === 'student' && (
           <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.5s' }}>
             <h2 className="text-foreground font-serif text-xl font-bold">Acceso Rápido</h2>
@@ -152,12 +238,12 @@ export default function DashboardPage() {
                 </Button>
               </Link>
               <Link href="/checkins">
-                <Button className="border-border text-foreground hover:border-primary/50 w-full border bg-white shadow-sm transition-all hover:bg-slate-50">
+                <Button className="border-border text-foreground hover:border-primary/50 w-full border bg-card shadow-sm transition-all hover:bg-secondary/50">
                   Registrar Check-in
                 </Button>
               </Link>
               <Link href="/alerts">
-                <Button className="border-border text-foreground hover:border-primary/50 w-full border bg-white shadow-sm transition-all hover:bg-slate-50">
+                <Button className="border-border text-foreground hover:border-primary/50 w-full border bg-card shadow-sm transition-all hover:bg-secondary/50">
                   Ver Alertas
                 </Button>
               </Link>

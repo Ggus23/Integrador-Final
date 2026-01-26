@@ -32,3 +32,25 @@
     - Registrar un nuevo usuario. 
     - Revisar la terminal para ver el log `EMAIL_MOCK` y obtener el token.
     - Construir manualmente la URL: `http://localhost:3000/auth/verify-email?token=<TOKEN_DEL_LOG>`.
+
+## 4. Backend Core y Estabilidad
+- **Consolidación de Servicios**: Servicios principales (`Checkin`, `Risk`, `Alert`) totalmente implementados y testeados.
+- **Calidad de Codebase**: 16 tests automatizados cubriendo Auth, Flujos, Errores y Lógica de Negocio.
+- **Estado**: Servicios validados y listos para integración completa con frontend.
+
+## 5. Inteligencia Artificial (Core)
+- **Modelo Implementado**: `RandomForestClassifier` (Scikit-Learn).
+- **Dataset Base**: `med dataset.csv` (887 estudiantes de medicina con métricas de depresión/ansiedad reales).
+- **Features**: PSS-10 (Estrés), Promedio de Ánimo, Frecuencia de Días Malos, Presión Académica (Proxy).
+- **Performance**:
+    - Accuracy Global: ~73-79%.
+    - Precisión (Alto Riesgo): >80%.
+    - *Estado*: Integrado en `RiskClassifier` con fallback a sistema experto.
+
+## 6. Visualización Explicable (XAI)
+- **Perfil Estudiante (Admin/Psicólogo)**:
+    - Gráfico de barras horizontal implementado con `Recharts`.
+    - Muestra la **Importancia Global de Factores** del modelo de IA (Nivel de Estrés, Ánimo, Presión Académica).
+    - Permite a los especialistas entender qué variables tienen mayor peso en la predicción de riesgo general.
+    - Integrado en la vista de detalle del estudiante (`/admin/students/[id]`).
+

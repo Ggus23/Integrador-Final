@@ -1,0 +1,20 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "back": "Back",
+        "save": "Save",
+        "cancel": "Cancel"
+    },
+    "auth": {
+        "login_title": "Login",
+        "login_subtitle": "Early detection of psychoemotional risk",
+        "email": "Email Address",
+        "password": "Password",
+        "forgot_password": "Forgot your password?",
+        "no_account": "Don't have an account?",
+        "create_account": "Create one",
+        "logging_in": "Logging in...",
+        "secure_data": "Your data is secure and encrypted."
+    }
+}
