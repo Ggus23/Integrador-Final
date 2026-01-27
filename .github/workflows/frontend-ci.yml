@@ -3,14 +3,8 @@ name: Frontend CI
 on:
   push:
     branches: [ "main", "master" ]
-    paths:
-      - 'frontend/**'
   pull_request:
     branches: [ "main", "master" ]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-ci.yml'
-      - 'package-lock.json'
 
 jobs:
   build-and-lint:
