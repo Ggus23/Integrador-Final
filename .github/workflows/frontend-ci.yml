@@ -9,6 +9,8 @@ on:
     branches: [ "main", "master" ]
     paths:
       - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+      - 'package-lock.json'
 
 jobs:
   build-and-lint:
