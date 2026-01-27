@@ -1,9 +1,9 @@
-const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || '/api/v1';
 const TOKEN_KEY = process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY || 'mentalink_token';
 
-if (!API_URL) {
-  throw new Error('NEXT_PUBLIC_API_BASE_URL is not defined');
+if (!process.env.NEXT_PUBLIC_API_BASE_URL && process.env.NODE_ENV === 'production') {
+  console.warn('Advertencia: NEXT_PUBLIC_API_BASE_URL no está definida. Usando valor por defecto.');
 }
 
 class APIClient {
