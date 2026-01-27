@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.db import base  # noqa: F401
 
 # from app.db.session import engine

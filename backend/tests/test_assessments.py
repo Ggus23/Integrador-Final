@@ -1,5 +1,3 @@
-import pytest
-
 from app.core.constants import AssessmentType, RiskLevel
 from app.services.risk_service import risk_service
 from app.services.scoring_service import scoring_service

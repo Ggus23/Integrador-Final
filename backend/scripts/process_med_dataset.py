@@ -1,6 +1,5 @@
 import os
 
-import joblib
 import numpy as np
 import pandas as pd
 
@@ -34,7 +33,6 @@ def process_data():
         cesd = row.get("cesd", 0)
         stai = row.get("stai_t", 0)
 
-        score = 0
         if cesd >= 24 or stai >= 55:
             return 2  # High Risk
         elif cesd >= 16 or stai >= 40:

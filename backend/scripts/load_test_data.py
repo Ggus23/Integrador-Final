@@ -6,7 +6,6 @@ from pathlib import Path
 backend_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(backend_dir))
 
-from app.db.init_db import init_db
 from app.db.session import SessionLocal
 
 logging.basicConfig(level=logging.INFO)

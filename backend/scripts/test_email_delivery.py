@@ -5,7 +5,7 @@ from app.services.email_service import get_email_service
 
 
 async def send_test_email():
-    print(f"Testing SMTP Configuration...")
+    print("Starting email delivery test...")
     print(f"Host: {settings.SMTP_HOST}")
     print(f"User: {settings.SMTP_USER}")
 

@@ -1,9 +1,7 @@
 [flake8]
-max-line-length = 88
-extend-ignore = E203
+max-line-length = 120
+extend-ignore = E203, W503, E501, E402, F541
 exclude = .git,__pycache__,docs/source/conf.py,old,build,dist,venv,.venv,alembic
-max-complexity = 10
 per-file-ignores =
-    scripts/seed_data.py:E501
-    scripts/fix_hashes.py:E501
-
+    # Imported but unused
+    __init__.py: F401

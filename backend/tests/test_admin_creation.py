@@ -1,8 +1,5 @@
-import pytest
-
 from app.core.security import get_password_hash
 from app.models.user import UserRole
-from app.services.auth_service import auth_service
 
 
 def test_create_psychologist_by_admin(client, db_session):

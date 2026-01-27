@@ -16,7 +16,6 @@ async def send_email(
     """
     logger.info(f"Sending email to {email_to} with subject '{subject}'")
     # Simulation of processing
-    pass
 
 
 async def send_reset_password_email(email_to: str, email: str, token: str) -> None:

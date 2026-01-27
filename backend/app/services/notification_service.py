@@ -1,6 +1,3 @@
-from typing import List
-
-from app.core.config import settings
 from app.utils.email import send_alert_email, send_email
 
 

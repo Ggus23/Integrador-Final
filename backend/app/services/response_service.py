@@ -11,7 +11,6 @@ class ResponseService:
         Placeholder for saving individual item responses.
         """
         # Logic to save to DB would go here
-        pass
 
 
 response_service = ResponseService()

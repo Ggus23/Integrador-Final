@@ -1,7 +1,5 @@
 from sqlalchemy.orm import Session
 
-from app.models.user import User
-
 # from app.crud import user as crud_user
 
 

@@ -108,6 +108,12 @@ Para asegurarte de que todo funciona correctamente:
     pre-commit run --all-files
     ```
 
+*   **Verificación Integral (Recomendado antes de Push):**
+    Hemos creado un script que verifica y arregla automáticamente tanto el Frontend como el Backend:
+    ```bash
+    ./check_project.sh
+    ```
+
 *   **Correr Tests de Frontend:**
     ```bash
     cd frontend

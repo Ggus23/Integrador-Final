@@ -7,11 +7,9 @@ def train_pipeline(data_path: str):
     """
     Orchestrates the training process: load, preprocess, train, save.
     """
-    pass
 
 
 def inference_pipeline(input_data: dict):
     """
     Orchestrates the inference process: preprocess, predict, postprocess.
     """
-    pass

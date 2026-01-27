@@ -208,7 +208,9 @@ def toggle_user_status(
 
         pending_alerts = (
             db.query(models.Alert)
-            .filter(models.Alert.user_id == user.id, models.Alert.is_resolved == False)
+            .filter(
+                models.Alert.user_id == user.id, models.Alert.is_resolved == False
+            )  # noqa: E712
             .all()
         )
         for alert in pending_alerts:

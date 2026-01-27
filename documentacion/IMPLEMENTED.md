@@ -38,6 +38,16 @@
 
 ## 7. DevOps & Monorepo 🚀
 - **Estructura Monorepo**: Frontend y Backend unificados con gestión de `npm workspaces`.
-- **CI/CD**: GitHub Actions separados para validación de cada stack.
+- **CI/CD**: GitHub Actions separados para validación de cada stack (Frontend-CI / Backend-CI).
 - **Pre-commit**: Hooks automáticos para limpieza de código (Black, Isort, Prettier).
 - **Git**: `.gitignore` completo y limpieza de archivos innecesarios.
+- **Herramientas de Calidad**: Script de verificación integral `check_project.sh` para validación local pre-push.
+
+## 8. Funcionalidades de Gestión y Profesionalismo 💎
+- **Notas Clínicas**: Sistema de registro privado para psicólogos vinculado a estudiantes (API + UI).
+- **Cambio de Contraseña Obligatorio**: Flujo de seguridad que fuerza a nuevos usuarios (creados por admin) a cambiar su contraseña en el primer login.
+- **Landing Page Profesional**: Página de inicio rediseñada con secciones de marketing, características y "Cómo funciona".
+- **Centro Legal y Soporte**:
+    - **Páginas Legales**: Políticas de Privacidad y Términos de Uso con diseño premium y estructurado.
+    - **Contacto Directo**: Integración de chat inmediato vía WhatsApp y canal dedicado de soporte técnico por email.
+    - **UX Premium**: Uso de micro-animaciones, iconos estilizados y diseño con enfoque en la confianza del usuario.

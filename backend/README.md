@@ -74,8 +74,9 @@ pytest
 ## Documentación
 
 - **Documentación API**: Disponible en `/docs` (Swagger UI) o `/redoc` cuando el servidor está en ejecución.
-- **Escalas y Puntuación**: Ver `app/docs/scales_definitions.md`.
-- **Ética y Privacidad**: Ver `app/docs/ethics_guidelines.md`.
+- **Escalas y Puntuación**: Ver `../documentacion/SCALES_DEFINITIONS.md`.
+- **Ética y Privacidad**: Ver `../documentacion/ETHICS_GUIDELINES.md`.
+- **Flujos Implementados**: Ver `../documentacion/IMPLEMENTED_FLOWS.md`.
 
 ## Solución de Problemas
 

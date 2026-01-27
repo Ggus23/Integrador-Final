@@ -1,5 +1,3 @@
-import pytest
-
 from app.core.security import get_password_hash
 from app.models.alert import Alert
 from app.models.audit_log import AuditLog
