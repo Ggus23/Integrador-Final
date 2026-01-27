@@ -13,17 +13,14 @@ def create_notes_table():
     db = SessionLocal()
     try:
         # Check if table exists
-        check_query = text(
-            """
+        check_query = text("""
             SELECT to_regclass('public.clinical_notes');
-        """
-        )
+        """)
         result = db.execute(check_query).fetchone()
 
         if not result[0]:
             logger.info("Table 'clinical_notes' not found. Creating it...")
-            create_table_query = text(
-                """
+            create_table_query = text("""
                 CREATE TABLE clinical_notes (
                     id SERIAL PRIMARY KEY,
                     student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -34,8 +31,7 @@ def create_notes_table():
                 );
                 CREATE INDEX ix_clinical_notes_student_id ON clinical_notes (student_id);
                 CREATE INDEX ix_clinical_notes_id ON clinical_notes (id);
-            """
-            )
+            """)
             db.execute(create_table_query)
             db.commit()
             logger.info("Table 'clinical_notes' created successfully.")
