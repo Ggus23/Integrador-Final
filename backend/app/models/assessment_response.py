@@ -15,7 +15,9 @@ class AssessmentResponse(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    assessment_id = Column(Integer, ForeignKey("assessments.id"), nullable=False, index=True)
+    assessment_id = Column(
+        Integer, ForeignKey("assessments.id"), nullable=False, index=True
+    )
 
     # Store raw answers as JSON: {"1": 4, "2": 2, ...}
     answers = Column(JSON, nullable=False)

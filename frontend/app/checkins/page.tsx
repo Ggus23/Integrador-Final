@@ -64,38 +64,42 @@ export default function CheckinsPage() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center py-12 text-muted-foreground animate-pulse">Cargando registros...</div>
+        <div className="text-muted-foreground flex animate-pulse items-center justify-center py-12">
+          Cargando registros...
+        </div>
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <div className="space-y-8 max-w-2xl mx-auto px-4">
+      <div className="mx-auto max-w-2xl space-y-8 px-4">
         <div>
-          <h1 className="text-foreground font-serif text-4xl font-bold tracking-tight">Registro de Bienestar</h1>
+          <h1 className="text-foreground font-serif text-4xl font-bold tracking-tight">
+            Registro de Bienestar
+          </h1>
           <p className="text-muted-foreground mt-2 text-lg">
             Un pequeño paso diario para cuidar tu salud mental y ver tu progreso.
           </p>
         </div>
 
         {error && (
-          <div className="border-destructive bg-destructive/10 text-destructive rounded-lg border p-4 text-sm animate-shake">
+          <div className="border-destructive bg-destructive/10 text-destructive animate-shake rounded-lg border p-4 text-sm">
             {error}
           </div>
         )}
 
-        <Card className="border-border bg-card p-6 md:p-8 shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-2 h-full bg-primary opacity-20 group-hover:opacity-100 transition-opacity" />
-          <h2 className="text-foreground font-serif text-2xl font-bold flex items-center gap-2">
+        <Card className="border-border bg-card group relative overflow-hidden p-6 shadow-xl md:p-8">
+          <div className="bg-primary absolute top-0 left-0 h-full w-2 opacity-20 transition-opacity group-hover:opacity-100" />
+          <h2 className="text-foreground flex items-center gap-2 font-serif text-2xl font-bold">
             ✨ ¿Cómo te sientes hoy?
           </h2>
           <form onSubmit={handleSubmit} className="mt-8 space-y-8">
             {/* Mood Score */}
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <label className="text-foreground font-semibold text-base">Estado de Ánimo</label>
-                <span className="text-primary font-bold text-lg bg-primary/10 px-3 py-1 rounded-full">
+              <div className="flex items-center justify-between">
+                <label className="text-foreground text-base font-semibold">Estado de Ánimo</label>
+                <span className="text-primary bg-primary/10 rounded-full px-3 py-1 text-lg font-bold">
                   {formData.mood_score}/5
                 </span>
               </div>
@@ -108,7 +112,7 @@ export default function CheckinsPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, mood_score: Number.parseInt(e.target.value) })
                 }
-                className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                className="bg-muted accent-primary h-2 w-full cursor-pointer appearance-none rounded-lg"
               />
               <div className="text-muted-foreground flex justify-between text-xs font-medium">
                 <span>Muy Mal</span>
@@ -118,9 +122,9 @@ export default function CheckinsPage() {
 
             {/* Energy Level */}
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <label className="text-foreground font-semibold text-base">Nivel de Energía</label>
-                <span className="text-primary font-bold text-lg bg-primary/10 px-3 py-1 rounded-full">
+              <div className="flex items-center justify-between">
+                <label className="text-foreground text-base font-semibold">Nivel de Energía</label>
+                <span className="text-primary bg-primary/10 rounded-full px-3 py-1 text-lg font-bold">
                   {formData.energy_level}/5
                 </span>
               </div>
@@ -133,7 +137,7 @@ export default function CheckinsPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, energy_level: Number.parseInt(e.target.value) })
                 }
-                className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                className="bg-muted accent-primary h-2 w-full cursor-pointer appearance-none rounded-lg"
               />
               <div className="text-muted-foreground flex justify-between text-xs font-medium">
                 <span>Agotado/a</span>
@@ -143,16 +147,18 @@ export default function CheckinsPage() {
 
             {/* Sleep Hours */}
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <label className="text-foreground font-semibold text-base">Horas de Sueño</label>
+              <div className="flex items-center justify-between">
+                <label className="text-foreground text-base font-semibold">Horas de Sueño</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
                     min="0"
                     max="24"
                     value={formData.sleep_hours}
-                    onChange={(e) => setFormData({ ...formData, sleep_hours: Number(e.target.value) })}
-                    className="w-16 bg-muted/50 border-none rounded px-2 py-1 text-center font-bold text-primary"
+                    onChange={(e) =>
+                      setFormData({ ...formData, sleep_hours: Number(e.target.value) })
+                    }
+                    className="bg-muted/50 text-primary w-16 rounded border-none px-2 py-1 text-center font-bold"
                   />
                   <span className="text-muted-foreground text-sm">horas</span>
                 </div>
@@ -161,19 +167,19 @@ export default function CheckinsPage() {
 
             {/* Note */}
             <div className="space-y-2">
-              <label className="text-foreground font-semibold text-base">Notas Personales</label>
+              <label className="text-foreground text-base font-semibold">Notas Personales</label>
               <textarea
                 value={formData.note}
                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                 placeholder="Escribe brevemente cómo te sientes o qué pasó hoy..."
-                className="border-border bg-muted/30 text-foreground focus:ring-2 focus:ring-primary/50 w-full rounded-xl border px-4 py-3 shadow-inner outline-none transition-all min-h-[100px]"
+                className="border-border bg-muted/30 text-foreground focus:ring-primary/50 min-h-[100px] w-full rounded-xl border px-4 py-3 shadow-inner transition-all outline-none focus:ring-2"
               />
             </div>
 
             <Button
               type="submit"
               disabled={submitting}
-              className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold text-lg shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-50"
+              className="bg-primary text-primary-foreground hover:shadow-primary/20 h-12 w-full rounded-xl text-lg font-bold shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
             >
               {submitting ? 'Guardando registro...' : 'Guardar mi Check-in'}
             </Button>
@@ -182,12 +188,15 @@ export default function CheckinsPage() {
 
         {/* Check-ins History */}
         <div className="space-y-6 pt-8">
-          <h2 className="text-foreground font-serif text-2xl font-bold border-l-4 border-primary pl-4">Mi Historial Reciente</h2>
+          <h2 className="text-foreground border-primary border-l-4 pl-4 font-serif text-2xl font-bold">
+            Mi Historial Reciente
+          </h2>
           {checkins.length === 0 ? (
-            <Card className="p-8 text-center border-dashed border-2 py-12">
-              <div className="text-4xl mb-4">📝</div>
+            <Card className="border-2 border-dashed p-8 py-12 text-center">
+              <div className="mb-4 text-4xl">📝</div>
               <p className="text-muted-foreground font-medium">
-                Aún no tienes registros. ¡Tu primer check-in será el comienzo de un gran seguimiento!
+                Aún no tienes registros. ¡Tu primer check-in será el comienzo de un gran
+                seguimiento!
               </p>
             </Card>
           ) : (
@@ -196,40 +205,51 @@ export default function CheckinsPage() {
                 <Card
                   key={checkin.id}
                   className={cn(
-                    "border-border bg-card p-5 transition-all hover:translate-x-1 animate-slide-up",
-                    idx === 0 && "ring-2 ring-primary/20"
+                    'border-border bg-card animate-slide-up p-5 transition-all hover:translate-x-1',
+                    idx === 0 && 'ring-primary/20 ring-2'
                   )}
                   style={{ animationDelay: `${idx * 0.1}s` }}
                 >
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex gap-4 items-center">
-                        <div className="flex flex-col items-center justify-center bg-primary/10 rounded-lg p-2 min-w-[60px]">
-                          <span className="text-xs text-primary font-bold uppercase">Ánimo</span>
-                          <span className="text-xl font-black text-primary">{checkin.mood_score}</span>
+                      <div className="flex items-center gap-4">
+                        <div className="bg-primary/10 flex min-w-[60px] flex-col items-center justify-center rounded-lg p-2">
+                          <span className="text-primary text-xs font-bold uppercase">Ánimo</span>
+                          <span className="text-primary text-xl font-black">
+                            {checkin.mood_score}
+                          </span>
                         </div>
                         {checkin.energy_level && (
-                          <div className="flex flex-col items-center justify-center bg-accent/10 rounded-lg p-2 min-w-[60px]">
-                            <span className="text-xs text-accent font-bold uppercase">Energía</span>
-                            <span className="text-xl font-black text-accent">{checkin.energy_level}</span>
+                          <div className="bg-accent/10 flex min-w-[60px] flex-col items-center justify-center rounded-lg p-2">
+                            <span className="text-accent text-xs font-bold uppercase">Energía</span>
+                            <span className="text-accent text-xl font-black">
+                              {checkin.energy_level}
+                            </span>
                           </div>
                         )}
                         {checkin.sleep_hours !== undefined && (
-                          <div className="flex flex-col items-center justify-center bg-muted rounded-lg p-2 min-w-[60px]">
-                            <span className="text-xs text-muted-foreground font-bold uppercase">Sueño</span>
-                            <span className="text-xl font-black text-foreground">{checkin.sleep_hours}h</span>
+                          <div className="bg-muted flex min-w-[60px] flex-col items-center justify-center rounded-lg p-2">
+                            <span className="text-muted-foreground text-xs font-bold uppercase">
+                              Sueño
+                            </span>
+                            <span className="text-foreground text-xl font-black">
+                              {checkin.sleep_hours}h
+                            </span>
                           </div>
                         )}
                       </div>
-                      <time className="text-muted-foreground text-xs font-medium bg-muted px-2 py-1 rounded">
+                      <time className="text-muted-foreground bg-muted rounded px-2 py-1 text-xs font-medium">
                         {new Date(checkin.created_at).toLocaleDateString(undefined, {
-                          day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
                         })}
                       </time>
                     </div>
                     {checkin.note && (
                       <div className="relative">
-                        <p className="text-foreground bg-muted/20 mt-1 rounded-xl p-4 text-sm border italic border-border/50">
+                        <p className="text-foreground bg-muted/20 border-border/50 mt-1 rounded-xl border p-4 text-sm italic">
                           {checkin.note}
                         </p>
                       </div>

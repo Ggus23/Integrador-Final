@@ -44,7 +44,7 @@ export function Sidebar() {
             className={cn(
               'block rounded px-4 py-2 text-sm font-medium transition-all',
               pathname === item.href
-                ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
+                ? 'bg-primary text-primary-foreground shadow-primary/20 shadow-sm'
                 : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
             )}
           >

@@ -1,6 +1,6 @@
+from app.core.security import get_password_hash
 from app.db.session import SessionLocal
 from app.models.user import User, UserRole
-from app.core.security import get_password_hash
 
 db = SessionLocal()
 
@@ -27,7 +27,7 @@ if not existing_admin:
         hashed_password=get_password_hash("Admin123"),
         role=UserRole.ADMIN,
         is_active=True,
-        is_email_verified=True
+        is_email_verified=True,
     )
     db.add(new_admin)
     print(f"Created new admin: {admin_email}")

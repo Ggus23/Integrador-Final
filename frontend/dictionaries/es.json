@@ -1,20 +1,20 @@
 {
-    "common": {
-        "loading": "Cargando...",
-        "error": "Ocurrió un error",
-        "back": "Volver",
-        "save": "Guardar",
-        "cancel": "Cancelar"
-    },
-    "auth": {
-        "login_title": "Iniciar Sesión",
-        "login_subtitle": "Detección temprana de riesgo psicoemocional",
-        "email": "Correo Electrónico",
-        "password": "Contraseña",
-        "forgot_password": "¿Olvidaste tu contraseña?",
-        "no_account": "¿No tienes una cuenta?",
-        "create_account": "Crear una",
-        "logging_in": "Iniciando sesión...",
-        "secure_data": "Tus datos están seguros y encriptados."
-    }
+  "common": {
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "back": "Volver",
+    "save": "Guardar",
+    "cancel": "Cancelar"
+  },
+  "auth": {
+    "login_title": "Iniciar Sesión",
+    "login_subtitle": "Detección temprana de riesgo psicoemocional",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "forgot_password": "¿Olvidaste tu contraseña?",
+    "no_account": "¿No tienes una cuenta?",
+    "create_account": "Crear una",
+    "logging_in": "Iniciando sesión...",
+    "secure_data": "Tus datos están seguros y encriptados."
+  }
 }

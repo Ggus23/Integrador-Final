@@ -21,7 +21,7 @@ class UserCreateBase(BaseModel):
     full_name: str
     email: EmailStr
     password: str
-    
+
     @field_validator("email")
     @classmethod
     def email_must_be_gmail(cls, v: str) -> str:
@@ -41,12 +41,14 @@ class UserCreateBase(BaseModel):
 
 class UserCreate(UserCreateBase):
     role: UserRole = UserRole.STUDENT
-    
+
     @field_validator("role")
     @classmethod
     def role_must_valid(cls, v: UserRole) -> UserRole:
         if v in [UserRole.ADMIN, UserRole.PSYCHOLOGIST]:
-             raise ValueError("Solo se permite el registro de estudiantes vía registro público")
+            raise ValueError(
+                "Solo se permite el registro de estudiantes vía registro público"
+            )
         return v
 
 

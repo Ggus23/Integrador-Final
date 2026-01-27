@@ -12,8 +12,8 @@ export function Navbar() {
   return (
     <nav className="border-border/50 bg-background/80 sticky top-0 z-50 border-b backdrop-blur-md transition-all">
       <div className="flex h-16 items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="text-foreground font-serif text-2xl font-black tracking-tight transition-colors group-hover:text-primary">
+        <Link href="/" className="group flex items-center gap-2">
+          <div className="text-foreground group-hover:text-primary font-serif text-2xl font-black tracking-tight transition-colors">
             MENTA<span className="text-primary">-LINK</span>
           </div>
         </Link>
@@ -23,7 +23,7 @@ export function Navbar() {
           <Button
             onClick={logout}
             variant="ghost"
-            className="text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all font-medium"
+            className="text-muted-foreground hover:bg-primary/10 hover:text-primary font-medium transition-all"
           >
             Cerrar Sesión
           </Button>

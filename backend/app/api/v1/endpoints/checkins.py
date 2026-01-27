@@ -65,7 +65,9 @@ def read_checkin(
     )
 
     if not checkin:
-        raise HTTPException(status_code=404, detail="Registro de bienestar no encontrado")
+        raise HTTPException(
+            status_code=404, detail="Registro de bienestar no encontrado"
+        )
 
     # IDOR Check
     if (

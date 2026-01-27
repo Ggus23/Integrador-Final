@@ -10,7 +10,9 @@ class AlertService:
         """
         if risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]:
             await notification_service.send_risk_alert(
-                user_email, risk_level.value, f"Alto Riesgo detectado durante: {context}"
+                user_email,
+                risk_level.value,
+                f"Alto Riesgo detectado durante: {context}",
             )
 
 

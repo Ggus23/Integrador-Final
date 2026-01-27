@@ -42,11 +42,14 @@ export default function AdminStudentsPage() {
 
   const getRiskColor = (level: string) => {
     switch (level?.toLowerCase()) {
-      case 'low': case 'bajo':
+      case 'low':
+      case 'bajo':
         return 'bg-risk-low/10 text-risk-low border-risk-low/20';
-      case 'medium': case 'medio':
+      case 'medium':
+      case 'medio':
         return 'bg-risk-medium/10 text-risk-medium border-risk-medium/20';
-      case 'high': case 'alto':
+      case 'high':
+      case 'alto':
         return 'bg-risk-high/10 text-risk-high border-risk-high/20';
       default:
         return 'bg-muted text-muted-foreground';
@@ -56,13 +59,20 @@ export default function AdminStudentsPage() {
   const translateRisk = (level?: string) => {
     if (!level) return 'N/A';
     switch (level.toLowerCase()) {
-      case 'high': return 'ALTO';
-      case 'medium': return 'MEDIO';
-      case 'low': return 'BAJO';
-      case 'alto': return 'ALTO';
-      case 'medio': return 'MEDIO';
-      case 'bajo': return 'BAJO';
-      default: return level.toUpperCase();
+      case 'high':
+        return 'ALTO';
+      case 'medium':
+        return 'MEDIO';
+      case 'low':
+        return 'BAJO';
+      case 'alto':
+        return 'ALTO';
+      case 'medio':
+        return 'MEDIO';
+      case 'bajo':
+        return 'BAJO';
+      default:
+        return level.toUpperCase();
     }
   };
 
@@ -102,7 +112,7 @@ export default function AdminStudentsPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-foreground">Riesgo:</span>
+                      <span className="text-foreground text-sm font-medium">Riesgo:</span>
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${getRiskColor(student.risk_level)}`}
                       >

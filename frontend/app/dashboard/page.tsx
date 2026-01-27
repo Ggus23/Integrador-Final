@@ -49,11 +49,14 @@ export default function DashboardPage() {
 
   const getRiskColor = (level: string) => {
     switch (level.toLowerCase()) {
-      case 'low': case 'bajo':
+      case 'low':
+      case 'bajo':
         return 'bg-risk-low/10 text-risk-low border-risk-low/20';
-      case 'medium': case 'medio':
+      case 'medium':
+      case 'medio':
         return 'bg-risk-medium/10 text-risk-medium border-risk-medium/20';
-      case 'high': case 'alto':
+      case 'high':
+      case 'alto':
         return 'bg-risk-high/10 text-risk-high border-risk-high/20';
       default:
         return 'bg-muted text-muted-foreground';
@@ -63,23 +66,34 @@ export default function DashboardPage() {
   const translateRisk = (level?: string) => {
     if (!level) return 'N/A';
     switch (level.toLowerCase()) {
-      case 'high': return 'ALTO';
-      case 'medium': return 'MEDIO';
-      case 'low': return 'BAJO';
-      case 'alto': return 'ALTO';
-      case 'medio': return 'MEDIO';
-      case 'bajo': return 'BAJO';
-      default: return level.toUpperCase();
+      case 'high':
+        return 'ALTO';
+      case 'medium':
+        return 'MEDIO';
+      case 'low':
+        return 'BAJO';
+      case 'alto':
+        return 'ALTO';
+      case 'medio':
+        return 'MEDIO';
+      case 'bajo':
+        return 'BAJO';
+      default:
+        return level.toUpperCase();
     }
   };
 
   const translateTrend = (trend?: string) => {
     if (!trend) return 'ESTABLE';
     switch (trend.toLowerCase()) {
-      case 'improving': return 'MEJORANDO';
-      case 'stable': return 'ESTABLE';
-      case 'declining': return 'DECAYENDO';
-      default: return trend.toUpperCase();
+      case 'improving':
+        return 'MEJORANDO';
+      case 'stable':
+        return 'ESTABLE';
+      case 'declining':
+        return 'DECAYENDO';
+      default:
+        return trend.toUpperCase();
     }
   };
 
@@ -109,21 +123,27 @@ export default function DashboardPage() {
             <h2 className="text-foreground font-serif text-xl font-bold">Gestión Administrativa</h2>
             <div className="grid gap-4 md:grid-cols-3">
               <Link href="/admin/users">
-                <Card className="p-6 border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 border-l-purple-500">
+                <Card className="border-border bg-card cursor-pointer border-l-4 border-l-purple-500 p-6 shadow-sm transition-all hover:shadow-md">
                   <h3 className="font-bold">Control de Usuarios</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Gestionar roles, psicólogos y cuentas.</p>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Gestionar roles, psicólogos y cuentas.
+                  </p>
                 </Card>
               </Link>
               <Link href="/admin/students">
-                <Card className="p-6 border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 border-l-primary">
+                <Card className="border-border bg-card border-l-primary cursor-pointer border-l-4 p-6 shadow-sm transition-all hover:shadow-md">
                   <h3 className="font-bold">Base de Estudiantes</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Auditoría de perfiles y registros técnicos.</p>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Auditoría de perfiles y registros técnicos.
+                  </p>
                 </Card>
               </Link>
               <Link href="/admin/reports">
-                <Card className="p-6 border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 border-l-accent">
+                <Card className="border-border bg-card border-l-accent cursor-pointer border-l-4 p-6 shadow-sm transition-all hover:shadow-md">
                   <h3 className="font-bold">Métricas Globales</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Análisis institucional del rendimiento.</p>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Análisis institucional del rendimiento.
+                  </p>
                 </Card>
               </Link>
             </div>
@@ -133,27 +153,35 @@ export default function DashboardPage() {
         {/* Psychologist Quick Actions */}
         {user?.role === 'psychologist' && (
           <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.1s' }}>
-            <h2 className="text-foreground font-serif text-xl font-bold">Panel Clínico Operativo</h2>
+            <h2 className="text-foreground font-serif text-xl font-bold">
+              Panel Clínico Operativo
+            </h2>
             <div className="grid gap-4 md:grid-cols-3">
               <Link href="/admin/alerts">
-                <Card className="p-6 border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 border-l-risk-high">
-                  <h3 className="font-bold flex justify-between items-center">
+                <Card className="border-border bg-card border-l-risk-high cursor-pointer border-l-4 p-6 shadow-sm transition-all hover:shadow-md">
+                  <h3 className="flex items-center justify-between font-bold">
                     Alertas Críticas
-                    <span className="flex h-2 w-2 rounded-full bg-risk-high animate-pulse" />
+                    <span className="bg-risk-high flex h-2 w-2 animate-pulse rounded-full" />
                   </h3>
-                  <p className="text-sm text-muted-foreground mt-1">Intervenir en casos de riesgo detectados por la IA.</p>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Intervenir en casos de riesgo detectados por la IA.
+                  </p>
                 </Card>
               </Link>
               <Link href="/admin/students">
-                <Card className="p-6 border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 border-l-blue-500">
+                <Card className="border-border bg-card cursor-pointer border-l-4 border-l-blue-500 p-6 shadow-sm transition-all hover:shadow-md">
                   <h3 className="font-bold">Seguimiento de Alumnos</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Revisar historial de bienestar y evoluciones.</p>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Revisar historial de bienestar y evoluciones.
+                  </p>
                 </Card>
               </Link>
               <Link href="/admin/reports">
-                <Card className="p-6 border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 border-l-green-500">
+                <Card className="border-border bg-card cursor-pointer border-l-4 border-l-green-500 p-6 shadow-sm transition-all hover:shadow-md">
                   <h3 className="font-bold">Análisis de Salud Mental</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Tendencias poblacionales y prevención.</p>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Tendencias poblacionales y prevención.
+                  </p>
                 </Card>
               </Link>
             </div>
@@ -238,12 +266,12 @@ export default function DashboardPage() {
                 </Button>
               </Link>
               <Link href="/checkins">
-                <Button className="border-border text-foreground hover:border-primary/50 w-full border bg-card shadow-sm transition-all hover:bg-secondary/50">
+                <Button className="border-border text-foreground hover:border-primary/50 bg-card hover:bg-secondary/50 w-full border shadow-sm transition-all">
                   Registrar Check-in
                 </Button>
               </Link>
               <Link href="/alerts">
-                <Button className="border-border text-foreground hover:border-primary/50 w-full border bg-card shadow-sm transition-all hover:bg-secondary/50">
+                <Button className="border-border text-foreground hover:border-primary/50 bg-card hover:bg-secondary/50 w-full border shadow-sm transition-all">
                   Ver Alertas
                 </Button>
               </Link>

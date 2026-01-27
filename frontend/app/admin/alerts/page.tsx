@@ -46,11 +46,14 @@ export default function AdminAlertsPage() {
 
   const getRiskColor = (level: string) => {
     switch (level?.toLowerCase()) {
-      case 'low': case 'bajo':
+      case 'low':
+      case 'bajo':
         return 'bg-risk-low/10 text-risk-low border-risk-low/20';
-      case 'medium': case 'medio':
+      case 'medium':
+      case 'medio':
         return 'bg-risk-medium/10 text-risk-medium border-risk-medium/20';
-      case 'high': case 'alto':
+      case 'high':
+      case 'alto':
         return 'bg-risk-high/10 text-risk-high border-risk-high/20';
       default:
         return 'bg-muted text-muted-foreground';
@@ -119,10 +122,11 @@ export default function AdminAlertsPage() {
                             : 'BAJO'}
                       </span>
                       <span
-                        className={`rounded px-2 py-1 text-xs font-medium ${!alert.is_resolved
-                          ? 'bg-secondary text-secondary-foreground'
-                          : 'bg-muted text-muted-foreground'
-                          }`}
+                        className={`rounded px-2 py-1 text-xs font-medium ${
+                          !alert.is_resolved
+                            ? 'bg-secondary text-secondary-foreground'
+                            : 'bg-muted text-muted-foreground'
+                        }`}
                       >
                         {alert.is_resolved ? 'RESUELTO' : 'PENDIENTE'}
                       </span>

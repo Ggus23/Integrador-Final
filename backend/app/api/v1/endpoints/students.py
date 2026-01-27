@@ -118,7 +118,7 @@ def read_student_detail(
         .order_by(models.Alert.created_at.desc())
         .all()
     )
-    
+
     # Active alerts count for summary
     active_alerts_count = sum(1 for a in alerts if not a.is_resolved)
 
@@ -183,7 +183,7 @@ def update_student(
         student.full_name = student_in.full_name
     if student_in.email is not None:
         student.email = student_in.email
-    
+
     db.add(student)
     db.commit()
     db.refresh(student)

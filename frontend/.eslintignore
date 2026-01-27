@@ -1,0 +1,12 @@
+.next/
+node_modules/
+out/
+coverage/
+dist/
+build/
+.git/
+.venv/
+.idea/
+.vscode/
+public/
+package-lock.json

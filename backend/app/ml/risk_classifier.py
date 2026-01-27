@@ -1,15 +1,17 @@
-import os
-import joblib
 import logging
+import os
 from typing import Dict, Tuple
+
+import joblib
 import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+
 class RiskClassifier:
     """
     Advanced Risk Classification Service.
-    
+
     Hybrid Approach:
     1. Tries to use a trained ML Model (Random Forest) for 80%+ accuracy.
     2. Falls back to Heuristic Rules (Expert System) if model is missing.
@@ -17,10 +19,12 @@ class RiskClassifier:
 
     def __init__(self):
         self.model = None
-        self.model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models", "risk_model.pkl")
-        
+        self.model_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "models", "risk_model.pkl"
+        )
+
         self._load_model()
-        
+
         # Fallback weights
         self.weights = {
             "pss_10": 0.4,
@@ -34,7 +38,9 @@ class RiskClassifier:
                 self.model = joblib.load(self.model_path)
                 logger.info("RiskClassifier: ML Model loaded successfully.")
             else:
-                logger.warning("RiskClassifier: Model file not found. Using Heuristic Fallback.")
+                logger.warning(
+                    "RiskClassifier: Model file not found. Using Heuristic Fallback."
+                )
         except Exception as e:
             logger.error(f"RiskClassifier: Failed to load ML model: {e}")
 
@@ -43,35 +49,42 @@ class RiskClassifier:
     ) -> Tuple[str, float]:
         """
         Calculates the risk level dynamically.
-        
+
         Args:
             pss_score: Normalized PSS-10 score (0.0 to 1.0)
             checkin_avg: Average mood score (1.0 to 5.0)
             bad_days_count: Number of checkins with mood < 3 in the last week
         """
-        
+
         if self.model:
             try:
                 # Prepare features match training [pss_score, mood_avg, bad_days_freq, study_pressure]
                 # Denormalize PSS (0-1 -> 0-40 approx)
                 pss_raw = int(pss_score * 40)
-                
+
                 # Derive proxy for study_pressure since we don't have it explicitly yet.
                 # Assuming high stress correlates with high study pressure.
                 # In the future, we should add this field to the Checkin.
-                study_pressure = max(1, min(10, int(pss_score * 10))) 
+                study_pressure = max(1, min(10, int(pss_score * 10)))
 
                 # Use DataFrame to avoid UserWarning about feature names
-                features_df = pd.DataFrame([[pss_raw, checkin_avg, bad_days_count, study_pressure]], 
-                                           columns=['pss_score', 'mood_avg', 'bad_days_freq', 'study_pressure'])
-                
+                features_df = pd.DataFrame(
+                    [[pss_raw, checkin_avg, bad_days_count, study_pressure]],
+                    columns=[
+                        "pss_score",
+                        "mood_avg",
+                        "bad_days_freq",
+                        "study_pressure",
+                    ],
+                )
+
                 # Predict (0=Low, 1=Medium, 2=High)
                 pred_class = self.model.predict(features_df)[0]
-                
+
                 # Get Probability/Confidence
                 probas = self.model.predict_proba(features_df)[0]
                 confidence = probas[pred_class]
-                
+
                 mapping = {0: "Low", 1: "Medium", 2: "High"}
                 return mapping.get(pred_class, "Low"), float(confidence)
             except Exception as e:
@@ -102,7 +115,7 @@ class RiskClassifier:
                 "pss_score": float(imps[0]),
                 "checkin_avg": float(imps[1]),
                 "bad_days_freq": float(imps[2]),
-                "study_pressure": float(imps[3])
+                "study_pressure": float(imps[3]),
             }
         return self.weights
 

@@ -1,11 +1,10 @@
 from datetime import timedelta
 from typing import Any
 
-from jose import jwt
-from pydantic import ValidationError
-
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
+from jose import jwt
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -82,9 +81,7 @@ def login_access_token(
         "access_token": security.create_access_token(
             user.id, role=user.role.value, expires_delta=access_token_expires
         ),
-        "refresh_token": security.create_refresh_token(
-            user.id, role=user.role.value
-        ),
+        "refresh_token": security.create_refresh_token(user.id, role=user.role.value),
         "token_type": "bearer",
     }
 
@@ -103,10 +100,10 @@ def refresh_token(
             refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         token_data = schemas.auth.TokenPayload(**payload)
-        
+
         # Validate token type specifically
         if payload.get("type") != "refresh":
-             raise HTTPException(
+            raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token type",
             )
@@ -116,23 +113,23 @@ def refresh_token(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-        
+
     # Check if user exists and is active
-    user = db.query(models.user.User).filter(models.user.User.id == token_data.sub).first()
+    user = (
+        db.query(models.user.User).filter(models.user.User.id == token_data.sub).first()
+    )
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
-        
+
     # Generate new tokens
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
         "access_token": security.create_access_token(
             user.id, role=user.role.value, expires_delta=access_token_expires
         ),
-        "refresh_token": security.create_refresh_token(
-             user.id, role=user.role.value
-        ),
+        "refresh_token": security.create_refresh_token(user.id, role=user.role.value),
         "token_type": "bearer",
     }
 
@@ -205,7 +202,7 @@ def test_token(current_user: models.user.User = Depends(deps.get_current_user)) 
 def change_required_password(
     *,
     db: Session = Depends(deps.get_db),
-    password_in: schemas.auth.PasswordResetConfirm, # Re-using a simple schema with 'new_password'
+    password_in: schemas.auth.PasswordResetConfirm,  # Re-using a simple schema with 'new_password'
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
     """
@@ -214,17 +211,19 @@ def change_required_password(
     """
     if not current_user.must_change_password:
         raise HTTPException(
-            status_code=400, 
-            detail="User is not required to change password"
+            status_code=400, detail="User is not required to change password"
         )
 
     current_user.hashed_password = security.get_password_hash(password_in.new_password)
     current_user.must_change_password = False
-    
+
     db.add(current_user)
     db.commit()
     db.refresh(current_user)
-    
-    log_security_event("PASSWORD_CHANGE_REQUIRED_SUCCESS", f"User {current_user.email} changed required password")
-    
+
+    log_security_event(
+        "PASSWORD_CHANGE_REQUIRED_SUCCESS",
+        f"User {current_user.email} changed required password",
+    )
+
     return current_user

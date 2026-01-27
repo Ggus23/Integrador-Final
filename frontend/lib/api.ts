@@ -119,12 +119,11 @@ class APIClient {
       }
 
       // Check if there is content before parsing
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.indexOf('application/json') !== -1) {
         return response.json();
       }
       return null;
-
     } catch (error) {
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
         throw new Error(
@@ -150,7 +149,6 @@ class APIClient {
   async createUserByAdmin(userData: Record<string, any>) {
     return this.request('POST', '/users/internal', userData);
   }
-
 
   async getMe() {
     return this.request('GET', '/users/me');
