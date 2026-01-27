@@ -29,3 +29,6 @@ class PasswordRecovery(BaseModel):
 class PasswordReset(BaseModel):
     token: str
     new_password: str
+
+class PasswordResetConfirm(BaseModel):
+    new_password: str

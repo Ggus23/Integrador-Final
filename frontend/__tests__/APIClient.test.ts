@@ -46,6 +46,24 @@ describe('APIClient', () => {
         await expect(apiClient.getMe()).rejects.toThrow('Custom error message');
     });
 
+    it('handles FastAPI validation errors (array details) correctly', async () => {
+        const validationError = {
+            detail: [
+                { loc: ['body', 'email'], msg: 'Invalid email', type: 'value_error.email' },
+                { loc: ['body', 'password'], msg: 'Password too short', type: 'value_error.any_str.min_length' }
+            ]
+        };
+
+        (global.fetch as any).mockResolvedValue({
+            status: 422,
+            ok: false,
+            headers: new Headers({ 'content-type': 'application/json' }),
+            json: () => Promise.resolve(validationError),
+        });
+
+        await expect(apiClient.login('bad', 'bad')).rejects.toThrow('Invalid email, Password too short');
+    });
+
     it('handles network failures (Failed to fetch)', async () => {
         (global.fetch as any).mockRejectedValue(new TypeError('Failed to fetch'));
 

@@ -9,8 +9,12 @@ export function useProtected() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
+    if (!loading) {
+      if (!user) {
+        router.push('/login');
+      } else if (user.must_change_password && window.location.pathname !== '/change-password') {
+        router.push('/change-password');
+      }
     }
   }, [user, loading, router]);
 

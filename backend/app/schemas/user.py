@@ -12,22 +12,16 @@ class UserBase(BaseModel):
     full_name: Optional[str] = None
     role: Optional[UserRole] = UserRole.STUDENT
     consent_accepted: bool = False
+    must_change_password: bool = False
 
 
 # Properties to receive via API on creation - Restricted to specified fields
-class UserCreate(BaseModel):
+# Properties to receive via API on creation - Restricted to specified fields
+class UserCreateBase(BaseModel):
     full_name: str
     email: EmailStr
     password: str
-    role: UserRole = UserRole.STUDENT
     
-    @field_validator("role")
-    @classmethod
-    def role_must_valid(cls, v: UserRole) -> UserRole:
-        if v in [UserRole.ADMIN, UserRole.PSYCHOLOGIST]:
-             raise ValueError("Solo se permite el registro de estudiantes vía registro público")
-        return v
-
     @field_validator("email")
     @classmethod
     def email_must_be_gmail(cls, v: str) -> str:
@@ -43,6 +37,21 @@ class UserCreate(BaseModel):
         if not any(char.isdigit() for char in v):
             raise ValueError("Password must contain at least one digit")
         return v
+
+
+class UserCreate(UserCreateBase):
+    role: UserRole = UserRole.STUDENT
+    
+    @field_validator("role")
+    @classmethod
+    def role_must_valid(cls, v: UserRole) -> UserRole:
+        if v in [UserRole.ADMIN, UserRole.PSYCHOLOGIST]:
+             raise ValueError("Solo se permite el registro de estudiantes vía registro público")
+        return v
+
+
+class UserCreateAdmin(UserCreateBase):
+    role: UserRole = UserRole.STUDENT
 
 
 # Properties to receive via API on update

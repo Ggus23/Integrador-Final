@@ -33,6 +33,7 @@ class User(Base):
     role = Column(Enum(UserRole), default=UserRole.STUDENT, nullable=False)
     is_active = Column(Boolean(), default=True)
     is_email_verified = Column(Boolean(), default=False)
+    must_change_password = Column(Boolean(), default=False)
 
     # Relationships with Full Cascade Delete
     # Academic Note: 'cascade="all, delete-orphan"' ensures that when a User is deleted,
@@ -49,6 +50,10 @@ class User(Base):
 
     # Audit related records
     audit_logs = relationship("AuditLog", back_populates="actor", cascade="all, delete-orphan")
+
+    # Clinical Notes relationships
+    clinical_notes_received = relationship("ClinicalNote", foreign_keys="[ClinicalNote.student_id]", back_populates="student", cascade="all, delete-orphan")
+    clinical_notes_authored = relationship("ClinicalNote", foreign_keys="[ClinicalNote.psychologist_id]", back_populates="psychologist")
 
     # Audit timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())

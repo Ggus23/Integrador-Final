@@ -20,6 +20,24 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+
 interface User {
     id: string;
     full_name: string;
@@ -34,6 +52,16 @@ export default function AdminUsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [dataLoading, setDataLoading] = useState(true);
     const [error, setError] = useState('');
+
+    // Create User State
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [createLoading, setCreateLoading] = useState(false);
+    const [newUserData, setNewUserData] = useState({
+        full_name: '',
+        email: '',
+        password: '',
+        role: 'student'
+    });
 
     // Dialog states
     const [confirmDelete, setConfirmDelete] = useState<{ id: string, name: string } | null>(null);
@@ -61,6 +89,22 @@ export default function AdminUsersPage() {
             }
         }
     }, [currentUser, loading, router]);
+
+    const handleCreateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setCreateLoading(true);
+        try {
+            await apiClient.createUserByAdmin(newUserData);
+            toast.success('Usuario creado exitosamente');
+            setIsCreateOpen(false);
+            setNewUserData({ full_name: '', email: '', password: '', role: 'student' }); // Reset form
+            fetchUsers();
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Error al crear usuario');
+        } finally {
+            setCreateLoading(false);
+        }
+    };
 
     const handleRoleChange = async (userId: string, newRole: string) => {
         const roleName = newRole === 'psychologist' ? 'Psicólogo' : 'Estudiante';
@@ -117,6 +161,79 @@ export default function AdminUsersPage() {
                     <p className="text-muted-foreground text-lg mt-2">
                         Administra los roles, estados y permanencia de los usuarios en el sistema.
                     </p>
+                </div>
+
+                <div className="flex justify-end">
+                    <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="bg-primary hover:bg-primary/90 text-white font-bold">
+                                + Crear Usuario
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Crear Nuevo Usuario (Interno)</DialogTitle>
+                                <DialogDescription>
+                                    Este formulario permite crear cuentas de Estudiantes, Psicólogos o Administradores directamente.
+                                    Estas cuentas se validan automáticamente.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <form onSubmit={handleCreateUser} className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Nombre Completo</label>
+                                    <Input
+                                        value={newUserData.full_name}
+                                        onChange={(e) => setNewUserData({ ...newUserData, full_name: e.target.value })}
+                                        required
+                                        placeholder="Ej. Dra. Ana López"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Email (@gmail.com)</label>
+                                    <Input
+                                        type="email"
+                                        value={newUserData.email}
+                                        onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
+                                        required
+                                        placeholder="usuario@gmail.com"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Rol</label>
+                                    <Select
+                                        value={newUserData.role}
+                                        onValueChange={(val) => setNewUserData({ ...newUserData, role: val })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona un rol" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="student">Estudiante</SelectItem>
+                                            <SelectItem value="psychologist">Psicólogo</SelectItem>
+                                            <SelectItem value="admin">Administrador</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Contraseña Inicial</label>
+                                    <Input
+                                        type="password"
+                                        value={newUserData.password}
+                                        onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
+                                        required
+                                        minLength={8}
+                                        placeholder="••••••••"
+                                    />
+                                    <p className="text-[10px] text-muted-foreground">Mínimo 8 caracteres, al menos un número.</p>
+                                </div>
+                                <DialogFooter>
+                                    <Button type="submit" disabled={createLoading}>
+                                        {createLoading ? 'Creando...' : 'Crear Usuario'}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
                 </div>
 
                 {error && (
@@ -265,6 +382,6 @@ export default function AdminUsersPage() {
                     </AlertDialogContent>
                 </AlertDialog>
             </div>
-        </Layout>
+        </Layout >
     );
 }

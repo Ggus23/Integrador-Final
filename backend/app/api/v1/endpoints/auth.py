@@ -199,3 +199,32 @@ def test_token(current_user: models.user.User = Depends(deps.get_current_user)) 
     Returns the current user's profile information.
     """
     return current_user
+
+
+@router.post("/change-required-password", response_model=schemas.user.User)
+def change_required_password(
+    *,
+    db: Session = Depends(deps.get_db),
+    password_in: schemas.auth.PasswordResetConfirm, # Re-using a simple schema with 'new_password'
+    current_user: models.user.User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Endpoint forced for users with must_change_password=True.
+    Updates password and clears the flag.
+    """
+    if not current_user.must_change_password:
+        raise HTTPException(
+            status_code=400, 
+            detail="User is not required to change password"
+        )
+
+    current_user.hashed_password = security.get_password_hash(password_in.new_password)
+    current_user.must_change_password = False
+    
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    
+    log_security_event("PASSWORD_CHANGE_REQUIRED_SUCCESS", f"User {current_user.email} changed required password")
+    
+    return current_user

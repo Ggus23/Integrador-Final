@@ -54,8 +54,49 @@ def create_user(
     from app.services.auth_service import auth_service
 
     auth_service.create_verification_token(db, db_obj)
+    
+    return db_obj
+
+
+@router.post("/internal", response_model=schemas.user.User, status_code=status.HTTP_201_CREATED)
+def create_user_by_admin(
+    *, 
+    db: Session = Depends(deps.get_db), 
+    user_in: schemas.user.UserCreateAdmin,
+    current_user: models.user.User = Depends(deps.get_admin_user),
+) -> Any:
+    """
+    Create a new user (Internal/Admin only).
+    Allows creation of PSYCHOLOGIST and ADMIN roles.
+    """
+    # Check if user with this email already exists
+    user = (
+        db.query(models.user.User)
+        .filter(models.user.User.email == user_in.email)
+        .first()
+    )
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ya existe un usuario con este correo electrónico en el sistema.",
+        )
+
+    # Create user object
+    db_obj = models.user.User(
+        email=user_in.email,
+        hashed_password=get_password_hash(user_in.password),
+        full_name=user_in.full_name,
+        role=user_in.role,
+        is_active=True,        # Admins create active users by default
+        is_email_verified=True, # Admins verify users implicitly
+        must_change_password=True # Force password change on first login
+    )
+    db.add(db_obj)
+    db.commit()
+    db.refresh(db_obj)
 
     return db_obj
+
 
 
 @router.get("/me", response_model=schemas.user.User)

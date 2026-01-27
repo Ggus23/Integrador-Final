@@ -6,6 +6,7 @@ export interface User {
   career?: string;
   semester?: number;
   consent_accepted: boolean;
+  must_change_password?: boolean;
 }
 
 export interface Assessment {

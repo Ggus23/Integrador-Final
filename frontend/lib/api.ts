@@ -100,7 +100,22 @@ class APIClient {
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({}));
-        throw new Error(error.detail || `Error de API: ${response.status}`);
+        let errorMessage = `Error de API: ${response.status}`;
+
+        if (error.detail) {
+          if (typeof error.detail === 'string') {
+            errorMessage = error.detail;
+          } else if (Array.isArray(error.detail)) {
+            // Handle FastAPI validation errors
+            errorMessage = error.detail
+              .map((err: any) => err.msg || JSON.stringify(err))
+              .join(', ');
+          } else {
+            errorMessage = JSON.stringify(error.detail);
+          }
+        }
+
+        throw new Error(errorMessage);
       }
 
       // Check if there is content before parsing
@@ -131,6 +146,11 @@ class APIClient {
   async register(userData: Record<string, any>) {
     return this.request('POST', '/users/', userData);
   }
+
+  async createUserByAdmin(userData: Record<string, any>) {
+    return this.request('POST', '/users/internal', userData);
+  }
+
 
   async getMe() {
     return this.request('GET', '/users/me');
@@ -204,6 +224,15 @@ class APIClient {
     return this.request('GET', '/reports/aggregated');
   }
 
+  // Clinical Notes
+  async createClinicalNote(studentId: string, content: string) {
+    return this.request('POST', '/clinical-notes/', { student_id: parseInt(studentId), content });
+  }
+
+  async getClinicalNotes(studentId: string) {
+    return this.request('GET', `/clinical-notes/?student_id=${studentId}`);
+  }
+
   async deleteUser(userId: string) {
     return this.request('DELETE', `/users/${userId}`);
   }
@@ -223,6 +252,10 @@ class APIClient {
 
   async resetPassword(token: string, newPassword: string) {
     return this.request('POST', '/auth/reset-password', { token, new_password: newPassword });
+  }
+
+  async changeRequiredPassword(newPassword: string) {
+    return this.request('POST', '/auth/change-required-password', { new_password: newPassword });
   }
 }
 

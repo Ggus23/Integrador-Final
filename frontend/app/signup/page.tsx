@@ -14,7 +14,8 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('student');
+  // Role is fixed to student for public registration
+  const role = 'student';
   const [loading, setLoading] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
   const [error, setError] = useState('');
@@ -139,37 +140,7 @@ export default function SignupPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-foreground text-sm font-medium">Soy un...</label>
-              <div className="relative">
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="border-input bg-background/50 text-foreground focus:border-primary focus:ring-primary/20 w-full appearance-none rounded-lg border px-4 py-2.5 shadow-sm transition-all outline-none focus:ring-2"
-                  required
-                >
-                  <option value="student">Estudiante</option>
-                  <option value="psychologist">Psicólogo</option>
-                </select>
-                <div className="text-muted-foreground pointer-events-none absolute top-1/2 right-4 -translate-y-1/2">
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 12 12"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M2.5 4.5L6 8L9.5 4.5"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
+            {/* Role selection removed for public registration */}
 
             <div className="space-y-2">
               <label className="text-foreground text-sm font-medium">Contraseña</label>

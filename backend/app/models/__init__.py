@@ -7,3 +7,4 @@ from .emotional_checkin import EmotionalCheckin  # noqa: F401
 from .risk_summary import RiskSummary  # noqa: F401
 from .tokens import EmailVerificationToken, PasswordResetToken  # noqa: F401
 from .user import User, UserRole  # noqa: F401
+from .clinical_note import ClinicalNote  # noqa: F401
