@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, ShieldCheck, HeartPulse, BrainCircuit, Activity } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+// MentaLink: Sistema de monitoreo de bienestar universitario
 export default function LandingPage() {
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
