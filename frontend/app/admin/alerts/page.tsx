@@ -107,42 +107,43 @@ export default function AdminAlertsPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {alerts.map((alert) => (
-              <Card key={alert.id} className="border-border bg-card p-6">
+            {alerts.map((riskAlert) => (
+              <Card key={riskAlert.id} className="border-border bg-card p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${getRiskColor(alert.severity.toLowerCase())} shadow-sm`}
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${getRiskColor(
+                          riskAlert.severity.toLowerCase()
+                        )} shadow-sm`}
                       >
-                        {alert.severity.toUpperCase() === 'HIGH'
+                        {riskAlert.severity.toUpperCase() === 'HIGH'
                           ? 'ALTO'
-                          : alert.severity.toUpperCase() === 'MEDIUM'
+                          : riskAlert.severity.toUpperCase() === 'MEDIUM'
                             ? 'MEDIO'
                             : 'BAJO'}
                       </span>
                       <span
-                        className={`rounded px-2 py-1 text-xs font-medium ${
-                          !alert.is_resolved
+                        className={`rounded px-2 py-1 text-xs font-medium ${!riskAlert.is_resolved
                             ? 'bg-secondary text-secondary-foreground'
                             : 'bg-muted text-muted-foreground'
-                        }`}
+                          }`}
                       >
-                        {alert.is_resolved ? 'RESUELTO' : 'PENDIENTE'}
+                        {riskAlert.is_resolved ? 'RESUELTO' : 'PENDIENTE'}
                       </span>
                       <span className="text-muted-foreground text-sm">
-                        {new Date(alert.created_at).toLocaleDateString()}
+                        {new Date(riskAlert.created_at).toLocaleDateString()}
                       </span>
                     </div>
-                    <p className="text-foreground mt-3 font-medium">{alert.message}</p>
+                    <p className="text-foreground mt-3 font-medium">{riskAlert.message}</p>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Link href={`/admin/students/${alert.user_id}`}>
+                    <Link href={`/admin/students/${riskAlert.user_id}`}>
                       <Button className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 w-full">
                         Ver Estudiante
                       </Button>
                     </Link>
-                    {!alert.is_resolved && (
+                    {!riskAlert.is_resolved && (
                       <Button
                         variant="outline"
                         className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
