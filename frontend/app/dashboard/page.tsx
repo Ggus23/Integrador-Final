@@ -131,7 +131,9 @@ export default function DashboardPage() {
         {user?.role === 'admin' && (
           <div className="space-y-6">
             <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.1s' }}>
-              <h2 className="text-foreground font-serif text-xl font-bold">Gestión Administrativa</h2>
+              <h2 className="text-foreground font-serif text-xl font-bold">
+                Gestión Administrativa
+              </h2>
               <div className="grid gap-4 md:grid-cols-3">
                 <Link href="/admin/users">
                   <Card className="border-border bg-card cursor-pointer border-l-4 border-l-purple-500 p-6 shadow-sm transition-all hover:shadow-md">
