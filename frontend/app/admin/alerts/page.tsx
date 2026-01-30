@@ -124,10 +124,11 @@ export default function AdminAlertsPage() {
                             : 'BAJO'}
                       </span>
                       <span
-                        className={`rounded px-2 py-1 text-xs font-medium ${!riskAlert.is_resolved
+                        className={`rounded px-2 py-1 text-xs font-medium ${
+                          !riskAlert.is_resolved
                             ? 'bg-secondary text-secondary-foreground'
                             : 'bg-muted text-muted-foreground'
-                          }`}
+                        }`}
                       >
                         {riskAlert.is_resolved ? 'RESUELTO' : 'PENDIENTE'}
                       </span>
