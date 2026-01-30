@@ -6,13 +6,17 @@ import { useProtected } from '@/hooks/useProtected';
 import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { TrendChart } from '@/components/dashboard/TrendChart';
+import { RiskDistributionChart } from '@/components/dashboard/RiskDistributionChart';
 import Link from 'next/link';
-import type { RiskSummary, AssessmentResponse } from '@/lib/types';
+import type { RiskSummary, AssessmentResponse, Checkin } from '@/lib/types';
 
 export default function DashboardPage() {
   const { user } = useProtected();
   const [riskSummary, setRiskSummary] = useState<RiskSummary | null>(null);
   const [lastAssessment, setLastAssessment] = useState<AssessmentResponse | null>(null);
+  const [checkins, setCheckins] = useState<Checkin[]>([]);
+  const [aggregatedReport, setAggregatedReport] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -21,16 +25,23 @@ export default function DashboardPage() {
 
     const fetchData = async () => {
       try {
-        const [risk, responses] = await Promise.all([
-          apiClient.getRiskSummary(),
-          apiClient.getMyAssessmentResponses(),
-        ]);
-        setRiskSummary(risk);
-        if (responses.length > 0) {
-          setLastAssessment(responses[0]);
+        if (user.role === 'student') {
+          const [risk, responses, checkinsData] = await Promise.all([
+            apiClient.getRiskSummary(),
+            apiClient.getMyAssessmentResponses(),
+            apiClient.getMyCheckins(),
+          ]);
+          setRiskSummary(risk);
+          if (responses.length > 0) {
+            setLastAssessment(responses[0]);
+          }
+          setCheckins(checkinsData || []);
+        } else {
+          const report = await apiClient.getAggregatedReports();
+          setAggregatedReport(report);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error al cargar los reportes');
+        setError(err instanceof Error ? err.message : 'Error al cargar los datos');
       } finally {
         setLoading(false);
       }
@@ -117,78 +128,93 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Admin Quick Actions */}
         {user?.role === 'admin' && (
-          <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.1s' }}>
-            <h2 className="text-foreground font-serif text-xl font-bold">Gestión Administrativa</h2>
-            <div className="grid gap-4 md:grid-cols-3">
-              <Link href="/admin/users">
-                <Card className="border-border bg-card cursor-pointer border-l-4 border-l-purple-500 p-6 shadow-sm transition-all hover:shadow-md">
-                  <h3 className="font-bold">Control de Usuarios</h3>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Gestionar roles, psicólogos y cuentas.
-                  </p>
-                </Card>
-              </Link>
-              <Link href="/admin/students">
-                <Card className="border-border bg-card border-l-primary cursor-pointer border-l-4 p-6 shadow-sm transition-all hover:shadow-md">
-                  <h3 className="font-bold">Base de Estudiantes</h3>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Auditoría de perfiles y registros técnicos.
-                  </p>
-                </Card>
-              </Link>
-              <Link href="/admin/reports">
-                <Card className="border-border bg-card border-l-accent cursor-pointer border-l-4 p-6 shadow-sm transition-all hover:shadow-md">
-                  <h3 className="font-bold">Métricas Globales</h3>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Análisis institucional del rendimiento.
-                  </p>
-                </Card>
-              </Link>
+          <div className="space-y-6">
+            <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.1s' }}>
+              <h2 className="text-foreground font-serif text-xl font-bold">Gestión Administrativa</h2>
+              <div className="grid gap-4 md:grid-cols-3">
+                <Link href="/admin/users">
+                  <Card className="border-border bg-card cursor-pointer border-l-4 border-l-purple-500 p-6 shadow-sm transition-all hover:shadow-md">
+                    <h3 className="font-bold">Control de Usuarios</h3>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Gestionar roles, psicólogos y cuentas.
+                    </p>
+                  </Card>
+                </Link>
+                <Link href="/admin/students">
+                  <Card className="border-border bg-card border-l-primary cursor-pointer border-l-4 p-6 shadow-sm transition-all hover:shadow-md">
+                    <h3 className="font-bold">Base de Estudiantes</h3>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Auditoría de perfiles y registros técnicos.
+                    </p>
+                  </Card>
+                </Link>
+                <Link href="/admin/reports">
+                  <Card className="border-border bg-card border-l-accent cursor-pointer border-l-4 p-6 shadow-sm transition-all hover:shadow-md">
+                    <h3 className="font-bold">Métricas Globales</h3>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Análisis institucional del rendimiento.
+                    </p>
+                  </Card>
+                </Link>
+              </div>
             </div>
+
+            {/* AI Performance Chart */}
+            {aggregatedReport && (
+              <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
+                <RiskDistributionChart data={aggregatedReport.risk_distribution} />
+              </div>
+            )}
           </div>
         )}
 
-        {/* Psychologist Quick Actions */}
         {user?.role === 'psychologist' && (
-          <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.1s' }}>
-            <h2 className="text-foreground font-serif text-xl font-bold">
-              Panel Clínico Operativo
-            </h2>
-            <div className="grid gap-4 md:grid-cols-3">
-              <Link href="/admin/alerts">
-                <Card className="border-border bg-card border-l-risk-high cursor-pointer border-l-4 p-6 shadow-sm transition-all hover:shadow-md">
-                  <h3 className="flex items-center justify-between font-bold">
-                    Alertas Críticas
-                    <span className="bg-risk-high flex h-2 w-2 animate-pulse rounded-full" />
-                  </h3>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Intervenir en casos de riesgo detectados por la IA.
-                  </p>
-                </Card>
-              </Link>
-              <Link href="/admin/students">
-                <Card className="border-border bg-card cursor-pointer border-l-4 border-l-blue-500 p-6 shadow-sm transition-all hover:shadow-md">
-                  <h3 className="font-bold">Seguimiento de Alumnos</h3>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Revisar historial de bienestar y evoluciones.
-                  </p>
-                </Card>
-              </Link>
-              <Link href="/admin/reports">
-                <Card className="border-border bg-card cursor-pointer border-l-4 border-l-green-500 p-6 shadow-sm transition-all hover:shadow-md">
-                  <h3 className="font-bold">Análisis de Salud Mental</h3>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Tendencias poblacionales y prevención.
-                  </p>
-                </Card>
-              </Link>
+          <div className="space-y-6">
+            <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.1s' }}>
+              <h2 className="text-foreground font-serif text-xl font-bold">
+                Panel Clínico Operativo
+              </h2>
+              <div className="grid gap-4 md:grid-cols-3">
+                <Link href="/admin/alerts">
+                  <Card className="border-border bg-card border-l-risk-high cursor-pointer border-l-4 p-6 shadow-sm transition-all hover:shadow-md">
+                    <h3 className="flex items-center justify-between font-bold">
+                      Alertas Críticas
+                      <span className="bg-risk-high flex h-2 w-2 animate-pulse rounded-full" />
+                    </h3>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Intervenir en casos de riesgo detectados por la IA.
+                    </p>
+                  </Card>
+                </Link>
+                <Link href="/admin/students">
+                  <Card className="border-border bg-card cursor-pointer border-l-4 border-l-blue-500 p-6 shadow-sm transition-all hover:shadow-md">
+                    <h3 className="font-bold">Seguimiento de Alumnos</h3>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Revisar historial de bienestar y evoluciones.
+                    </p>
+                  </Card>
+                </Link>
+                <Link href="/admin/reports">
+                  <Card className="border-border bg-card cursor-pointer border-l-4 border-l-green-500 p-6 shadow-sm transition-all hover:shadow-md">
+                    <h3 className="font-bold">Análisis de Salud Mental</h3>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Tendencias poblacionales y prevención.
+                    </p>
+                  </Card>
+                </Link>
+              </div>
             </div>
+
+            {/* AI Performance Chart */}
+            {aggregatedReport && (
+              <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
+                <RiskDistributionChart data={aggregatedReport.risk_distribution} />
+              </div>
+            )}
           </div>
         )}
 
-        {/* Risk Summary (Only for Students) */}
         {user?.role === 'student' && (
           <div className="grid gap-4 md:grid-cols-3">
             {riskSummary && (
@@ -231,7 +257,13 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Last Assessment (Only for Students) */}
+        {user?.role === 'student' && checkins.length > 0 && (
+          <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.4s' }}>
+            <h2 className="text-foreground font-serif text-xl font-bold">Tendencia Emocional</h2>
+            <TrendChart data={checkins} />
+          </div>
+        )}
+
         {user?.role === 'student' && lastAssessment && (
           <Card
             className="border-border bg-card animate-slide-up p-6 shadow-sm"
@@ -255,7 +287,6 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        {/* Quick Access (Check-ins for Students) */}
         {user?.role === 'student' && (
           <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.5s' }}>
             <h2 className="text-foreground font-serif text-xl font-bold">Acceso Rápido</h2>

@@ -20,6 +20,7 @@ export default function CheckinsPage() {
   const [formData, setFormData] = useState({
     mood_score: 3,
     energy_level: 3,
+    academic_pressure: 3,
     sleep_hours: 8,
     note: '',
   });
@@ -51,6 +52,7 @@ export default function CheckinsPage() {
       setFormData({
         mood_score: 3,
         energy_level: 3,
+        academic_pressure: 3,
         sleep_hours: 8,
         note: '',
       });
@@ -95,7 +97,6 @@ export default function CheckinsPage() {
             ✨ ¿Cómo te sientes hoy?
           </h2>
           <form onSubmit={handleSubmit} className="mt-8 space-y-8">
-            {/* Mood Score */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="text-foreground text-base font-semibold">Estado de Ánimo</label>
@@ -120,7 +121,6 @@ export default function CheckinsPage() {
               </div>
             </div>
 
-            {/* Energy Level */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="text-foreground text-base font-semibold">Nivel de Energía</label>
@@ -145,7 +145,30 @@ export default function CheckinsPage() {
               </div>
             </div>
 
-            {/* Sleep Hours */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-foreground text-base font-semibold">Presión Académica</label>
+                <span className="text-risk-high bg-risk-high/10 rounded-full px-3 py-1 text-lg font-bold">
+                  {formData.academic_pressure}/5
+                </span>
+              </div>
+              <input
+                type="range"
+                min="1"
+                max="5"
+                step="1"
+                value={formData.academic_pressure}
+                onChange={(e) =>
+                  setFormData({ ...formData, academic_pressure: Number.parseInt(e.target.value) })
+                }
+                className="bg-muted accent-risk-high h-2 w-full cursor-pointer appearance-none rounded-lg"
+              />
+              <div className="text-muted-foreground flex justify-between text-xs font-medium">
+                <span>Relajado</span>
+                <span>Muy Estresado</span>
+              </div>
+            </div>
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="text-foreground text-base font-semibold">Horas de Sueño</label>
@@ -165,7 +188,6 @@ export default function CheckinsPage() {
               </div>
             </div>
 
-            {/* Note */}
             <div className="space-y-2">
               <label className="text-foreground text-base font-semibold">Notas Personales</label>
               <textarea
@@ -186,7 +208,6 @@ export default function CheckinsPage() {
           </form>
         </Card>
 
-        {/* Check-ins History */}
         <div className="space-y-6 pt-8">
           <h2 className="text-foreground border-primary border-l-4 pl-4 font-serif text-2xl font-bold">
             Mi Historial Reciente
@@ -224,6 +245,16 @@ export default function CheckinsPage() {
                             <span className="text-accent text-xs font-bold uppercase">Energía</span>
                             <span className="text-accent text-xl font-black">
                               {checkin.energy_level}
+                            </span>
+                          </div>
+                        )}
+                        {checkin.academic_pressure && (
+                          <div className="bg-risk-high/10 flex min-w-[60px] flex-col items-center justify-center rounded-lg p-2">
+                            <span className="text-risk-high text-xs font-bold uppercase">
+                              Presión
+                            </span>
+                            <span className="text-risk-high text-xl font-black">
+                              {checkin.academic_pressure}
                             </span>
                           </div>
                         )}

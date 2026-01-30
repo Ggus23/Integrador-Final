@@ -11,16 +11,31 @@ La Escala de Estrés Percibido (PSS) es el instrumento psicológico más utiliza
     - 14-26: Estrés moderado
     - 27-40: Alto estrés percibido
 
-## DASS-21 (Escalas de Depresión, Ansiedad y Estrés)
-Un conjunto de tres escalas de autoinforme diseñadas para medir los estados emocionales de depresión, ansiedad y estrés.
+## Escala de Ansiedad Generalizada (GAD-7)
+Instrumento breve para detectar síntomas de ansiedad generalizada.
+- **Ítems**: 7 preguntas.
+- **Rango**: 0-3 por ítem (0=Nunca, 3=Casi todos los días).
+- **Interpretación (Spitzer et al., 2006)**:
+    - 0-4: Ansiedad Mínima (Riesgo Bajo)
+    - 5-9: Ansiedad Leve (Riesgo Bajo)
+    - 10-14: Ansiedad Moderada (Riesgo Medio)
+    - 15-21: Ansiedad Severa (Riesgo Alto)
 
-### Puntuación (x2 para comparabilidad completa con DASS)
-Cada escala (D, A, S) tiene 7 ítems. Las puntuaciones se suman y se multiplican por 2.
-- **Depresión**: Normal (0-9), Leve (10-13), Moderada (14-20), Severa (21-27), Extremadamente Severa (28+)
-- **Ansiedad**: Normal (0-7), Leve (8-9), Moderada (10-14), Severa (15-19), Extremadamente Severa (20+)
-- **Estrés**: Normal (0-14), Leve (15-18), Moderada (19-25), Severa (26-33), Extremadamente Severa (34+)
+## Cuestionario sobre la Salud del Paciente (PHQ-9)
+Módulo de depresión diseñado para facilitar el reconocimiento de trastornos depresivos.
+- **Ítems**: 9 preguntas.
+- **Rango**: 0-3 por ítem.
+- **Interpretación (Kroenke et al., 2001)**:
+    - 0-4: Ninguna (Riesgo Bajo)
+    - 5-9: Leve (Riesgo Bajo)
+    - 10-14: Moderada (Riesgo Medio)
+    - 15-19: Moderadamente Severa (Riesgo Alto)
+    - 20-27: Severa (Riesgo Alto)
 
 ## Lógica de Riesgo
 MENTALINK mapea estas puntuaciones a niveles de riesgo ("Bajo", "Medio", "Alto") para activar intervenciones o alertas apropiadas. Esta **no es una herramienta de diagnóstico**.
 
 - **Implementación**: Ver `app/services/scoring_service.py` y `app/services/risk_service.py`.
+
+## Nota sobre Infraestructura de Datos
+Para garantizar la integridad referencial estricta requerida por los protocolos de ética (borrado en cascada de datos sensibles al eliminar usuarios), el sistema utiliza **PostgreSQL 16** como motor de base de datos relacional.

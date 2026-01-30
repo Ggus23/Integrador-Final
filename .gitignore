@@ -45,3 +45,8 @@ MANIFEST
 *.sqlite3
 backend/.env
 backend/.env.backend
+
+# ML Data & Models (Do not commit large or generated files)
+backend/data/*.csv
+backend/app/models/*.pkl
+*.pkl

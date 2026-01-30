@@ -37,10 +37,11 @@ export interface AssessmentResponse {
 }
 
 export interface Checkin {
-  id: string;
-  user_id: string;
+  id: number;
+  user_id: number;
   mood_score: number;
   energy_level?: number;
+  academic_pressure?: number;
   sleep_hours?: number;
   note?: string;
   created_at: string;
