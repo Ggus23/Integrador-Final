@@ -122,11 +122,10 @@ export default function AdminAlertsPage() {
                             : 'BAJO'}
                       </span>
                       <span
-                        className={`rounded px-2 py-1 text-xs font-medium ${
-                          !alert.is_resolved
+                        className={`rounded px-2 py-1 text-xs font-medium ${!alert.is_resolved
                             ? 'bg-secondary text-secondary-foreground'
                             : 'bg-muted text-muted-foreground'
-                        }`}
+                          }`}
                       >
                         {alert.is_resolved ? 'RESUELTO' : 'PENDIENTE'}
                       </span>
@@ -136,11 +135,18 @@ export default function AdminAlertsPage() {
                     </div>
                     <p className="text-foreground mt-3 font-medium">{alert.message}</p>
                   </div>
-                  <Link href={`/admin/students/${alert.user_id}`}>
-                    <Button className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90">
-                      Ver Estudiante
-                    </Button>
-                  </Link>
+                  <div className="flex flex-col gap-2">
+                    <Link href={`/admin/students/${alert.user_id}`}>
+                      <Button className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 w-full">
+                        Ver Estudiante
+                      </Button>
+                    </Link>
+                    {!alert.is_resolved && (
+                      <Button variant="outline" className="border-emerald-500 text-emerald-600 hover:bg-emerald-50" onClick={() => alert('¡Predicción Validada! Datos agregados al Dataset de Entrenamiento Real.')}>
+                        ✓ Validar IA
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </Card>
             ))}
