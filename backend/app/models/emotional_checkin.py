@@ -26,6 +26,10 @@ class EmotionalCheckin(Base):
     # Optional note from the user
     note = Column(Text, nullable=True)
 
+    # Mood score usually 1 to 5 (1: Very Bad, 5: Very Good)
+    # New Field: Academic Pressure (1: Very Low, 5: Very High)
+    academic_pressure = Column(Integer, nullable=True, default=3)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
 
     # Relationship back to the user

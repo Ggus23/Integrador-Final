@@ -136,10 +136,25 @@ class AssessmentService:
         )
         bad_days = len([c for c in last_checkins if c.mood_score < 3])
 
+        average_pressure = (
+            sum(
+                [
+                    c.academic_pressure
+                    for c in last_checkins
+                    if c.academic_pressure is not None
+                ]
+            )
+            / len(last_checkins)
+            if last_checkins
+            else 3.0
+        )
+
         # Normalize PSS score (max is 40)
         norm_pss = score / 40.0 if assessment.type == "PSS-10" else 0.5
 
-        ml_risk, confidence = risk_classifier.predict_risk(norm_pss, avg_mood, bad_days)
+        ml_risk, confidence = risk_classifier.predict_risk(
+            norm_pss, avg_mood, bad_days, average_pressure
+        )
 
         risk_summary.current_risk_level = ml_risk
         risk_summary.prediction_confidence = float(confidence)

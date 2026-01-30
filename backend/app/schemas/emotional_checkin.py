@@ -10,6 +10,10 @@ class EmotionalCheckinBase(BaseModel):
     )
     energy_level: Optional[int] = Field(3, ge=1, le=5)
     sleep_hours: Optional[int] = Field(None, ge=0, le=24)
+    sleep_hours: Optional[int] = Field(None, ge=0, le=24)
+    academic_pressure: Optional[int] = Field(
+        3, ge=1, le=5, description="Level of academic pressure (1-5)"
+    )
     note: Optional[str] = None
 
 
