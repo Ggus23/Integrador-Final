@@ -26,14 +26,16 @@ def get_db() -> Generator:
 
 
 def get_current_user(
-    # Con esta funcion Recibimos el token y conexion a DB.
-    # Si falla muestra 401
-    # Se busca el ID, Si no existe el usuario muestra 404
-    # Si no esta activo muestra 400
-    # Si todo esta bien retorna el usuario
     db: Session = Depends(get_db),
     token: str = Depends(reusable_oauth2),
 ) -> User:
+    """
+    Con esta funcion Recibimos el token y conexion a DB.
+    Si falla muestra 401
+    Se busca el ID, Si no existe el usuario muestra 404
+    Si no esta activo muestra 400
+    Si todo esta bien retorna el usuario
+    """
 
     try:
         payload = jwt.decode(
