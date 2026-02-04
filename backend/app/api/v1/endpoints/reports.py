@@ -1,11 +1,12 @@
 from datetime import datetime
 from typing import Any, Dict
 
-from app import models
-from app.api import deps
 from fastapi import APIRouter, Depends
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+
+from app import models
+from app.api import deps
 
 router = APIRouter()
 

@@ -1,12 +1,13 @@
 from typing import Dict
 
+from sqlalchemy.orm import Session
+
 from app import schemas
 from app.ml.risk_classifier import risk_classifier
 from app.models.alert import Alert
 from app.models.assessment import Assessment
 from app.models.assessment_response import AssessmentResponse
 from app.models.risk_summary import RiskSummary
-from sqlalchemy.orm import Session
 
 
 class AssessmentService:

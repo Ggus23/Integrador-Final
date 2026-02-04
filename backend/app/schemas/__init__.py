@@ -1,8 +1,8 @@
+from . import auth  # noqa: F401
 from . import (
     alert,
     assessment,
     assessment_response,
-    auth,  # noqa: F401
     clinical_note,
     consent,
     emotional_checkin,

@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
+
 from app.core.constants import RiskLevel
 from app.services.checkin_service import checkin_service
 

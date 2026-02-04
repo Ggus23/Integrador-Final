@@ -4,6 +4,7 @@ from typing import Dict, Tuple
 
 import joblib
 import pandas as pd
+
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)

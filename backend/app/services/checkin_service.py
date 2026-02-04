@@ -1,8 +1,9 @@
 from typing import Any, Dict
 
+from sqlalchemy.orm import Session
+
 from app.services.alert_service import alert_service
 from app.services.risk_service import risk_service
-from sqlalchemy.orm import Session
 
 
 class CheckinService:

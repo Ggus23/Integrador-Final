@@ -10,10 +10,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from app.core.security import get_password_hash
 from app.db.session import SessionLocal
 from app.models.assessment import Assessment
-from app.models.assessment_response import AssessmentResponse
 from app.models.consent import Consent
 from app.models.emotional_checkin import EmotionalCheckin
-from app.models.risk_summary import RiskSummary
 from app.models.user import User, UserRole
 from app.services.assessment_service import assessment_service
 
@@ -104,7 +102,7 @@ def create_student_profile(db, email_prefix, risk_profile, num_checkins=10):
 
         # Let's insert record manually but trigger the logic
         # We need to calculate risk to update Summary
-        score_total = sum(answers.values())  # Simple sum for mock
+        # score_total = sum(answers.values())  # Simple sum for mock
 
         # This part re-uses the logic we want to test!
         # Context: predict_risk needs (pss_score, checkin_avg, bad_days, pressure_avg)
