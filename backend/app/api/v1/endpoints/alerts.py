@@ -12,15 +12,21 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[schemas.alert.Alert])
+"""
+Esta funcion primero verifica permisos si no es psicologo o admin muestra 403,
+luego recibe los filtros y se conecta a la DB,
+Inicia la consulta con filtro de riesgo y estado
+Al final ejecuta y retorna lo pedido
+Los noqa: E712 son para que no marque error al usar == True o False debido a en FastAPI no se puede usar == True 
+Pero es necesario usarlo en la consulta
+"""
 def read_all_alerts(
     risk_level: str = None,
     status: str = None,
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_psychologist_user),
 ) -> Any:
-    """
-    Retrieve all alerts with optional filtering. Restricted to Psychologist/Admin.
-    """
+
     query = db.query(models.alert.Alert)
 
     if risk_level:
@@ -35,13 +41,16 @@ def read_all_alerts(
 
 
 @router.get("/me", response_model=List[schemas.alert.Alert])
+"""
+Esta funcion verifica si esta autenticado o no,
+Si esta identificado retorna los alertas del usuario
+y al final ejecuta y retorna lo pedido
+"""
 def read_my_alerts(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-    """
-    Retrieve alerts for the current student.
-    """
+
     return (
         db.query(models.alert.Alert)
         .filter(models.alert.Alert.user_id == current_user.id)
@@ -50,15 +59,21 @@ def read_my_alerts(
 
 
 @router.put("/{alert_id}", response_model=schemas.alert.Alert)
+"""
+Primero verificamos permisos si no es psicologo o admin muestra 403,
+Recibimos los datos segunel ID de la alerta
+Busca la alerta en la DB sino existe muestra un 404
+Al resolver la alerta se actualiza el estado y la fecha de resolucion
+Luego se hacen commit para ver quien hizo la modificacion
+Al final retorna la alerta
+"""
 def resolve_alert(
     alert_id: int,
     alert_in: schemas.alert.AlertUpdate,
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_psychologist_user),
 ) -> Any:
-    """
-    Mark an alert as resolved. Restricted to Psychologist/Admin.
-    """
+
     alert = (
         db.query(models.alert.Alert).filter(models.alert.Alert.id == alert_id).first()
     )

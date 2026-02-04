@@ -5,11 +5,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """
-    Application settings and configuration.
-    Uses pydantic-settings to automatically load environment variables.
-    """
-
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=True, extra="ignore"
     )
@@ -17,20 +12,13 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "MENTALINK"
     API_V1_STR: str = "/api/v1"
 
-    # JWT Configuration
-    # In a production environment, this should be a long, random, secret string
     SECRET_KEY: str = "your-secret-key-change-it-in-production"
     ALGORITHM: str = "HS256"
-    # Token expiration time in minutes
-    # Academic Note: Short-lived tokens (30-60 mins) are a security best practice
-    # to limit the window of opportunity if a token is intercepted.
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # Sentry Configuration
     SENTRY_DSN: str | None = None
 
-    # Database Configuration
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
@@ -39,10 +27,8 @@ class Settings(BaseSettings):
 
     @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
     @classmethod
+
     def assemble_db_connection(cls, v: str | None, info: ValidationInfo) -> str:
-        """
-        Assembles the database connection URI from individual components.
-        """
         if isinstance(v, str):
             return v
         return (
@@ -52,11 +38,8 @@ class Settings(BaseSettings):
             f"{info.data.get('POSTGRES_DB')}"
         )
 
-    # Security
-    # Origins that are allowed to make cross-origin requests
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
 
-    # SMTP Configuration
     SMTP_TLS: bool = True
     SMTP_PORT: int | None = 587
     SMTP_HOST: str | None = None
@@ -64,6 +47,8 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str | None = None
     EMAILS_FROM_EMAIL: str | None = None
     EMAILS_FROM_NAME: str = "MENTA-LINK"
+
+    ML_MODEL_PATH: str = "app/models/risk_model.pkl"
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod

@@ -5,27 +5,23 @@ from typing import Dict, Tuple
 import joblib
 import pandas as pd
 
+from app.core.config import settings
+
 logger = logging.getLogger(__name__)
 
 
 class RiskClassifier:
-    """
-    Advanced Risk Classification Service.
-
-    Hybrid Approach:
-    1. Tries to use a trained ML Model (Random Forest) for 80%+ accuracy.
-    2. Falls back to Heuristic Rules (Expert System) if model is missing.
-    """
 
     def __init__(self):
         self.model = None
-        self.model_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "models", "risk_model.pkl"
-        )
+        if os.path.isabs(settings.ML_MODEL_PATH):
+            self.model_path = settings.ML_MODEL_PATH
+        else:
+            base_path = os.getcwd()
+            self.model_path = os.path.join(base_path, settings.ML_MODEL_PATH)
 
         self._load_model()
 
-        # Fallback weights
         self.weights = {
             "pss_10": 0.4,
             "checkin_avg": 0.3,
@@ -36,13 +32,10 @@ class RiskClassifier:
         try:
             if os.path.exists(self.model_path):
                 self.model = joblib.load(self.model_path)
-                logger.info("RiskClassifier: ML Model loaded successfully.")
             else:
-                logger.warning(
-                    "RiskClassifier: Model file not found. Using Heuristic Fallback."
-                )
+                logger.warning(f"RiskClassifier: {self.model_path}")
         except Exception as e:
-            logger.error(f"RiskClassifier: Failed to load ML model: {e}")
+            logger.error(f"RiskClassifier: Falló la carga del modelo ML: {e}")
 
     def predict_risk(
         self,
@@ -51,15 +44,6 @@ class RiskClassifier:
         bad_days_count: int,
         academic_pressure_avg: float,
     ) -> Tuple[str, float]:
-        """
-        Calculates the risk level dynamically.
-
-        Args:
-            pss_score: Normalized PSS-10 score (0.0 to 1.0)
-            checkin_avg: Average mood score (1.0 to 5.0)
-            bad_days_count: Number of checkins with mood < 3 in the last week
-            academic_pressure_avg: Average academic pressure (1.0 to 5.0)
-        """
 
         if self.model:
             try:
@@ -76,19 +60,20 @@ class RiskClassifier:
                     ],
                 )
 
-                # Predict (0=Low, 1=Medium, 2=High)
                 pred_class = self.model.predict(features_df)[0]
 
-                # Get Probability/Confidence
                 probas = self.model.predict_proba(features_df)[0]
                 confidence = probas[pred_class]
 
-                mapping = {0: "Low", 1: "Medium", 2: "High"}
+                mapping = {
+                    0: "Low",
+                    1: "Medium",
+                    2: "High",
+                }
                 return mapping.get(pred_class, "Low"), float(confidence)
             except Exception as e:
-                logger.error(f"ML Prediction failed: {e}. Falling back to heuristics.")
+                logger.error(f"Predicción ML falló: {e}. Recurriendo a heurística.")
 
-        # --- HEURISTIC FALLBACK (Legacy Logic) ---
         normalized_mood = (5 - checkin_avg) / 4.0
         normalized_bad_days = min(bad_days_count / 7.0, 1.0)
         normalized_pressure = (academic_pressure_avg - 1) / 4.0
@@ -109,7 +94,6 @@ class RiskClassifier:
 
     def get_feature_importance(self) -> Dict[str, float]:
         if self.model:
-            # Return Feature Importances from Random Forest
             imps = self.model.feature_importances_
             return {
                 "pss_score": float(imps[0]),

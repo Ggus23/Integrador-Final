@@ -12,55 +12,46 @@ from app.db.session import SessionLocal
 from app.models.user import User, UserRole
 from app.schemas.auth import TokenPayload
 
-# OAuth2PasswordBearer is a class that tells FastAPI that the URL /api/v1/auth/login
-# is where we get the token. It will look for the Authorization header.
+
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
 
 def get_db() -> Generator:
-    """
-    Dependency function to provide a database session to each request.
-    Ensures that the session is closed after the request is finished.
-    """
+
     try:
         db = SessionLocal()
         yield db
     finally:
         db.close()
-
-
+"""
+# Con esta funcion Recibimos el token y conexion a DB. 
+# Si falla muestra 401
+# Se busca el ID, Si no existe el usuario muestra 404
+# Si no esta activo muestra 400
+# Si todo esta bien retorna el usuario
+"""
 def get_current_user(
     db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
 ) -> User:
-    """
-    Extracts the user from the JWT token provided in the request header.
-    Validates the token signature and expiration.
-    """
+
     try:
-        # Decode the token using our secret key and algorithm
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
     except (jwt.JWTError, ValidationError) as e:
-        # Academic Note: Logging failed validation attempts helps identify
-        # expired or tampered token usage.
         log_security_event("INVALID_TOKEN", f"Token validation failed: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
-    # Check if the user exists in the database
     user = db.query(User).filter(User.id == token_data.sub).first()
     if not user:
         log_security_event(
             "USER_NOT_FOUND", f"User with ID {token_data.sub} not in database"
         )
         raise HTTPException(status_code=404, detail="User not found")
-
-    # Check if user account is active
     if not user.is_active:
         log_security_event(
             "INACTIVE_USER", f"User {user.email} attempted access while inactive"
@@ -69,12 +60,12 @@ def get_current_user(
 
     return user
 
+"""
+La clase RoleChecker es una fabrica de dependencias que permite reutilizar
+la logica de verificacion de roles en diferentes endpoints
+"""
 
 class RoleChecker:
-    """
-    Dependency class to enforce Role-Based Access Control (RBAC).
-    Can be used to restrict access to specific roles.
-    """
 
     def __init__(self, allowed_roles: List[UserRole]):
         self.allowed_roles = allowed_roles
@@ -92,8 +83,6 @@ class RoleChecker:
             )
         return current_user
 
-
-# Common role check dependencies
 get_admin_user = RoleChecker([UserRole.ADMIN])
 get_psychologist_user = RoleChecker([UserRole.ADMIN, UserRole.PSYCHOLOGIST])
 get_staff_user = RoleChecker([UserRole.ADMIN, UserRole.PSYCHOLOGIST])

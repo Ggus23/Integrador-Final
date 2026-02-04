@@ -9,15 +9,16 @@ from app.services.assessment_service import assessment_service
 
 router = APIRouter()
 
-
-@router.get("/", response_model=List[schemas.assessment.Assessment])
+"""
+Verificamos si el usuario esta logueado, sino muestra 401
+Luego retorna todos los cuestionarios disponibles
+"""
+@router.get("/", response_model=List[schemas.assessment.Assessment], 
+            status_code=200,
+            dependencies=[Depends(deps.get_current_user)])
 def read_assessments(
     db: Session = Depends(deps.get_db),
-    current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-    """
-    Get the list of available psychometric assessments (PSS-10, DASS-21, etc.)
-    """
     return db.query(models.assessment.Assessment).all()
 
 
@@ -27,9 +28,6 @@ def read_assessment_by_key(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-    """
-    Get a specific assessment by its type key (e.g. 'PSS-10').
-    """
     assessment = (
         db.query(models.assessment.Assessment)
         .filter(models.assessment.Assessment.type == key)
@@ -39,7 +37,12 @@ def read_assessment_by_key(
         raise HTTPException(status_code=404, detail="Assessment not found")
     return assessment
 
-
+"""
+Verificamos si el usuario esta logueado, sino muestra 401
+Recibimos la key(ej: Ansiedad)
+Busca por tipo, si existe prepara el objeto y lo retorna
+y si no existe muestra 404 
+"""
 @router.post(
     "/responses", response_model=schemas.assessment_response.AssessmentResponse
 )
@@ -49,16 +52,18 @@ def submit_assessment_response(
     response_in: schemas.assessment_response.AssessmentResponseCreate,
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-    """
-    Submit answers for an assessment.
-    Triggers automatic scoring and risk level calculation.
-    """
     response = assessment_service.process_response(db, current_user.id, response_in)
     if not response:
         raise HTTPException(status_code=404, detail="Assessment not found")
     return response
 
-
+"""
+Verifcamos si el usuario esta logueado, sino muestra 401
+Obtiene el ID del usuario obtenido del token
+Prepara la consulta AssessmentResponse + where user_id = ID
+Busca la respuesta o respuestas que pertenecen al usuario
+Retorna el historial
+"""
 @router.get(
     "/responses/me", response_model=List[schemas.assessment_response.AssessmentResponse]
 )
@@ -66,9 +71,6 @@ def read_my_responses(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-    """
-    Get history of assessments completed by the current user.
-    """
     return (
         db.query(models.assessment_response.AssessmentResponse)
         .filter(

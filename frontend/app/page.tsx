@@ -15,7 +15,6 @@ export default function LandingPage() {
   }, []);
   return (
     <div className="bg-background text-foreground selection:bg-primary/20 flex min-h-screen flex-col font-sans">
-      {/* Navbar */}
       <header className="bg-background/80 fixed z-50 w-full border-b border-white/10 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-2">
@@ -62,9 +61,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section */}
       <section className="relative overflow-hidden pt-32 pb-20 lg:pt-48 lg:pb-32">
-        {/* Background Gradients */}
         <div className="pointer-events-none absolute top-0 left-1/2 h-full w-full max-w-7xl -translate-x-1/2">
           <div className="bg-primary/20 absolute top-20 left-10 h-72 w-72 animate-pulse rounded-full blur-[100px]" />
           <div className="absolute right-10 bottom-20 h-96 w-96 rounded-full bg-purple-500/10 blur-[120px]" />
@@ -113,7 +110,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats/Social Proof Strips */}
       <div className="bg-muted/20 border-y border-white/5 backdrop-blur-sm">
         <div className="container mx-auto grid grid-cols-2 gap-8 px-6 py-8 text-center md:grid-cols-4">
           <div>
@@ -143,7 +139,6 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Features Grid */}
       <section id="features" className="bg-muted/10 py-24">
         <div className="container mx-auto px-6">
           <div className="mb-16 text-center">
@@ -193,7 +188,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How it Works Section */}
       <section id="how-it-works" className="bg-background py-24">
         <div className="container mx-auto px-6">
           <div className="mb-16 text-center">
@@ -204,7 +198,6 @@ export default function LandingPage() {
           </div>
 
           <div className="relative grid gap-8 md:grid-cols-4">
-            {/* Connecting Line (Desktop) */}
             <div className="bg-border absolute top-12 left-0 -z-10 hidden h-0.5 w-full md:block" />
 
             <div className="bg-background pt-4 md:pt-0">
@@ -251,7 +244,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Bottom */}
       <section className="relative overflow-hidden py-24">
         <div className="relative z-10 container mx-auto px-6 text-center">
           <h2 className="mb-8 font-serif text-4xl font-bold md:text-5xl">
@@ -272,7 +264,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-background border-border border-t py-12">
         <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-6 md:flex-row">
           <div className="flex items-center gap-2">
