@@ -13,7 +13,7 @@ router = APIRouter()
 def create_user(
     *, db: Session = Depends(deps.get_db), user_in: schemas.user.UserCreate
 ) -> Any:
-    
+
     user = (
         db.query(models.user.User)
         .filter(models.user.User.email == user_in.email)
@@ -68,7 +68,7 @@ def create_user_by_admin(
         hashed_password=get_password_hash(user_in.password),
         full_name=user_in.full_name,
         role=user_in.role,
-        is_active=True,  
+        is_active=True,
         is_email_verified=True,
         must_change_password=True,
     )
@@ -112,7 +112,6 @@ def read_users(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-
     current_user: models.user.User = Depends(deps.get_admin_user),
 ) -> Any:
 

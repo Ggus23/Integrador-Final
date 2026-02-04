@@ -131,7 +131,6 @@ def read_student_detail(
         "risk_level": risk_summary.current_risk_level if risk_summary else "Low",
         "active_alerts": active_alerts_count,
         "last_assessment_date": responses[0].created_at if responses else None,
-
         "risk_summary": risk_summary,
         "alerts": alerts,
         "assessment_responses": responses,
