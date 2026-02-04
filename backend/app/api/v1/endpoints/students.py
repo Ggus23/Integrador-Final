@@ -1,12 +1,11 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
 from app import models, schemas
 from app.api import deps
 from app.ml.risk_classifier import risk_classifier
 from app.services.audit_service import log_access
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -16,11 +15,7 @@ def read_students(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_staff_user),
 ) -> Any:
-    """
-    Retrieve all students with their summary risk status.
-    Accessible by: Admin, Psychologist.
-    """
-    # Get all student users
+
     students = (
         db.query(models.user.User)
         .filter(models.user.User.role == models.user.UserRole.STUDENT)
@@ -29,14 +24,13 @@ def read_students(
 
     summaries = []
     for student in students:
-        # Get Risk Summary
+
         risk_summary = (
             db.query(models.RiskSummary)
             .filter(models.RiskSummary.user_id == student.id)
             .first()
         )
 
-        # Get Active Alerts Count
         active_alerts = (
             db.query(models.Alert)
             .filter(
@@ -46,7 +40,6 @@ def read_students(
             .count()
         )
 
-        # Get Last Assessment
         last_assessment = (
             db.query(models.AssessmentResponse)
             .filter(models.AssessmentResponse.user_id == student.id)
@@ -79,10 +72,7 @@ def read_student_detail(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_staff_user),
 ) -> Any:
-    """
-    Get comprehensive details for a specific student profile.
-    Includes Risk History, Alerts, Assessments, and Checkins.
-    """
+
     student = (
         db.query(models.user.User)
         .filter(
@@ -95,7 +85,6 @@ def read_student_detail(
     if not student:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
 
-    # Audit Log
     log_access(
         db=db,
         actor_id=current_user.id,
@@ -104,14 +93,12 @@ def read_student_detail(
         details=f"Viewed full profile of {student.email}",
     )
 
-    # 1. Risk Summary
     risk_summary = (
         db.query(models.RiskSummary)
         .filter(models.RiskSummary.user_id == student.id)
         .first()
     )
 
-    # 2. Alerts (All history)
     alerts = (
         db.query(models.Alert)
         .filter(models.Alert.user_id == student.id)
@@ -119,10 +106,8 @@ def read_student_detail(
         .all()
     )
 
-    # Active alerts count for summary
     active_alerts_count = sum(1 for a in alerts if not a.is_resolved)
 
-    # 3. Assessment Responses
     responses = (
         db.query(models.AssessmentResponse)
         .filter(models.AssessmentResponse.user_id == student.id)
@@ -130,7 +115,6 @@ def read_student_detail(
         .all()
     )
 
-    # 4. Checkins (Last 20)
     checkins = (
         db.query(models.EmotionalCheckin)
         .filter(models.EmotionalCheckin.user_id == student.id)
@@ -147,7 +131,7 @@ def read_student_detail(
         "risk_level": risk_summary.current_risk_level if risk_summary else "Low",
         "active_alerts": active_alerts_count,
         "last_assessment_date": responses[0].created_at if responses else None,
-        # Detailed fields
+
         "risk_summary": risk_summary,
         "alerts": alerts,
         "assessment_responses": responses,
@@ -163,10 +147,7 @@ def update_student(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_admin_user),
 ) -> Any:
-    """
-    Actualizar información básica de un estudiante.
-    Protegido: Solo accesible por 'admin'. Los psicólogos solo pueden ver datos clínicos.
-    """
+
     student = (
         db.query(models.user.User)
         .filter(

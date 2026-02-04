@@ -1,7 +1,6 @@
+from app.core.config import settings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from app.core.config import settings
 
 # Create the SQLAlchemy engine.
 # The engine is the main entry point to the database, handling connections and pools.

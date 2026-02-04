@@ -1,10 +1,9 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-
 from app import models, schemas
 from app.api import deps
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -20,11 +19,7 @@ def create_clinical_note(
     note_in: schemas.clinical_note.ClinicalNoteCreate,
     current_user: models.user.User = Depends(deps.get_psychologist_user),
 ) -> Any:
-    """
-    Create a new clinical note.
-    Only Psychologists (and Admins) can create notes.
-    """
-    # Verify student exists
+
     student = (
         db.query(models.user.User)
         .filter(models.user.User.id == note_in.student_id)
@@ -42,7 +37,6 @@ def create_clinical_note(
     db.commit()
     db.refresh(note)
 
-    # Enrich response with psychologist name manually if needed, or rely on lazy load
     response = schemas.clinical_note.ClinicalNote.model_validate(note)
     response.psychologist_name = current_user.full_name
 
@@ -56,10 +50,7 @@ def read_clinical_notes(
     student_id: int,
     current_user: models.user.User = Depends(deps.get_psychologist_user),
 ) -> Any:
-    """
-    Get clinical notes for a specific student.
-    Only Psychologists (and Admins) can view notes.
-    """
+
     notes = (
         db.query(models.clinical_note.ClinicalNote)
         .filter(models.clinical_note.ClinicalNote.student_id == student_id)

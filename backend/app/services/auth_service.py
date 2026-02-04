@@ -2,11 +2,10 @@ import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy.orm import Session
-
 from app.models.tokens import EmailVerificationToken, PasswordResetToken
 from app.models.user import User
 from app.services.email_service import email_service
+from sqlalchemy.orm import Session
 
 
 class AuthService:

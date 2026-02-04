@@ -1,8 +1,7 @@
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
-
 from app.models.user import UserRole
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 
 # Shared properties across all user schemas

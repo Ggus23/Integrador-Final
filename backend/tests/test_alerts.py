@@ -1,7 +1,6 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
-
 from app.core.constants import RiskLevel
 from app.services.alert_service import alert_service
 

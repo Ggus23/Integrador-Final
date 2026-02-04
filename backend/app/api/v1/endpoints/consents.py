@@ -1,10 +1,9 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
 from app import models, schemas
 from app.api import deps
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -14,9 +13,7 @@ def read_my_consent(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-    """
-    Check if the current user has already accepted the informed consent.
-    """
+
     consent = (
         db.query(models.consent.Consent)
         .filter(models.consent.Consent.user_id == current_user.id)
@@ -34,10 +31,7 @@ def accept_consent(
     consent_in: schemas.consent.ConsentCreate,
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-    """
-    Accept the informed consent. This is a prerequisite for using other
-    platform features.
-    """
+
     db_consent = (
         db.query(models.consent.Consent)
         .filter(models.consent.Consent.user_id == current_user.id)

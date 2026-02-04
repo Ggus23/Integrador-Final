@@ -1,18 +1,14 @@
 import sentry_sdk
+from app.api.v1.api import api_router
+from app.core.config import settings
+from app.core.errors import (general_exception_handler, http_exception_handler,
+                             not_found_handler)
+from app.core.limiter import limiter
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
-
-from app.api.v1.api import api_router
-from app.core.config import settings
-from app.core.errors import (
-    general_exception_handler,
-    http_exception_handler,
-    not_found_handler,
-)
-from app.core.limiter import limiter
 
 if settings.SENTRY_DSN and settings.SENTRY_DSN.strip().startswith("http"):
     sentry_sdk.init(

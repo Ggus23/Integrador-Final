@@ -1,11 +1,10 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
 from app import models, schemas
 from app.api import deps
 from app.core.logging import log_security_event
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -17,9 +16,6 @@ def read_my_checkins(
     skip: int = 0,
     limit: int = 100,
 ) -> Any:
-    """
-    Retrieve all emotional check-ins for the current logged-in user.
-    """
     return (
         db.query(models.emotional_checkin.EmotionalCheckin)
         .filter(models.emotional_checkin.EmotionalCheckin.user_id == current_user.id)
@@ -36,9 +32,6 @@ def create_checkin(
     checkin_in: schemas.emotional_checkin.EmotionalCheckinCreate,
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-    """
-    Record a new emotional check-in for the user.
-    """
     db_obj = models.emotional_checkin.EmotionalCheckin(
         **checkin_in.model_dump(), user_id=current_user.id
     )
@@ -54,10 +47,6 @@ def read_checkin(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-    """
-    Retrieve a specific emotional check-in.
-    Security: IDOR Prevention - Verifies that the check-in belongs to the current user.
-    """
     checkin = (
         db.query(models.emotional_checkin.EmotionalCheckin)
         .filter(models.emotional_checkin.EmotionalCheckin.id == checkin_id)
@@ -69,7 +58,6 @@ def read_checkin(
             status_code=404, detail="Registro de bienestar no encontrado"
         )
 
-    # IDOR Check
     if (
         checkin.user_id != current_user.id
         and current_user.role != models.user.UserRole.ADMIN
