@@ -13,9 +13,14 @@ router = APIRouter()
 Verificamos si el usuario esta logueado, sino muestra 401
 Luego retorna todos los cuestionarios disponibles
 """
-@router.get("/", response_model=List[schemas.assessment.Assessment], 
-            status_code=200,
-            dependencies=[Depends(deps.get_current_user)])
+
+
+@router.get(
+    "/",
+    response_model=List[schemas.assessment.Assessment],
+    status_code=200,
+    dependencies=[Depends(deps.get_current_user)],
+)
 def read_assessments(
     db: Session = Depends(deps.get_db),
 ) -> Any:
@@ -37,12 +42,15 @@ def read_assessment_by_key(
         raise HTTPException(status_code=404, detail="Assessment not found")
     return assessment
 
+
 """
 Verificamos si el usuario esta logueado, sino muestra 401
 Recibimos la key(ej: Ansiedad)
 Busca por tipo, si existe prepara el objeto y lo retorna
 y si no existe muestra 404 
 """
+
+
 @router.post(
     "/responses", response_model=schemas.assessment_response.AssessmentResponse
 )
@@ -57,6 +65,7 @@ def submit_assessment_response(
         raise HTTPException(status_code=404, detail="Assessment not found")
     return response
 
+
 """
 Verifcamos si el usuario esta logueado, sino muestra 401
 Obtiene el ID del usuario obtenido del token
@@ -64,6 +73,8 @@ Prepara la consulta AssessmentResponse + where user_id = ID
 Busca la respuesta o respuestas que pertenecen al usuario
 Retorna el historial
 """
+
+
 @router.get(
     "/responses/me", response_model=List[schemas.assessment_response.AssessmentResponse]
 )

@@ -18,25 +18,25 @@ router = APIRouter()
 
 
 @router.post("/login", response_model=schemas.auth.Token)
-"""
-El limiter impide que alguien intente adivinar contaseñas por medio de scripts
-Solo permite 5 intentos de login por minuto desde la misma IP
-"""
 @limiter.limit("5/minute")
 def login_access_token(
-    #El request:Request es necesario par que el limiter sepa cual es el IP
+    # El request:Request es necesario par que el limiter sepa cual es el IP
     request: Request,
     db: Session = Depends(deps.get_db),
-    #En el form_data  FastAPI usa OAuth2PasswordRequestForm para obtener datos
+    # En el form_data  FastAPI usa OAuth2PasswordRequestForm para obtener datos
     form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> Any:
+    """
+    El limiter impide que alguien intente adivinar contaseñas por medio de scripts
+    Solo permite 5 intentos de login por minuto desde la misma IP
+    """
     user = (
         db.query(models.user.User)
         .filter(models.user.User.email == form_data.username)
         .first()
     )
-    #El verified admite la contraseña como correcta
-    #El new hash genera un nuevo hash si la contraseña es correcta pero el hash es viejo
+    # El verified admite la contraseña como correcta
+    # El new hash genera un nuevo hash si la contraseña es correcta pero el hash es viejo
     verified, new_hash = False, None
     if user:
         verified, new_hash = security.verify_and_update_password(
@@ -76,7 +76,7 @@ def login_access_token(
 
     log_security_event(
         "LOGIN_SUCCESS", f"User {user.email} logged in successfully", level=10
-    ) 
+    )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
         "access_token": security.create_access_token(
@@ -87,7 +87,7 @@ def login_access_token(
     }
 
 
-#Aqui no usamos depends(get_current_user) porque se espera un access_token en el body
+# Aqui no usamos depends(get_current_user) porque se espera un access_token en el body
 @router.post("/refresh", response_model=schemas.auth.Token)
 def refresh_token(
     refresh_token: str,
@@ -136,16 +136,17 @@ def refresh_token(
         "token_type": "bearer",
     }
 
-"""
-Esta def nos ayuda Recibir el token, lo desencripta, busca al usuario segun el correo
-si no existe el correo devuelve error 400
-Si existe el correo muestra el mensaje "Email verified successfully"
-"""
+
 @router.post("/verify-email")
 def verify_email(
     token: str,
     db: Session = Depends(deps.get_db),
 ) -> Any:
+    """
+    Esta def nos ayuda Recibir el token, lo desencripta, busca al usuario segun el correo
+    si no existe el correo devuelve error 400
+    Si existe el correo muestra el mensaje "Email verified successfully"
+    """
     #
     from app.services.auth_service import auth_service
 
@@ -156,36 +157,40 @@ def verify_email(
         )
     return {"msg": "Email verified successfully"}
 
-"""
-Este def maneja la solicitud  de recuperacion de contraseña
-Mediante el email_in se envia un JSON simple FastAPI valida que el formato sea correcto
-"""
+
 @router.post("/recover-password")
 def recover_password(
     email_in: schemas.auth.PasswordRecovery,
     db: Session = Depends(deps.get_db),
 ) -> Any:
+    """
+    Este def maneja la solicitud  de recuperacion de contraseña
+    Mediante el email_in se envia un JSON simple FastAPI valida que el formato sea correcto
+    """
 
     from app.services.auth_service import auth_service
-    #El auth_service busca si el email existe
-    #Si existe genera un token temporal 
-    #Luego envia un correo al usuario con un enlace 
+
+    # El auth_service busca si el email existe
+    # Si existe genera un token temporal
+    # Luego envia un correo al usuario con un enlace
     auth_service.request_password_reset(db, email_in.email)
 
-    #Fija que el endpoint devuelva un 200 sin importar si el correo esta o no
-    #Porque si responde Correo no encontrado seria inseguro y se haria la prueba para obtener emails
+    # Fija que el endpoint devuelva un 200 sin importar si el correo esta o no
+    # Porque si responde Correo no encontrado seria inseguro y se haria la prueba para obtener emails
     return {"msg": "Si el correo existe, se ha enviado un enlace de recuperación."}
 
-#El def reset_password es el final para recuperar la contraseña
+
+# El def reset_password es el final para recuperar la contraseña
 @router.post("/reset-password")
 def reset_password(
-    #El reset_in contiene el token y el new_password
+    # El reset_in contiene el token y el new_password
     reset_in: schemas.auth.PasswordReset,
     db: Session = Depends(deps.get_db),
 ) -> Any:
-    
+
     # El from app.core.security antes de pasar la contraseña a cualquier otro lado aplica el hash
     from app.core.security import get_password_hash
+
     # El from app.services.auth_service llama a la logica de negocio pasando el token y el hash
     """
     Verifica si el token es valido y si no expiro
@@ -198,28 +203,29 @@ def reset_password(
     success = auth_service.reset_password(
         db, reset_in.token, get_password_hash(reset_in.new_password)
     )
-    #Valida si el token ya vencio o si existe manupalacion el servicio devuelve False
+    # Valida si el token ya vencio o si existe manupalacion el servicio devuelve False
     if not success:
         raise HTTPException(status_code=400, detail="Invalid or expired token")
-    #Este log deja un registro de que la operacion fue exitosa
+    # Este log deja un registro de que la operacion fue exitosa
     log_security_event("PASSWORD_RESET_SUCCESS", "Password reset successful via token")
     return {"msg": "Contraseña actualizada exitosamente"}
 
-# Este def es util para la interfaz grafica 
-@router.post("/test-token", response_model=schemas.user.User)
 
-#Se confia en el current_user que viene del token
-#Si el token es invalido se muestra error 401
-#Si el token es valido se retorna el usuario
-"""
-Esto es vital por que necesitamos validar la sesion, nos ayuda a obtener los datos del usuario y
-nos ayuda a depurar 
-"""
+# Este def es util para la interfaz grafica
+@router.post("/test-token", response_model=schemas.user.User)
+# Se confia en el current_user que viene del token
+# Si el token es invalido se muestra error 401
+# Si el token es valido se retorna el usuario
 def test_token(current_user: models.user.User = Depends(deps.get_current_user)) -> Any:
+    """
+    Esto es vital por que necesitamos validar la sesion, nos ayuda a obtener los datos del usuario y
+    nos ayuda a depurar
+    """
 
     return current_user
 
-#Este def implementa el cambio de contraseña obligatorio para el usuario psicologo
+
+# Este def implementa el cambio de contraseña obligatorio para el usuario psicologo
 @router.post("/change-required-password", response_model=schemas.user.User)
 def change_required_password(
     *,
@@ -227,15 +233,15 @@ def change_required_password(
     password_in: schemas.auth.PasswordResetConfirm,  # Re-using a simple schema with 'new_password'
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-    #Esta validacion es exclusivamente para cuando es obligatorio 
+    # Esta validacion es exclusivamente para cuando es obligatorio
     if not current_user.must_change_password:
         raise HTTPException(
             status_code=400, detail="User is not required to change password"
         )
-    
-    #Se toma el new_password se encripta y se reemplaza
+
+    # Se toma el new_password se encripta y se reemplaza
     current_user.hashed_password = security.get_password_hash(password_in.new_password)
-    #Este desbloquea la cuenta 
+    # Este desbloquea la cuenta
     current_user.must_change_password = False
 
     """
