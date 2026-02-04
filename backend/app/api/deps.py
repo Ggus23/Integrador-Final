@@ -25,17 +25,14 @@ def get_db() -> Generator:
         db.close()
 
 
-"""
-# Con esta funcion Recibimos el token y conexion a DB. 
-# Si falla muestra 401
-# Se busca el ID, Si no existe el usuario muestra 404
-# Si no esta activo muestra 400
-# Si todo esta bien retorna el usuario
-"""
-
-
 def get_current_user(
-    db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
+    # Con esta funcion Recibimos el token y conexion a DB.
+    # Si falla muestra 401
+    # Se busca el ID, Si no existe el usuario muestra 404
+    # Si no esta activo muestra 400
+    # Si todo esta bien retorna el usuario
+    db: Session = Depends(get_db),
+    token: str = Depends(reusable_oauth2),
 ) -> User:
 
     try:
@@ -65,13 +62,11 @@ def get_current_user(
     return user
 
 
-"""
-La clase RoleChecker es una fabrica de dependencias que permite reutilizar
-la logica de verificacion de roles en diferentes endpoints
-"""
-
-
 class RoleChecker:
+    """
+    La clase RoleChecker es una fabrica de dependencias que permite reutilizar
+    la logica de verificacion de roles en diferentes endpoints
+    """
 
     def __init__(self, allowed_roles: List[UserRole]):
         self.allowed_roles = allowed_roles
