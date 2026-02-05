@@ -17,6 +17,10 @@ def read_my_checkins(
     skip: int = 0,
     limit: int = 100,
 ) -> Any:
+    """
+    Este def retorna todos los checkins (emociones) del usuario autenticado
+    en caso de no estar autenticado retorna un error 401
+    """
     return (
         db.query(models.emotional_checkin.EmotionalCheckin)
         .filter(models.emotional_checkin.EmotionalCheckin.user_id == current_user.id)
@@ -33,6 +37,14 @@ def create_checkin(
     checkin_in: schemas.emotional_checkin.EmotionalCheckinCreate,
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
+    """
+    Este def primero verifica que el usuario esté autenticado.
+    Recibe los datos con el estado de ánimo, obtiene el id del usuario
+    con el current_user para crear el checkin (mood, notes).
+    Add (prepara), Commit (guarda) y luego se refrescan los datos
+    para obtener el id del checkin creado.
+    Retorna el checkin creado.
+    """
     db_obj = models.emotional_checkin.EmotionalCheckin(
         **checkin_in.model_dump(), user_id=current_user.id
     )
@@ -48,6 +60,13 @@ def read_checkin(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
+    """
+    Este def retorna un checkin (emoción) por su id.
+    Busca el checkin por id; si no existe, retorna error 404.
+    Verifica que el usuario autenticado sea el dueño del checkin.
+    Si el usuario es Admin, puede acceder a cualquier checkin.
+    Si no tiene permisos, retorna error 403.
+    """
     checkin = (
         db.query(models.emotional_checkin.EmotionalCheckin)
         .filter(models.emotional_checkin.EmotionalCheckin.id == checkin_id)

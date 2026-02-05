@@ -14,14 +14,20 @@ def read_my_consent(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-
+    """
+    Retorna el consentimiento del usuario autenticado.
+    Si no existe, devuelve error 404.
+    """
+    # Busca el consentimiento en la DB
     consent = (
         db.query(models.consent.Consent)
         .filter(models.consent.Consent.user_id == current_user.id)
         .first()
     )
+
     if not consent:
         raise HTTPException(status_code=404, detail="Consent not found for this user")
+
     return consent
 
 
@@ -32,12 +38,17 @@ def accept_consent(
     consent_in: schemas.consent.ConsentCreate,
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-
+    """
+    Crea o actualiza el consentimiento del usuario autenticado.
+    """
+    # Verifica si ya existe un consentimiento previo
     db_consent = (
         db.query(models.consent.Consent)
         .filter(models.consent.Consent.user_id == current_user.id)
         .first()
     )
+
+    # Si existe, se actualiza; si no, se crea uno nuevo
     if db_consent:
         db_consent.has_accepted = consent_in.has_accepted
         db_consent.version = consent_in.version
@@ -49,6 +60,7 @@ def accept_consent(
         )
         db.add(db_consent)
 
+    # Guarda los cambios en la DB
     db.commit()
     db.refresh(db_consent)
     return db_consent
