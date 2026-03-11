@@ -61,3 +61,20 @@ def mock_email():
     auth_service.mail = MockEmailService()
     yield
     auth_service.mail = original_service
+
+
+@pytest.fixture(scope="session", autouse=True)
+def mock_genai():
+    """
+    Mock Google GenAI client for all tests to prevent real API calls.
+    """
+    from unittest.mock import MagicMock, patch
+
+    mock_client_instance = MagicMock()
+    # Mock some typical responses if needed
+    mock_response = MagicMock()
+    mock_response.text = '{"dominant_emotion": "neutral", "emotion_scores": {"felicidad": 0.2, "tristeza": 0.2, "ansiedad": 0.2, "enojo": 0.2, "neutral": 0.2}}'
+    mock_client_instance.models.generate_content.return_value = mock_response
+
+    with patch("google.genai.Client", return_value=mock_client_instance):
+        yield
