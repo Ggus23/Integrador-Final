@@ -19,7 +19,7 @@ def generate_combined_data():
     # Algunos CSVs de este tipo usan punto y coma, verificamos.
     try:
         df = pd.read_csv(DATASET_PATH)
-    except:
+    except Exception:
         df = pd.read_csv(DATASET_PATH, sep=";")
 
     print(f"Columnas detectadas: {df.columns.tolist()}")
@@ -50,7 +50,6 @@ def generate_combined_data():
 
     # Generar datos sintéticos de Salud Mental para MentaLink
     # Queremos que haya correlación: Peor salud mental -> Más riesgo de Dropout
-    n_rows = len(df)
 
     # PSS Score (0-40): Más alto es más estrés
     # Mood Avg (1-5): Más alto es mejor ánimo

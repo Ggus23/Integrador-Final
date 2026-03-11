@@ -218,8 +218,6 @@ class AssessmentService:
         if phq9_critical:
             effective_risk = RiskLevel.CRITICAL
 
-        phq9_q6 = assessment_type == "PHQ-9" and answers.get("q6", 0) > 0
-
         # ONLY update recommendations if the current test is PSS-10
         # This follows the requirement: "solo debe brindarme consejos para el test pss 10 no para todos"
         if assessment_type == "PSS-10":

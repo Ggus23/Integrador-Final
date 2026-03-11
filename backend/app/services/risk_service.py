@@ -1,4 +1,4 @@
-from app.core.constants import AssessmentType, RiskLevel
+from app.core.constants import RiskLevel
 
 
 class RiskService:

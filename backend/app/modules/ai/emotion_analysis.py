@@ -1,7 +1,7 @@
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from google import genai
 from google.genai import types
@@ -32,9 +32,9 @@ class EmotionAnalysisService:
         prompt = f"""
         Analiza el siguiente texto de un diario emocional de un estudiante y detecta las emociones presentes.
         Debes clasificar el texto en las siguientes categorías: felicidad, tristeza, ansiedad, enojo, neutral.
-        
+
         Texto: "{text}"
-        
+
         Instrucciones:
         1. Identifica la emoción dominante.
         2. Proporciona un puntaje de probabilidad (0.0 a 1.0) para cada una de las 5 emociones.
