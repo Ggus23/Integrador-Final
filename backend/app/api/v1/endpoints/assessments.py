@@ -54,13 +54,23 @@ y si no existe muestra 404
 @router.post(
     "/responses", response_model=schemas.assessment_response.AssessmentResponse
 )
-def submit_assessment_response(
+async def submit_assessment_response(
     *,
     db: Session = Depends(deps.get_db),
     response_in: schemas.assessment_response.AssessmentResponseCreate,
     current_user: models.user.User = Depends(deps.get_current_user),
 ) -> Any:
-    response = assessment_service.process_response(db, current_user.id, response_in)
+    """
+    Submit a completed psychometric assessment.
+    The backend calculates risk, runs ML prediction, generates recommendations,
+    creates differentiated alerts, and persists everything atomically.
+    """
+    response = await assessment_service.process_response(
+        db,
+        user_id=current_user.id,
+        user_email=current_user.email,
+        response_in=response_in,
+    )
     if not response:
         raise HTTPException(status_code=404, detail="Assessment not found")
     return response

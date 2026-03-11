@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -13,7 +14,12 @@ export default function SecurityLayout({ children }: { children: React.ReactNode
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <span className="font-serif text-xl font-bold tracking-tight">MenTaLink Legal</span>
+            <div className="flex items-center gap-2">
+              <div className="relative h-8 w-8 overflow-hidden rounded-md">
+                <Image src="/icon_logo.png" alt="MentaLink Logo" fill className="object-cover" />
+              </div>
+              <span className="font-serif text-xl font-bold tracking-tight">MenTaLink Legal</span>
+            </div>
           </div>
         </div>
       </header>

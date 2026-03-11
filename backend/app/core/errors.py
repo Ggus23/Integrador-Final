@@ -28,8 +28,9 @@ async def general_exception_handler(request: Request, exc: Exception):
     Global exception handler for 500 errors.
     Prevents leaking internal stack traces to the client.
     """
-    # In a real app, you would log the exception here: logger.error(f"Global error: {exc}")
-    # print(f"Global error: {exc}") # For debugging locally if needed
+    import traceback
+    traceback.print_exc()
+    print(f"Global error: {exc}")
 
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

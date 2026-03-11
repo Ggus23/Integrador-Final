@@ -4,6 +4,7 @@ import type React from 'react';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -44,10 +45,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-50 to-teal-50 px-4 py-12 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#ecfeff] via-[#cffafe] to-[#a5f3fc] px-4 py-12 dark:from-[#083344] dark:via-[#164e63] dark:to-[#083344]">
       <Card className="animate-fade-in w-full max-w-md border-white/20 bg-white/80 p-8 shadow-xl backdrop-blur-md dark:bg-slate-900/80">
         <div className="space-y-6">
-          <div className="space-y-2 text-center">
+          <div className="flex flex-col items-center space-y-2 text-center">
+            <div className="relative mb-4 h-20 w-20 overflow-hidden rounded-full shadow-lg">
+              <Image src="/icon_logo.png" alt="MentaLink Logo" fill className="object-cover" />
+            </div>
             <h1 className="from-primary to-accent bg-gradient-to-r bg-clip-text font-serif text-4xl font-bold text-transparent">
               MENTA-LINK
             </h1>
@@ -111,7 +115,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="from-primary to-accent w-full rounded-lg bg-gradient-to-r py-6 text-base font-semibold text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground w-full rounded-lg py-6 text-base font-semibold shadow-lg transition-all hover:shadow-xl"
             >
               {loading ? t('auth.logging_in') : t('auth.login_title')}
             </Button>

@@ -46,6 +46,8 @@ interface StudentDetails {
   risk_summary: {
     current_risk_level: string;
     prediction_confidence?: number;
+    dropout_risk?: string;
+    dropout_probability?: number;
   } | null;
   risk_factors?: Record<string, number>;
   recent_checkins: {
@@ -70,6 +72,15 @@ interface StudentDetails {
     risk_level: string;
     created_at: string;
   }[];
+  academic_profile: {
+    course: string;
+    current_gpa: number;
+    units_approved: number;
+    hito2_procesual: number; hito2_nota: number;
+    hito3_procesual: number; hito3_nota: number;
+    hito4_procesual: number; hito4_nota: number;
+    hito5_procesual: number; hito5_nota: number;
+  } | null;
 }
 
 export default function StudentDetailPage() {
@@ -229,6 +240,23 @@ export default function StudentDetailPage() {
               )}
             </div>
           </div>
+
+          {/* NEW: Dropout Risk Badge */}
+          <div
+            className={`rounded-xl border-2 px-6 py-4 ${getRiskColor(student.risk_summary?.dropout_risk)} shadow-sm`}
+          >
+            <div className="mb-1 text-xs font-bold tracking-widest uppercase opacity-80">
+              Riesgo de Abandono
+            </div>
+            <div className="flex items-center gap-2 text-3xl font-black">
+              {translateRisk(student.risk_summary?.dropout_risk)}
+              {student.risk_summary?.dropout_probability !== undefined && (
+                <span className="text-sm font-medium opacity-70" title="Probabilidad de Abandono">
+                  ({(student.risk_summary.dropout_probability * 100).toFixed(0)}%)
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
         {error && (
@@ -251,6 +279,67 @@ export default function StudentDetailPage() {
             <RiskFactorsChart factors={student.risk_factors || {}} />
           </div>
         </Card>
+
+        {/* Academic Profile Section */}
+        {student.academic_profile && (
+          <Card className="border-border p-8 shadow-md">
+            <h3 className="mb-4 font-serif text-2xl font-bold">🎓 Perfil Académico</h3>
+            <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+              <div className="bg-muted/30 border-border/50 rounded-xl border p-4">
+                <span className="text-muted-foreground mb-1 block text-[10px] font-black uppercase">
+                  Carrera
+                </span>
+                <span className="text-xl font-bold">
+                  {student.academic_profile.course || 'No especificada'}
+                </span>
+              </div>
+              <div className="bg-muted/30 border-border/50 rounded-xl border p-4">
+                <span className="text-muted-foreground mb-1 block text-[10px] font-black uppercase">
+                  Materias Aprobadas
+                </span>
+                <span className="text-xl font-bold">
+                  {student.academic_profile.units_approved} Unidades
+                </span>
+              </div>
+              <div className="bg-primary/10 border-primary/20 rounded-xl border p-4">
+                <span className="text-primary/70 mb-1 block text-[10px] font-black uppercase">
+                  Puntaje Total (GPA)
+                </span>
+                <span className="text-primary text-2xl font-black">
+                  {student.academic_profile.current_gpa}/100
+                </span>
+              </div>
+            </div>
+
+            <div className="border-border overflow-hidden rounded-xl border">
+              <div className="divide-border grid grid-cols-2 divide-x divide-y lg:grid-cols-4 lg:divide-y-0">
+                {[2, 3, 4, 5].map((num) => {
+                  const proc = (student.academic_profile as any)[`hito${num}_procesual`] || 0;
+                  const nota = (student.academic_profile as any)[`hito${num}_nota`] || 0;
+                  return (
+                    <div key={num} className="space-y-2 p-4">
+                      <div className="text-muted-foreground text-xs font-black uppercase">
+                        Hito {num}
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Procesual:</span>
+                        <span className="font-bold">{proc}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Examen:</span>
+                        <span className="font-bold">{nota}</span>
+                      </div>
+                      <div className="text-primary mt-2 border-t pt-2 flex justify-between font-bold">
+                        <span>Total:</span>
+                        <span>{proc + nota}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </Card>
+        )}
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Management/Clinical Actions Section */}

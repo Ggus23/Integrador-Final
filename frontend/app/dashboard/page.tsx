@@ -7,7 +7,11 @@ import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { TrendChart } from '@/components/dashboard/TrendChart';
+import { DropoutTrendChart } from '@/components/dashboard/DropoutTrendChart';
 import { RiskDistributionChart } from '@/components/dashboard/RiskDistributionChart';
+import { AcademicProfileForm } from '@/components/AcademicProfileForm';
+import { AppointmentRequest } from '@/components/AppointmentRequest';
+import { RecommendationsPanel } from '@/components/dashboard/RecommendationsPanel';
 import Link from 'next/link';
 import type { RiskSummary, AssessmentResponse, Checkin } from '@/lib/types';
 
@@ -15,6 +19,7 @@ export default function DashboardPage() {
   const { user } = useProtected();
   const [riskSummary, setRiskSummary] = useState<RiskSummary | null>(null);
   const [lastAssessment, setLastAssessment] = useState<AssessmentResponse | null>(null);
+  const [assessments, setAssessments] = useState<AssessmentResponse[]>([]);
   const [checkins, setCheckins] = useState<Checkin[]>([]);
   const [aggregatedReport, setAggregatedReport] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -32,6 +37,7 @@ export default function DashboardPage() {
             apiClient.getMyCheckins(),
           ]);
           setRiskSummary(risk);
+          setAssessments(responses || []);
           if (responses.length > 0) {
             setLastAssessment(responses[0]);
           }
@@ -122,6 +128,28 @@ export default function DashboardPage() {
           </p>
         </div>
 
+        {user?.role === 'student' && (
+          <div className="bg-primary/10 border-primary/20 text-foreground animate-fade-in flex flex-col items-start gap-3 rounded-lg border p-4 text-sm shadow-sm md:flex-row md:items-center">
+            <svg
+              className="text-primary h-6 w-6 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <p>
+              <strong>Aviso:</strong> Esta plataforma proporciona orientación preventiva y no
+              reemplaza la evaluación de un profesional de la salud mental.
+            </p>
+          </div>
+        )}
+
         {error && (
           <div className="border-destructive bg-destructive/10 text-destructive rounded border p-4 text-sm">
             {error}
@@ -134,9 +162,9 @@ export default function DashboardPage() {
               <h2 className="text-foreground font-serif text-xl font-bold">
                 Gestión Administrativa
               </h2>
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <Link href="/admin/users">
-                  <Card className="border-border bg-card cursor-pointer border-l-4 border-l-purple-500 p-6 shadow-sm transition-all hover:shadow-md">
+                  <Card className="border-border bg-card cursor-pointer border-l-4 border-l-blue-500 p-6 shadow-sm transition-all hover:shadow-md">
                     <h3 className="font-bold">Control de Usuarios</h3>
                     <p className="text-muted-foreground mt-1 text-sm">
                       Gestionar roles, psicólogos y cuentas.
@@ -177,7 +205,7 @@ export default function DashboardPage() {
               <h2 className="text-foreground font-serif text-xl font-bold">
                 Panel Clínico Operativo
               </h2>
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <Link href="/admin/alerts">
                   <Card className="border-border bg-card border-l-risk-high cursor-pointer border-l-4 p-6 shadow-sm transition-all hover:shadow-md">
                     <h3 className="flex items-center justify-between font-bold">
@@ -218,7 +246,7 @@ export default function DashboardPage() {
         )}
 
         {user?.role === 'student' && (
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {riskSummary && (
               <>
                 <Card
@@ -260,9 +288,15 @@ export default function DashboardPage() {
         )}
 
         {user?.role === 'student' && checkins.length > 0 && (
-          <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.4s' }}>
-            <h2 className="text-foreground font-serif text-xl font-bold">Tendencia Emocional</h2>
-            <TrendChart data={checkins} />
+          <div className="animate-slide-up grid gap-6 md:grid-cols-2" style={{ animationDelay: '0.4s' }}>
+            <div className="space-y-4">
+              <h2 className="text-foreground font-serif text-xl font-bold">Bienestar Emocional</h2>
+              <TrendChart data={checkins} />
+            </div>
+            <div className="space-y-4">
+              <h2 className="text-foreground font-serif text-xl font-bold">Riesgo de Deserción</h2>
+              <DropoutTrendChart data={assessments} />
+            </div>
           </div>
         )}
 
@@ -289,12 +323,43 @@ export default function DashboardPage() {
           </Card>
         )}
 
+        {user?.role === 'student' && lastAssessment && (
+          <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.45s' }}>
+            <RecommendationsPanel
+              recommendations={riskSummary?.recommendations || []}
+              completedCount={new Set(assessments.map(a => a.assessment_id)).size}
+            />
+          </div>
+        )}
+
+        {user?.role === 'student' && (
+          <div className="space-y-8">
+            <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.48s' }}>
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-1 bg-primary rounded-full" />
+                <h2 className="text-foreground font-serif text-2xl font-bold">Seguimiento Académico</h2>
+              </div>
+              <AcademicProfileForm />
+            </div>
+
+            <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.5s' }}>
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-1 bg-accent rounded-full" />
+                <h2 className="text-foreground font-serif text-2xl font-bold">Apoyo Profesional</h2>
+              </div>
+              <div className="max-w-xl">
+                <AppointmentRequest />
+              </div>
+            </div>
+          </div>
+        )}
+
         {user?.role === 'student' && (
           <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.5s' }}>
             <h2 className="text-foreground font-serif text-xl font-bold">Acceso Rápido</h2>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Link href="/assessments">
-                <Button className="from-primary to-accent w-full bg-gradient-to-r text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg">
+                <Button className="from-primary to-accent w-full bg-gradient-to-r text-primary-foreground shadow-md transition-all hover:opacity-90 hover:shadow-lg">
                   Realizar Evaluación
                 </Button>
               </Link>

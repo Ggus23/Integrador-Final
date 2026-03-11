@@ -1,70 +1,142 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, ShieldCheck, HeartPulse, BrainCircuit, Activity } from 'lucide-react';
+import { ArrowRight, ShieldCheck, HeartPulse, BrainCircuit, Activity, Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 // MentaLink: Sistema de monitoreo de bienestar universitario
 export default function LandingPage() {
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
   return (
     <div className="bg-background text-foreground selection:bg-primary/20 flex min-h-screen flex-col font-sans">
       <header className="bg-background/80 fixed z-50 w-full border-b border-white/10 backdrop-blur-md">
-        <div className="container mx-auto flex h-16 items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary/10 rounded-lg p-2">
-              <Activity className="text-primary h-6 w-6" />
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
+            <div className="bg-primary/10 overflow-hidden rounded-lg p-1.5 md:p-2 flex-shrink-0">
+              <Image
+                src="/icon_logo.png"
+                alt="MentaLink Logo"
+                width={32}
+                height={32}
+                className="h-8 w-8 md:h-10 md:w-10 rounded-md object-cover flex-shrink-0"
+              />
             </div>
-            <span className="font-serif text-xl font-bold tracking-tight">MenTaLink</span>
-          </div>
+            <span className="font-serif text-lg md:text-xl font-bold tracking-tight whitespace-nowrap">MenTaLink</span>
+          </Link>
 
-          <nav className="text-muted-foreground hidden items-center gap-8 text-sm font-medium md:flex">
-            <a href="#features" className="hover:text-primary transition-colors">
+          {/* Desktop Nav */}
+          <nav className="text-muted-foreground hidden items-center gap-6 lg:gap-8 text-sm font-medium lg:flex">
+            <a href="#features" className="hover:text-primary transition-colors whitespace-nowrap">
               Características
             </a>
-            <a href="#how-it-works" className="hover:text-primary transition-colors">
+            <a href="#how-it-works" className="hover:text-primary transition-colors whitespace-nowrap">
               Cómo funciona
             </a>
-            <Link href="/privacy" className="hover:text-primary transition-colors">
+            <Link href="/privacy" className="hover:text-primary transition-colors whitespace-nowrap">
               Privacidad
             </Link>
           </nav>
 
-          <div className="flex items-center gap-4">
-            {mounted && user ? (
-              <Link href="/dashboard">
-                <Button className="font-bold">
-                  Ir al Dashboard <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Link href="/login">
-                  <Button variant="ghost" className="hover:bg-muted/50 font-medium">
-                    Iniciar Sesión
+          <div className="flex items-center gap-2 md:gap-4 ml-auto">
+            <div className="hidden sm:flex items-center gap-2 md:gap-4">
+              {mounted && user ? (
+                <Link href="/dashboard">
+                  <Button className="font-bold">
+                    Dashboard <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/signup">
-                  <Button className="shadow-primary/20 hover:shadow-primary/30 font-bold shadow-lg transition-all">
-                    Comenzar Ahora
-                  </Button>
-                </Link>
-              </>
-            )}
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="ghost" className="hover:bg-muted/50 font-medium whitespace-nowrap">
+                      Entrar
+                    </Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button className="shadow-primary/20 hover:shadow-primary/30 text-sm md:text-base font-bold shadow-lg transition-all px-4 md:px-6 whitespace-nowrap">
+                      Comenzar
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
+
+            {/* Mobile Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
           </div>
         </div>
+
+        {/* Mobile Menu Overlay */}
+        {isMenuOpen && (
+          <div className="bg-background/95 lg:hidden animate-in fade-in slide-in-from-top-4 fixed top-16 left-0 h-screen w-full border-t border-border backdrop-blur-md">
+            <nav className="flex flex-col p-6 space-y-6">
+              <a 
+                href="#features" 
+                onClick={() => setIsMenuOpen(false)}
+                className="text-lg font-bold border-b border-border pb-2"
+              >
+                Características
+              </a>
+              <a 
+                href="#how-it-works" 
+                onClick={() => setIsMenuOpen(false)}
+                className="text-lg font-bold border-b border-border pb-2"
+              >
+                Cómo funciona
+              </a>
+              <Link 
+                href="/privacy" 
+                onClick={() => setIsMenuOpen(false)}
+                className="text-lg font-bold border-b border-border pb-2"
+              >
+                Privacidad
+              </Link>
+              {mounted && user ? (
+                 <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}>
+                    <Button className="w-full h-12 font-bold text-lg">
+                      Ir al Dashboard
+                    </Button>
+                 </Link>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  <Link href="/login" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full h-12 text-lg font-medium">
+                      Iniciar Sesión
+                    </Button>
+                  </Link>
+                  <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
+                    <Button className="w-full h-12 text-lg font-bold">
+                      Registrarse ahora
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </nav>
+          </div>
+        )}
       </header>
 
       <section className="relative overflow-hidden pt-32 pb-20 lg:pt-48 lg:pb-32">
         <div className="pointer-events-none absolute top-0 left-1/2 h-full w-full max-w-7xl -translate-x-1/2">
           <div className="bg-primary/20 absolute top-20 left-10 h-72 w-72 animate-pulse rounded-full blur-[100px]" />
-          <div className="absolute right-10 bottom-20 h-96 w-96 rounded-full bg-purple-500/10 blur-[120px]" />
+          <div className="bg-accent/20 absolute right-10 bottom-20 h-96 w-96 rounded-full blur-[120px]" />
         </div>
 
         <div className="relative z-10 container mx-auto px-6 text-center">
@@ -267,7 +339,9 @@ export default function LandingPage() {
       <footer className="bg-background border-border border-t py-12">
         <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-6 md:flex-row">
           <div className="flex items-center gap-2">
-            <Activity className="text-muted-foreground h-5 w-5" />
+            <div className="relative h-8 w-8 overflow-hidden rounded-md">
+              <Image src="/icon_logo.png" alt="MentaLink Logo" fill className="object-cover" />
+            </div>
             <span className="text-muted-foreground font-serif font-bold">MenTaLink</span>
           </div>
           <div className="text-muted-foreground text-sm">

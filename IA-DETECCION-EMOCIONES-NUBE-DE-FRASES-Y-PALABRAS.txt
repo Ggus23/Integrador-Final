@@ -1,0 +1,46 @@
+1. Grabación de audio
+Función: Capturar audio desde micrófono o cargar archivo (MP3, WAV, etc.).
+Herramientas: API de grabación web (como Web Audio API) o apps como Descript, ScreenApp o Alrite. 
+2. Conversión de audio a texto (Speech-to-Text)
+Función: Transcribir automáticamente el audio usando IA.
+Características clave: Alta precisión, identificación de hablantes, marcas de tiempo.
+Herramientas recomendadas:
+Google Speech-to-Text (Chirp 3): Más de 85 idiomas, diarización de hablantes.
+ElevenLabs, Alrite, Rask AI: Transcripción con IA, detección de eventos de audio (risas, aplausos), exportación en múltiples formatos. 
+3. Generación de nube de palabras
+Función: Analizar texto transcribido, filtrar palabras vacías, calcular frecuencias y visualizar con tamaño proporcional.
+Implementación: Usar bibliotecas como wordcloud en Python o herramientas con IA como Shulex VOC o Wooclap IA.
+4. Conversión a nube de frases
+Función: Extraer frases clave o combinaciones significativas (n-gramas) en lugar de palabras individuales.
+Técnicas:
+Usar PLN para detectar colocalizaciones (ej. "inteligencia artificial", "procesamiento de datos").
+Aplicar modelos de lenguaje para identificar frases relevantes.
+Visualizar con herramientas que soporten frases (como Alrite, que genera mapas mentales y resúmenes con IA). 
+Flujo completo sugerido:
+Grabar o subir audio.
+Transcribir con IA (ej. ElevenLabs o Google STT).
+Procesar texto: limpieza, extracción de palabras/frases clave.
+Generar nube de palabras → luego nube de frases.
+Visualizar y exportar (PDF, imagen, HTML). 
+Herramientas todo-en-uno como Alrite o ScreenApp ya ofrecen funciones integradas de grabación, transcripción, resúmenes y extracción de frases clave, acelerando este proceso sin necesidad de programar desde cero. 
+Para enfocarte solo en palabras asociadas a depresión, ansiedad o estrés y luego analizar su frecuencia:
+
+1. Filtrado por palabras clave emocionales
+Crea una lista de palabras semilla relacionadas con estos estados emocionales, como:
+Depresión: tristeza, desesperanza, culpa, vacío, inutilidad, melancolía.
+Ansiedad: miedo, nerviosismo, preocupación, ataque, inquietud.
+Estrés: tensión, agobio, presión, agotamiento, sobrecarga.
+Usa listas validadas como las del Inventario de Depresión de Beck o estudios de análisis de texto en foros como Reddit. 
+2. Extracción y conteo de frecuencia
+Tras transcribir el audio, procesa el texto con:
+Filtro de palabras vacías (artículos, preposiciones).
+Coincidencia exacta o por similitud semántica (ej. "agobio" ≈ "estrés").
+Usa modelos de PLN como spaCy o BERT para detectar sinónimos o frases con carga emocional.
+3. Análisis estadístico
+Genera un ranking de frecuencia de las palabras objetivo.
+Visualiza con gráficos (barras, líneas) o nubes de palabras solo con términos emocionales.
+Calcula métricas: frecuencia relativa, apariciones por minuto, evolución en el tiempo.
+4. Herramientas recomendadas
+Alrite o ElevenLabs: Transcriben y resaltan frases clave.
+iWeaver, BytesView: Analizan sentimientos y emociones en texto. 
+Python + librerías (nltk, wordcloud, matplotlib) para personalizar el análisis.

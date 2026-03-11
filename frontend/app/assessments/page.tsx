@@ -67,7 +67,7 @@ export default function AssessmentsPage() {
               <p className="text-muted-foreground mt-2 text-sm">{assessment.description}</p>
               <p className="text-muted-foreground mt-4 text-xs">Tiempo estimado: 5 minutos</p>
               <Link href={`/assessments/${assessment.type}`} className="mt-4 inline-block">
-                <Button className="from-primary to-accent w-full bg-gradient-to-r text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg">
+                <Button className="from-primary to-accent w-full bg-gradient-to-r text-primary-foreground shadow-md transition-all hover:opacity-90 hover:shadow-lg">
                   Comenzar Evaluación
                 </Button>
               </Link>

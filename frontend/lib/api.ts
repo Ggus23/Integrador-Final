@@ -1,4 +1,11 @@
-const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const getAPIUrl = () => {
+  if (typeof window !== 'undefined') {
+    return `${window.location.protocol}//${window.location.hostname}:8000`;
+  }
+  return process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+};
+
+const API_URL = getAPIUrl();
 const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || '/api/v1';
 const TOKEN_KEY = process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY || 'mentalink_token';
 
@@ -163,9 +170,14 @@ class APIClient {
     return this.request('GET', `/assessments/${assessmentKey}`);
   }
 
-  async submitAssessmentResponse(assessmentId: number, answers: Record<string, number>) {
-    return this.request('POST', '/assessments/responses', { assessment_id: assessmentId, answers });
+  async submitAssessmentResponse(assessmentId: number, answers: Record<string, number>, shareWithPsychologist = false) {
+    return this.request('POST', '/assessments/responses', {
+      assessment_id: assessmentId,
+      answers,
+      share_with_psychologist: shareWithPsychologist
+    });
   }
+
 
   async getMyAssessmentResponses() {
     return this.request('GET', '/assessments/responses/me');
@@ -254,6 +266,68 @@ class APIClient {
 
   async changeRequiredPassword(newPassword: string) {
     return this.request('POST', '/auth/change-required-password', { new_password: newPassword });
+  }
+
+  // Academic Profile
+  async getMyAcademicProfile() {
+    return this.request('GET', '/academic/me');
+  }
+
+  async updateMyAcademicProfile(data: Record<string, any>) {
+    return this.request('PUT', '/academic/me', data);
+  }
+
+  async getStudentAcademicProfile(studentId: string) {
+    return this.request('GET', `/academic/${studentId}`);
+  }
+
+  // Appointments
+  async createAppointment(data: { appointment_date: string; reason?: string }) {
+    return this.request('POST', '/appointments/', data);
+  }
+
+  async getMyAppointments() {
+    return this.request('GET', '/appointments/me');
+  }
+
+  async getAllAppointments() {
+    return this.request('GET', '/appointments/');
+  }
+
+  async updateAppointment(id: number, data: Record<string, any>) {
+    return this.request('PATCH', `/appointments/${id}`, data);
+  }
+
+  // Diary endpoints
+  async createDiaryEntry(data: {
+    experience?: string;
+    activities?: string;
+    emotion: string;
+    emotion_color: string;
+    wellbeing_level: number;
+    date?: string;
+  }) {
+    return this.request('POST', '/diary/', data);
+  }
+
+  async getMyDiaryHistory() {
+    return this.request('GET', '/diary/me');
+  }
+
+  async getDiaryToday() {
+    return this.request('GET', '/diary/today');
+  }
+
+  async updateDiaryEntry(id: number, data: Record<string, any>) {
+    return this.request('PATCH', `/diary/${id}`, data);
+  }
+
+  async getWordCloud() {
+    return this.request('GET', '/diary/visualizations/word-cloud');
+  }
+
+  async getPhraseCloud() {
+    return this.request('GET', '/diary/visualizations/phrase-cloud');
   }
 }
 

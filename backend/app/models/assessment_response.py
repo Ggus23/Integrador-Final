@@ -1,8 +1,10 @@
-from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Integer, String, Boolean
+
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.db.base_class import Base
+from app.core.constants import RiskLevel
 
 
 class AssessmentResponse(Base):
@@ -27,7 +29,14 @@ class AssessmentResponse(Base):
     # Risk Level: "Low", "Medium", "High"
     risk_level = Column(String, nullable=False)
 
+    # NEW: Store dropout probability at the time of assessment
+    dropout_probability = Column(Float, default=0.0)
+
+    # Consent to share with cabinet
+    share_with_psychologist = Column(Boolean, default=False)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+
 
     # Relationships
     user = relationship("User", back_populates="assessment_responses")

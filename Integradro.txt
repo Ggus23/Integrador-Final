@@ -1,0 +1,135 @@
+Ver el caso de que el estudiante recomendar un tratamiento en vase a la recomendacion del psicologo usando LLM
+Manejar dos usuarios:
+Pasiente interactua con la plataforma
+Pasiente cuando se vea afectado para usar la plataforma
+APLICAR EN LA PLATAFORMA
+Incorporar analizar emociones con audio usando el procesamiento de lenguaje natural
+Mentalia:
+El pasiente tiene una cita y se graba el audio wisper para convertir a texto, se procesa el texto para predecir analisis de semtimientos y emociones.
+Guardar estadisticas, generar nube de palabras y una nube de frases
+Hacer un logo a mentalink
+Usar DL para ver gestos en rostro
+Ver una revision por semana-Tomarla como un trabajo
+Que me proponga una solucion o una respuesta
+Buscar datasets para analisis de sentimientos y emociones, convertir internamente el idioma
+LUNES, MARTES, JUEVES Y VIERNES
+Reunion Martes a las 5 de la tarde
+
+Evolución del Sistema Mentalink – Resumen para Validación Psicológica
+
+El objetivo de esta nueva fase es evolucionar Mentalink de una plataforma que detecta indicadores de riesgo psicoemocional a una herramienta más completa que también pueda analizar emociones desde múltiples fuentes y generar recomendaciones preventivas que apoyen el trabajo del psicólogo.
+
+1. Módulo de asistencia inteligente (IA conversacional)
+
+Se incorporará un asistente basado en inteligencia artificial que pueda analizar los resultados de las evaluaciones y generar recomendaciones preventivas personalizadas. Estas recomendaciones no serán diagnósticas ni clínicas, sino orientativas, y estarán basadas en criterios previamente definidos por el psicólogo. Además, el estudiante podrá interactuar con el sistema para comprender mejor su estado emocional y recibir orientación preventiva.
+
+2. Módulo de análisis emocional mediante voz
+
+El sistema permitirá registrar audio, por ejemplo durante sesiones o interacciones voluntarias. Este audio se convertirá en texto y se analizará para identificar indicadores emocionales, como niveles de estrés o estados emocionales predominantes. Esto permitirá generar estadísticas emocionales, como frecuencia de emociones y tendencias en el tiempo, que servirán como apoyo para el seguimiento psicológico.
+
+3. Módulo de análisis emocional mediante expresiones faciales
+
+Se incorporará un módulo que permita analizar expresiones faciales mediante video o cámara, con el objetivo de identificar indicadores emocionales como estrés, tristeza o neutralidad. Este análisis servirá como una fuente adicional de información, complementaria a las evaluaciones y registros del estudiante.
+
+4. Perfil emocional longitudinal del estudiante
+
+El sistema integrará toda la información disponible, incluyendo evaluaciones psicométricas, registros emocionales, análisis de voz y análisis facial, para construir un perfil emocional longitudinal. Esto permitirá observar tendencias, cambios y posibles señales de riesgo a lo largo del tiempo, facilitando una detección más temprana y precisa.
+
+5. Mejora continua mediante entrenamiento de modelos
+
+Se utilizarán bases de datos científicas existentes sobre emociones para mejorar la precisión del sistema. Estas bases serán adaptadas al contexto local y al idioma español, con el objetivo de garantizar resultados más confiables y culturalmente adecuados.
+
+6. Enfoque principal de esta fase
+
+El propósito general es que Mentalink no solo detecte indicadores de riesgo psicoemocional, sino que también pueda:
+
+Analizar emociones desde diferentes fuentes (evaluaciones, voz y expresiones faciales)
+
+Generar recomendaciones preventivas basadas en inteligencia artificial
+
+Construir un perfil emocional evolutivo del estudiante
+
+Apoyar al psicólogo en la detección temprana y el seguimiento emocional
+
+Es importante destacar que el sistema no reemplaza el criterio profesional del psicólogo, sino que actúa como una herramienta de apoyo para mejorar la detección temprana y facilitar el acompañamiento preventivo.
+
+Area psicologica
+
+agregar contexto a los tests a cada pregunta o un contexto en general del test
+
+Implementar una accion para que el estudiante en nivel medio pueda gestionar una cita
+
+Prevencion bien enfocada para la desercion de la universidad 
+
+si se puede un espacio para recomendaciones 
+Usar el correo universitario institucional
+
+Poblacion y muestra con estudiantes iniciales
+
+Fortalecer con estrategias 
+
+Agregar un link directo al gabinete	
+
+Doc. Monica Mesa 
+77902335
+
+Revision 1
+
+Neural pagina de la u
+
+Buscar libro de escala pss10
+
+Poner en el drive El tutor
+
+Revision 1 Inge sergio
+
+Implementar sonido de fondo al sistema para relajar
+
+Buscar informacion sobre relacion a la parte mental
+Documentacion marcarlo con resaltador puntos para el marco teorico 
+
+implementar en pythonanywhare una vez terminandolo 
+
+Nube de palabras en Nube de frases
+
+Buscar una funcion que me detecte la frase o la oracion
+
+Buscar canciones que hablen de sentimientos
+Manejar estadisticas de frases y palabras
+
+Tener en cuenta si bien se crea una aplicacion mas fuerte que eso es el trabajo de investigacion
+
+Revisiom 2 
+
+tener el audio del pasiente usando wisper 
+
+la idea es definir la frase o la oraciom
+
+Ver las expleciones regulares con canciones
+
+Las recomendaciones solo para el PSS 10
+
+Hablar con alguien y tener cita 
+
+Registro diario opcionalx
+
+Tener una nota de confidencialidad
+
+preguntar quieres pasar las notas de cada estudiante
+
+MANEJAR COLORES Y CARITAS QUE TE LLEVEN A LAS NUBES EN EL DIARIO
+
+TENER UN DIARIO CON CARITAS PALABRAS Y COLORES PARA EL ANALISIS 
+
+UN CONTEO DE ACTIVIDADES
+
+Logica de loockchaing
+
+USAR LA CNN DE MANERA INTERNA EN LA PLATAFORMA MIENTRAS HACE CON CONCENTIMIENTO DEL ESTUDIANTE
+
+Revision 10 de marzo
+
+Usar la camara para la deteccion fasial
+Otorgando permisos
+Avanzar Documentacion
+

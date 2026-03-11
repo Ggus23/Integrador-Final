@@ -8,3 +8,6 @@ from .emotional_checkin import EmotionalCheckin  # noqa: F401
 from .risk_summary import RiskSummary  # noqa: F401
 from .tokens import EmailVerificationToken, PasswordResetToken  # noqa: F401
 from .user import User, UserRole  # noqa: F401
+from .emotional_diary import EmotionalDiary  # noqa: F401
+from .academic_profile import AcademicProfile  # noqa: F401
+from .appointment import Appointment  # noqa: F401

@@ -4,83 +4,76 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #ecfeff; /* Cyan 50 - Very light Cyan tint */
+  --foreground: #020617; /* Slate 950 - Near Black for main text */
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #020617;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #0d9488;
-  /* Teal 600 - "Menta" */
-  --primary-foreground: #f0fdfa;
-  --secondary: #f1f5f9;
-  /* Slate 100 */
-  --secondary-foreground: #0f172a;
-  --muted: #f8fafc;
-  --muted-foreground: #94a3b8;
-  /* Slate 400 - Más claro para mejor legibilidad */
-  --accent: #14b8a6;
-  /* Teal 500 */
-  --accent-foreground: #ffffff;
-  --destructive: #e11d48;
-  /* Rose 600 */
+  --popover-foreground: #020617;
+  --primary: #0891b2; /* Cyan 600 - The main brand color is now Cyan */
+  --primary-foreground: #ffffff;
+  --secondary: #cffafe; /* Cyan 100 */
+  --secondary-foreground: #1f2937; /* Use user's dark gray for secondary text */
+  --muted: #ecfeff;
+  --muted-foreground: #1f2937; /* rgb(31,41,55) - Replacing gray with dark gray */
+  --accent: #22d3ee; /* Cyan 400 - Bright Cyan */
+  --accent-foreground: #1f2937;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #0d9488;
+  --border: #a5f3fc; /* Cyan 200 */
+  --input: #a5f3fc;
+  --ring: #06b6d4; /* Cyan 500 */
   --radius: 0.75rem;
 
-  /* Risk Specific Colors - Premium Scale */
+  /* Risk Colors */
   --risk-low: #10b981;
   --risk-medium: #f59e0b;
   --risk-high: #f43f5e;
 
   --sidebar: #ffffff;
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #0d9488;
+  --sidebar-foreground: #020617;
+  --sidebar-primary: #0891b2;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f0fdfa;
-  --sidebar-accent-foreground: #0d9488;
-  --sidebar-border: #f1f5f9;
-  --sidebar-ring: #0d9488;
+  --sidebar-accent: #ecfeff;
+  --sidebar-accent-foreground: #0891b2;
+  --sidebar-border: #cffafe;
+  --sidebar-ring: #06b6d4;
 }
 
 .dark {
-  --background: #020617;
-  --foreground: #f8fafc;
-  --card: #0f172a;
-  --card-foreground: #f8fafc;
-  --popover: #0f172a;
-  --popover-foreground: #f8fafc;
-  --primary: #14b8a6;
-  /* Teal 500 */
-  --primary-foreground: #f0fdfa;
-  --secondary: #1e293b;
-  --secondary-foreground: #f8fafc;
-  --muted: #0f172a;
-  --muted-foreground: #cbd5e1;
-  /* Slate 300 - Más claro para mejor visibilidad en modo oscuro */
-  --accent: #0d9488;
-  --accent-foreground: #ffffff;
+  --background: #083344; /* Cyan 950/Slate mix - Deep Cyan Dark */
+  --foreground: #cffafe; /* Cyan 100 - softer than ecfeff */
+  --card: #164e63; /* Cyan 900 */
+  --card-foreground: #cffafe;
+  --popover: #164e63;
+  --popover-foreground: #cffafe;
+  --primary: #22d3ee; /* Cyan 400 - Bright Cyan for Dark Mode */
+  --primary-foreground: #164e63; /* Dark text on bright cyan */
+  --secondary: #155e75; /* Cyan 800 */
+  --secondary-foreground: #cffafe;
+  --muted: #164e63;
+  --muted-foreground: #a5f3fc; /* Cyan 200 - replacing harsh gray */
+  --accent: #67e8f9; /* Cyan 300 */
+  --accent-foreground: #164e63;
   --destructive: #f87171;
   --destructive-foreground: #ffffff;
-  --border: #1e293b;
-  --input: #1e293b;
-  --ring: #14b8a6;
+  --border: #155e75;
+  --input: #155e75;
+  --ring: #22d3ee;
 
-  /* Risk Specific Colors - Dark Mode */
+  /* Risk Colors */
   --risk-low: #34d399;
   --risk-medium: #fbbf24;
   --risk-high: #fb7185;
 
-  --sidebar: #020617;
-  --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #14b8a6;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #0f172a;
-  --sidebar-accent-foreground: #14b8a6;
-  --sidebar-border: #1e293b;
-  --sidebar-ring: #14b8a6;
+  --sidebar: #083344;
+  --sidebar-foreground: #ecfeff;
+  --sidebar-primary: #22d3ee;
+  --sidebar-primary-foreground: #164e63;
+  --sidebar-accent: #164e63;
+  --sidebar-accent-foreground: #22d3ee;
+  --sidebar-border: #155e75;
+  --sidebar-ring: #22d3ee;
 }
 
 @theme inline {

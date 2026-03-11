@@ -7,7 +7,7 @@ def test_registration_creates_verification_token(client, db_session):
     # Register
     payload = {
         "full_name": "Test Student",
-        "email": "student@gmail.com",
+        "email": "student@unifranz.edu.bo",
         "password": "Password123",
         "role": "student",
     }
@@ -15,7 +15,7 @@ def test_registration_creates_verification_token(client, db_session):
     assert r.status_code == 201
 
     # Check DB for User
-    user = db_session.query(User).filter(User.email == "student@gmail.com").first()
+    user = db_session.query(User).filter(User.email == "student@unifranz.edu.bo").first()
     assert user is not None
     assert user.is_email_verified is False
 

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './useAuth';
 
-export function useProtected() {
+export function useProtected(allowedRoles?: string[]) {
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -14,9 +14,11 @@ export function useProtected() {
         router.push('/login');
       } else if (user.must_change_password && window.location.pathname !== '/change-password') {
         router.push('/change-password');
+      } else if (allowedRoles && !allowedRoles.includes(user.role)) {
+        router.push('/dashboard');
       }
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, allowedRoles]);
 
   return { user, loading };
 }

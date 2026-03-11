@@ -54,6 +54,15 @@ class User(Base):
         cascade="all, delete-orphan",
     )
     alerts = relationship("Alert", back_populates="user", cascade="all, delete-orphan")
+    academic_profile = relationship(
+        "AcademicProfile", back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+    appointments = relationship(
+        "Appointment", foreign_keys="[Appointment.user_id]", back_populates="student", cascade="all, delete-orphan"
+    )
+    emotional_diary_entries = relationship(
+        "EmotionalDiary", back_populates="user", cascade="all, delete-orphan"
+    )
 
     # Auth tokens relationships
     verification_tokens = relationship(

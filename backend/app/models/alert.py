@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.db.base_class import Base
+from app.core.constants import RiskLevel
 
 
 class Alert(Base):
@@ -17,7 +18,7 @@ class Alert(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    severity = Column(String, default="Medium")  # Low, Medium, High
+    severity = Column(String, default=RiskLevel.MEDIUM.value)  # Low, Medium, High
     message = Column(String, nullable=False)
     is_resolved = Column(Boolean, default=False)
 

@@ -9,6 +9,9 @@ from . import (
     risk_summary,
     student,
     user,
+    academic_profile,
+    appointment,
+    emotional_diary,
 )
 from .auth import Token, TokenPayload  # noqa: F401
 from .user import User, UserCreate, UserUpdate  # noqa: F401

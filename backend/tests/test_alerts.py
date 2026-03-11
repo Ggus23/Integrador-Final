@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from unittest.mock import MagicMock
 from app.core.constants import RiskLevel
 from app.services.alert_service import alert_service
 
@@ -12,11 +13,12 @@ async def test_process_risk_alert_high():
         "app.services.notification_service.notification_service.send_risk_alert",
         new_callable=AsyncMock,
     ) as mock_notify:
+        db_mock = MagicMock()
         await alert_service.process_risk_alert(
-            "user@example.com", RiskLevel.HIGH, "Test Context"
+            db_mock, 1, "user@example.com", RiskLevel.HIGH, "Test Context"
         )
         mock_notify.assert_called_once_with(
-            "user@example.com", "high", "Alto Riesgo detectado durante: Test Context"
+            "user@example.com", RiskLevel.HIGH.value, "Riesgo Alto detectado durante: Test Context"
         )
 
 
@@ -26,7 +28,8 @@ async def test_process_risk_alert_low():
         "app.services.notification_service.notification_service.send_risk_alert",
         new_callable=AsyncMock,
     ) as mock_notify:
+        db_mock = MagicMock()
         await alert_service.process_risk_alert(
-            "user@example.com", RiskLevel.LOW, "Test Context"
+            db_mock, 1, "user@example.com", RiskLevel.LOW, "Test Context"
         )
         mock_notify.assert_not_called()

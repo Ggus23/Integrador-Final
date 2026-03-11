@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict
+from typing import Dict, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -10,7 +10,8 @@ class AssessmentResponseBase(BaseModel):
 
 
 class AssessmentResponseCreate(AssessmentResponseBase):
-    pass
+    share_with_psychologist: bool = False
+
 
 
 class AssessmentResponse(AssessmentResponseBase):
@@ -18,6 +19,7 @@ class AssessmentResponse(AssessmentResponseBase):
     user_id: int
     total_score: float
     risk_level: str
+    dropout_probability: Optional[float] = 0.0
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

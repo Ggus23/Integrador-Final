@@ -3,26 +3,14 @@ import type { Metadata } from 'next';
 
 import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
-import {
-  DM_Sans as V0_Font_DM_Sans,
-  Space_Mono as V0_Font_Space_Mono,
-  Source_Serif_4 as V0_Font_Source_Serif_4,
-} from 'next/font/google';
+import "@fontsource/dm-sans";
+import "@fontsource/space-mono";
+import "@fontsource/source-serif-4";
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 
 import { LanguageProvider } from '@/context/LanguageContext';
-
-// Initialize fonts
-const _dmSans = V0_Font_DM_Sans({
-  subsets: ['latin'],
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900', '1000'],
-});
-const _spaceMono = V0_Font_Space_Mono({ subsets: ['latin'], weight: ['400', '700'] });
-const _sourceSerif_4 = V0_Font_Source_Serif_4({
-  subsets: ['latin'],
-  weight: ['200', '300', '400', '500', '600', '700', '800', '900'],
-});
+import { SidebarProvider } from '@/context/sidebar-context';
 
 export const metadata: Metadata = {
   title: 'MENTIS - Early Psychological Risk Detection',
@@ -31,19 +19,19 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
+        url: '/icon_logo.png',
         media: '(prefers-color-scheme: light)',
       },
       {
-        url: '/icon-dark-32x32.png',
+        url: '/icon_logo.png',
         media: '(prefers-color-scheme: dark)',
       },
       {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: '/icon_logo.png',
+        type: 'image/png',
       },
     ],
-    apple: '/apple-icon.png',
+    apple: '/icon_logo.png',
   },
 };
 
@@ -62,7 +50,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <LanguageProvider>
-            {children}
+            <SidebarProvider>
+              {children}
+            </SidebarProvider>
             <Toaster />
             <Analytics />
           </LanguageProvider>

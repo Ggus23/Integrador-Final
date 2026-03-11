@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function AboutPage() {
@@ -7,7 +8,10 @@ export default function AboutPage() {
     <div className="bg-background min-h-screen font-sans">
       {/* Navbar mimic or back button */}
       <header className="absolute top-0 z-10 flex w-full items-center justify-between p-6">
-        <Link href="/" className="font-serif text-xl font-bold">
+        <Link href="/" className="flex items-center gap-2 font-serif text-xl font-bold">
+          <div className="relative h-8 w-8 overflow-hidden rounded-md">
+            <Image src="/icon_logo.png" alt="MentaLink Logo" fill className="object-cover" />
+          </div>
           MenTaLink
         </Link>
         <Link href="/">

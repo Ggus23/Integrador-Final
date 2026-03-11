@@ -3,6 +3,7 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/lib/api';
@@ -33,8 +34,8 @@ export default function SignupPage() {
   }, [user, router]);
 
   const validateForm = () => {
-    if (!email.toLowerCase().endsWith('@gmail.com')) {
-      setError('Email must be a @gmail.com address');
+    if (!email.toLowerCase().endsWith('@unifranz.edu.bo')) {
+      setError('Debes usar tu correo institucional (@unifranz.edu.bo)');
       return false;
     }
     if (password.length < 8) {
@@ -97,10 +98,13 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-50 to-teal-50 px-4 py-8 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#ecfeff] via-[#cffafe] to-[#a5f3fc] px-4 py-8 dark:from-[#083344] dark:via-[#164e63] dark:to-[#083344]">
       <Card className="animate-fade-in w-full max-w-md border-white/20 bg-white/80 p-8 shadow-xl backdrop-blur-md dark:bg-slate-900/80">
         <div className="space-y-6">
-          <div className="space-y-2 text-center">
+          <div className="flex flex-col items-center space-y-4 text-center">
+            <div className="relative h-20 w-20 overflow-hidden rounded-full shadow-lg">
+              <Image src="/icon_logo.png" alt="MentaLink Logo" fill className="object-cover" />
+            </div>
             <h1 className="from-primary to-accent bg-gradient-to-r bg-clip-text font-serif text-4xl font-bold text-transparent">
               MENTA-LINK
             </h1>
@@ -128,13 +132,13 @@ export default function SignupPage() {
 
             <div className="space-y-2">
               <label className="text-foreground text-sm font-medium">
-                Correo Electrónico (Gmail requerido)
+                Correo Electrónico Institucional
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu.nombre@gmail.com"
+                placeholder="tu.correo@unifranz.edu.bo"
                 className="border-input bg-background/50 text-foreground focus:border-primary focus:ring-primary/20 w-full rounded-lg border px-4 py-2.5 shadow-sm transition-all outline-none focus:ring-2"
                 required
               />
@@ -175,7 +179,7 @@ export default function SignupPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="from-primary to-accent w-full rounded-lg bg-gradient-to-r py-6 text-base font-semibold text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground w-full rounded-lg py-6 text-base font-semibold shadow-lg transition-all hover:shadow-xl"
             >
               {loading ? 'Creando cuenta...' : 'Registrarse'}
             </Button>

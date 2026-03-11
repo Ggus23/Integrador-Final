@@ -48,9 +48,10 @@ if settings.BACKEND_CORS_ORIGINS:
             str(origin).rstrip("/") for origin in settings.BACKEND_CORS_ORIGINS
         ],
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization"],
     )
+
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 

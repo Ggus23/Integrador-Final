@@ -6,3 +6,4 @@ from app.models.consent import Consent  # noqa
 from app.models.emotional_checkin import EmotionalCheckin  # noqa
 from app.models.risk_summary import RiskSummary  # noqa
 from app.models.user import User  # noqa
+from app.models.academic_profile import AcademicProfile  # noqa

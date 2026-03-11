@@ -24,9 +24,11 @@ class UserCreateBase(BaseModel):
 
     @field_validator("email")
     @classmethod
-    def email_must_be_gmail(cls, v: str) -> str:
-        if not v.lower().endswith("@gmail.com"):
-            raise ValueError("Email must be a @gmail.com address")
+    def email_domain_must_be_accepted(cls, v: str) -> str:
+        domain = v.lower().split("@")[-1]
+        allowed_domains = ["unifranz.edu.bo", "gmail.com"]
+        if domain not in allowed_domains:
+            raise ValueError("El correo debe ser institucional (@unifranz.edu.bo) o @gmail.com")
         return v.lower()
 
     @field_validator("password")

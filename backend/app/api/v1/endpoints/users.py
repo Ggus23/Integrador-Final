@@ -30,6 +30,14 @@ def create_user(
             detail="Ya existe un usuario con este correo electrónico en el sistema.",
         )
 
+    # Validar que sea correo institucional (@unifranz.edu.bo) para Estudiantes
+    if user_in.role == models.user.UserRole.STUDENT:
+        if not user_in.email.lower().endswith("@unifranz.edu.bo"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Debes usar tu correo institucional (@unifranz.edu.bo) para registrarte.",
+            )
+
     # Crea el usuario, hashea la contraseña y la guarda en la DB
     db_obj = models.user.User(
         email=user_in.email,
@@ -76,6 +84,14 @@ def create_user_by_admin(
             status_code=status.HTTP_409_CONFLICT,
             detail="Ya existe un usuario con este correo electrónico en el sistema.",
         )
+
+    # Validar correo institucional para estudiantes
+    if user_in.role == models.user.UserRole.STUDENT:
+        if not user_in.email.lower().endswith("@unifranz.edu.bo"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Como administrador, debes asignar un correo institucional (@unifranz.edu.bo) a los estudiantes.",
+            )
 
     # Aquí el admin establece 3 estados de forma manual y directa:
     # is_active: El usuario nace activo

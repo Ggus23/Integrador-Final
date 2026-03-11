@@ -6,6 +6,7 @@ import joblib
 import pandas as pd
 
 from app.core.config import settings
+from app.core.constants import RiskLevel
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ class RiskClassifier:
         if self.model:
             try:
                 pss_raw = int(pss_score * 40)
-                study_pressure = academic_pressure_avg * 2.0
+                study_pressure = float(academic_pressure_avg)
 
                 features_df = pd.DataFrame(
                     [[pss_raw, checkin_avg, bad_days_count, study_pressure]],
@@ -66,11 +67,11 @@ class RiskClassifier:
                 confidence = probas[pred_class]
 
                 mapping = {
-                    0: "Low",
-                    1: "Medium",
-                    2: "High",
+                    0: RiskLevel.LOW.value,
+                    1: RiskLevel.MEDIUM.value,
+                    2: RiskLevel.HIGH.value,
                 }
-                return mapping.get(pred_class, "Low"), float(confidence)
+                return mapping.get(pred_class, RiskLevel.LOW.value), float(confidence)
             except Exception as e:
                 logger.error(f"Predicción ML falló: {e}. Recurriendo a heurística.")
 
@@ -86,11 +87,11 @@ class RiskClassifier:
         )
 
         if score < 0.3:
-            return "Low", 1.0 - score
+            return RiskLevel.LOW.value, 1.0 - score
         elif score < 0.6:
-            return "Medium", score if score > 0.5 else 1.0 - score
+            return RiskLevel.MEDIUM.value, score if score > 0.5 else 1.0 - score
         else:
-            return "High", score
+            return RiskLevel.HIGH.value, score
 
     def get_feature_importance(self) -> Dict[str, float]:
         if self.model:

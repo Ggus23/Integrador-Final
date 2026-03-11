@@ -5,7 +5,9 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api import deps
+from app.core.constants import RiskLevel
 from app.ml.risk_classifier import risk_classifier
+from app.ml.dropout_predictor import dropout_predictor
 from app.services.audit_service import log_access
 
 router = APIRouter()
@@ -62,7 +64,7 @@ def read_students(
                 "full_name": student.full_name,
                 "role": student.role,
                 "risk_level": (
-                    risk_summary.current_risk_level if risk_summary else "Low"
+                    risk_summary.current_risk_level if risk_summary else RiskLevel.LOW.value
                 ),
                 "active_alerts": active_alerts,
                 "last_assessment_date": (
@@ -136,20 +138,30 @@ def read_student_detail(
         .all()
     )
 
+    academic_profile = (
+        db.query(models.AcademicProfile)
+        .filter(models.AcademicProfile.user_id == student.id)
+        .first()
+    )
+
     return {
         "id": student.id,
         "email": student.email,
         "full_name": student.full_name,
         "role": student.role,
-        "risk_level": risk_summary.current_risk_level if risk_summary else "Low",
+        "risk_level": risk_summary.current_risk_level if risk_summary else RiskLevel.LOW.value,
         "active_alerts": active_alerts_count,
         "last_assessment_date": responses[0].created_at if responses else None,
         "risk_summary": risk_summary,
+        "academic_profile": academic_profile,
         "alerts": alerts,
         "assessment_responses": responses,
-        "recent_checkins": checkins,
         # Explica los factores de riesgo identificados por la IA
-        "risk_factors": risk_classifier.get_feature_importance(),
+        "recent_checkins": checkins,
+        "risk_factors": {
+            **risk_classifier.get_feature_importance(),
+            **dropout_predictor.get_feature_importance()
+        },
     }
 
 

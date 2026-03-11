@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends
@@ -5,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api import deps
+from app.core.constants import RiskLevel
 
 router = APIRouter()
 
@@ -29,10 +31,12 @@ def read_my_risk_summary(
     # Si no existe, retorna un resumen con valores por defecto
     if not summary:
         return {
-            "current_risk_level": "Low",
+            "current_risk_level": RiskLevel.LOW.value,
             "prediction_confidence": 1.0,
+            "dropout_probability": 0.0,
+            "dropout_risk": RiskLevel.LOW.value,
             "user_id": current_user.id,
             "id": 0,
-            "last_updated": "2024-01-01T00:00:00",
+            "last_updated": datetime.now(),
         }
     return summary
