@@ -170,14 +170,17 @@ class APIClient {
     return this.request('GET', `/assessments/${assessmentKey}`);
   }
 
-  async submitAssessmentResponse(assessmentId: number, answers: Record<string, number>, shareWithPsychologist = false) {
+  async submitAssessmentResponse(
+    assessmentId: number,
+    answers: Record<string, number>,
+    shareWithPsychologist = false
+  ) {
     return this.request('POST', '/assessments/responses', {
       assessment_id: assessmentId,
       answers,
-      share_with_psychologist: shareWithPsychologist
+      share_with_psychologist: shareWithPsychologist,
     });
   }
-
 
   async getMyAssessmentResponses() {
     return this.request('GET', '/assessments/responses/me');

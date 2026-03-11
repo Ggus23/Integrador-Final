@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
-
 from app.core.constants import RiskLevel
+from pydantic import BaseModel, ConfigDict
 
 
 class StudentSummary(BaseModel):
@@ -20,10 +19,10 @@ class StudentSummary(BaseModel):
 
 from typing import Dict, List
 
+from app.schemas.academic_profile import AcademicProfile
 from app.schemas.alert import Alert
 from app.schemas.assessment_response import AssessmentResponse
 from app.schemas.emotional_checkin import EmotionalCheckin as Checkin
-from app.schemas.academic_profile import AcademicProfile
 from app.schemas.risk_summary import RiskSummary
 
 

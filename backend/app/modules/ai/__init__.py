@@ -1,1 +1,1 @@
-from .emotion_analysis import emotion_analysis_service, EmotionAnalysisService
+from .emotion_analysis import EmotionAnalysisService, emotion_analysis_service

@@ -1,18 +1,17 @@
 from datetime import timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.security import OAuth2PasswordRequestForm
-from jose import jwt
-from pydantic import ValidationError
-from sqlalchemy.orm import Session
-
 from app import models, schemas
 from app.api import deps
 from app.core import security
 from app.core.config import settings
 from app.core.limiter import limiter
 from app.core.logging import log_security_event
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.security import OAuth2PasswordRequestForm
+from jose import jwt
+from pydantic import ValidationError
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 

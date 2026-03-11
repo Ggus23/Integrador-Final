@@ -1,8 +1,9 @@
 import logging
 import os
+from typing import Dict, Tuple
+
 import joblib
 import pandas as pd
-from typing import Tuple, Dict
 from app.core.config import settings
 from app.core.constants import RiskLevel
 

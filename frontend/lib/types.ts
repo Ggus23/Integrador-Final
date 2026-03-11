@@ -89,7 +89,7 @@ export interface AcademicProfile {
   current_semester: number;
   units_approved: number;
   current_gpa: number;
-  
+
   // Hitos fields
   hito2_procesual: number;
   hito2_nota: number;
@@ -114,7 +114,7 @@ export interface DiaryEntry {
   emotion_color: string;
   wellbeing_level: number;
   created_at: string;
-  
+
   // AI Analysis fields
   emotion_ai?: string;
   emotion_scores?: Record<string, number>;

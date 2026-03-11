@@ -1,10 +1,10 @@
 import json
 import logging
-from typing import List, Optional, Any
-from google import genai
-from google.genai import types
+from typing import Any, List, Optional
 
 from app.core.constants import RiskLevel
+from google import genai
+from google.genai import types
 
 logger = logging.getLogger(__name__)
 

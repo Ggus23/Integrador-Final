@@ -67,6 +67,7 @@ export function AcademicProfileForm() {
     profile.hito4_nota,
     profile.hito5_procesual,
     profile.hito5_nota,
+    profile.current_gpa,
   ]);
 
   const handleSubmit = async (e: React.FormEvent) => {

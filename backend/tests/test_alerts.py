@@ -1,8 +1,6 @@
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
-from unittest.mock import MagicMock
 from app.core.constants import RiskLevel
 from app.services.alert_service import alert_service
 

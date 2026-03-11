@@ -1,17 +1,16 @@
 import logging
 from typing import Dict, Tuple
 
-from sqlalchemy.orm import Session
-
 from app import schemas
 from app.core.constants import PHQ9_CRITICAL_ITEM_KEY, RiskLevel
-from app.services.alert_service import alert_service
+from app.ml.risk_classifier import risk_classifier
 from app.models.assessment import Assessment
 from app.models.assessment_response import AssessmentResponse
 from app.models.emotional_checkin import EmotionalCheckin
 from app.models.risk_summary import RiskSummary
-from app.ml.risk_classifier import risk_classifier
+from app.services.alert_service import alert_service
 from app.services.recommendation_service import recommendation_service
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 

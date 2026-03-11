@@ -1,10 +1,9 @@
 import enum
 
+from app.db.base_class import Base
 from sqlalchemy import Boolean, Column, DateTime, Enum, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-
-from app.db.base_class import Base
 
 
 class UserRole(str, enum.Enum):

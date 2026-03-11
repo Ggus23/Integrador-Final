@@ -1,20 +1,19 @@
-from fastapi import APIRouter
-
 from app.api.v1.endpoints import (
+    academic,
     alerts,
+    appointment,
     assessments,
     auth,
     checkins,
     clinical_notes,
     consents,
+    diary,
     reports,
     risk,
     students,
     users,
-    academic,
-    appointment,
-    diary,
 )
+from fastapi import APIRouter
 
 api_router = APIRouter()
 

@@ -1,9 +1,9 @@
 import pytest
-from app.ml.risk_classifier import risk_classifier
-from app.ml.dropout_predictor import dropout_predictor
-from app.api.v1.endpoints.diary import get_word_cloud, get_phrase_cloud
-from app.models.emotional_diary import EmotionalDiary
 from app import models
+from app.api.v1.endpoints.diary import get_phrase_cloud, get_word_cloud
+from app.ml.dropout_predictor import dropout_predictor
+from app.ml.risk_classifier import risk_classifier
+from app.models.emotional_diary import EmotionalDiary
 
 
 def test_risk_classifier_calibration():
@@ -54,8 +54,8 @@ def test_diary_visualizations_logic():
     # Mocking simple de DB o comportamiento lógico
     # (Este test valida la robustez del código de procesamiento en diary.py)
 
-    from collections import Counter
     import re
+    from collections import Counter
 
     def mock_process(text):
         words = re.findall(r"\w+", text.lower())
