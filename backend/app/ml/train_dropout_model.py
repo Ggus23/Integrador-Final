@@ -1,4 +1,3 @@
-
 import os
 import joblib
 import numpy as np
@@ -23,7 +22,7 @@ FEATURES = [
     "Gender",
     "pss_score",
     "mood_avg",
-    "risk_level_encoded",   # 0=Low, 1=Medium, 2=High, 3=Critical
+    "risk_level_encoded",  # 0=Low, 1=Medium, 2=High, 3=Critical
 ]
 
 
@@ -35,12 +34,13 @@ def _derive_risk_level_encoded(df: pd.DataFrame) -> pd.Series:
     If the dataset already contains a 'risk_level_encoded' column this
     function is not called (real labels are preferred).
     """
+
     def encode(pss: float) -> int:
         if pss <= 13:
             return 0  # Low
         if pss <= 26:
             return 1  # Medium
-        return 2      # High
+        return 2  # High
 
     return df["pss_score"].apply(encode)
 
@@ -55,9 +55,7 @@ def train_dropout_model():
 
     # Derive risk_level_encoded if the column is missing from the CSV
     if "risk_level_encoded" not in df.columns:
-        print(
-            "Column 'risk_level_encoded' not in dataset — deriving from pss_score …"
-        )
+        print("Column 'risk_level_encoded' not in dataset — deriving from pss_score …")
         df["risk_level_encoded"] = _derive_risk_level_encoded(df)
 
     missing = [c for c in FEATURES if c not in df.columns]
@@ -76,7 +74,7 @@ def train_dropout_model():
     clf = RandomForestClassifier(
         n_estimators=300,
         max_depth=12,
-        class_weight="balanced",   # handles class imbalance
+        class_weight="balanced",  # handles class imbalance
         random_state=42,
         n_jobs=-1,
     )

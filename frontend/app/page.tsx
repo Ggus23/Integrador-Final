@@ -20,34 +20,42 @@ export default function LandingPage() {
     <div className="bg-background text-foreground selection:bg-primary/20 flex min-h-screen flex-col font-sans">
       <header className="bg-background/80 fixed z-50 w-full border-b border-white/10 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="bg-primary/10 overflow-hidden rounded-lg p-1.5 md:p-2 flex-shrink-0">
+          <Link href="/" className="flex shrink-0 items-center gap-2">
+            <div className="bg-primary/10 flex-shrink-0 overflow-hidden rounded-lg p-1.5 md:p-2">
               <Image
                 src="/icon_logo.png"
                 alt="MentaLink Logo"
                 width={32}
                 height={32}
-                className="h-8 w-8 md:h-10 md:w-10 rounded-md object-cover flex-shrink-0"
+                className="h-8 w-8 flex-shrink-0 rounded-md object-cover md:h-10 md:w-10"
               />
             </div>
-            <span className="font-serif text-lg md:text-xl font-bold tracking-tight whitespace-nowrap">MenTaLink</span>
+            <span className="font-serif text-lg font-bold tracking-tight whitespace-nowrap md:text-xl">
+              MenTaLink
+            </span>
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="text-muted-foreground hidden items-center gap-6 lg:gap-8 text-sm font-medium lg:flex">
-            <a href="#features" className="hover:text-primary transition-colors whitespace-nowrap">
+          <nav className="text-muted-foreground hidden items-center gap-6 text-sm font-medium lg:flex lg:gap-8">
+            <a href="#features" className="hover:text-primary whitespace-nowrap transition-colors">
               Características
             </a>
-            <a href="#how-it-works" className="hover:text-primary transition-colors whitespace-nowrap">
+            <a
+              href="#how-it-works"
+              className="hover:text-primary whitespace-nowrap transition-colors"
+            >
               Cómo funciona
             </a>
-            <Link href="/privacy" className="hover:text-primary transition-colors whitespace-nowrap">
+            <Link
+              href="/privacy"
+              className="hover:text-primary whitespace-nowrap transition-colors"
+            >
               Privacidad
             </Link>
           </nav>
 
-          <div className="flex items-center gap-2 md:gap-4 ml-auto">
-            <div className="hidden sm:flex items-center gap-2 md:gap-4">
+          <div className="ml-auto flex items-center gap-2 md:gap-4">
+            <div className="hidden items-center gap-2 sm:flex md:gap-4">
               {mounted && user ? (
                 <Link href="/dashboard">
                   <Button className="font-bold">
@@ -57,12 +65,15 @@ export default function LandingPage() {
               ) : (
                 <>
                   <Link href="/login">
-                    <Button variant="ghost" className="hover:bg-muted/50 font-medium whitespace-nowrap">
+                    <Button
+                      variant="ghost"
+                      className="hover:bg-muted/50 font-medium whitespace-nowrap"
+                    >
                       Entrar
                     </Button>
                   </Link>
                   <Link href="/signup">
-                    <Button className="shadow-primary/20 hover:shadow-primary/30 text-sm md:text-base font-bold shadow-lg transition-all px-4 md:px-6 whitespace-nowrap">
+                    <Button className="shadow-primary/20 hover:shadow-primary/30 px-4 text-sm font-bold whitespace-nowrap shadow-lg transition-all md:px-6 md:text-base">
                       Comenzar
                     </Button>
                   </Link>
@@ -85,46 +96,42 @@ export default function LandingPage() {
 
         {/* Mobile Menu Overlay */}
         {isMenuOpen && (
-          <div className="bg-background/95 lg:hidden animate-in fade-in slide-in-from-top-4 fixed top-16 left-0 h-screen w-full border-t border-border backdrop-blur-md">
-            <nav className="flex flex-col p-6 space-y-6">
-              <a 
-                href="#features" 
+          <div className="bg-background/95 animate-in fade-in slide-in-from-top-4 border-border fixed top-16 left-0 h-screen w-full border-t backdrop-blur-md lg:hidden">
+            <nav className="flex flex-col space-y-6 p-6">
+              <a
+                href="#features"
                 onClick={() => setIsMenuOpen(false)}
-                className="text-lg font-bold border-b border-border pb-2"
+                className="border-border border-b pb-2 text-lg font-bold"
               >
                 Características
               </a>
-              <a 
-                href="#how-it-works" 
+              <a
+                href="#how-it-works"
                 onClick={() => setIsMenuOpen(false)}
-                className="text-lg font-bold border-b border-border pb-2"
+                className="border-border border-b pb-2 text-lg font-bold"
               >
                 Cómo funciona
               </a>
-              <Link 
-                href="/privacy" 
+              <Link
+                href="/privacy"
                 onClick={() => setIsMenuOpen(false)}
-                className="text-lg font-bold border-b border-border pb-2"
+                className="border-border border-b pb-2 text-lg font-bold"
               >
                 Privacidad
               </Link>
               {mounted && user ? (
-                 <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}>
-                    <Button className="w-full h-12 font-bold text-lg">
-                      Ir al Dashboard
-                    </Button>
-                 </Link>
+                <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}>
+                  <Button className="h-12 w-full text-lg font-bold">Ir al Dashboard</Button>
+                </Link>
               ) : (
                 <div className="flex flex-col gap-4">
                   <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full h-12 text-lg font-medium">
+                    <Button variant="ghost" className="h-12 w-full text-lg font-medium">
                       Iniciar Sesión
                     </Button>
                   </Link>
                   <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
-                    <Button className="w-full h-12 text-lg font-bold">
-                      Registrarse ahora
-                    </Button>
+                    <Button className="h-12 w-full text-lg font-bold">Registrarse ahora</Button>
                   </Link>
                 </div>
               )}

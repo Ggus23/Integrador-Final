@@ -128,6 +128,7 @@ def seed_assessments(db):
         if pss_10.items != pss_10_items:
             logger.warning("PSS-10 items content mismatch. Updating...")
             from sqlalchemy.orm.attributes import flag_modified
+
             pss_10.items = pss_10_items
             flag_modified(pss_10, "items")
             db.commit()
@@ -220,6 +221,7 @@ def seed_assessments(db):
         if gad_7.items != gad_7_items:
             logger.warning("GAD-7 items content mismatch. Updating...")
             from sqlalchemy.orm.attributes import flag_modified
+
             gad_7.items = gad_7_items
             flag_modified(gad_7, "items")
             db.commit()
@@ -330,6 +332,7 @@ def seed_assessments(db):
         if phq_9.items != phq_9_items:
             logger.warning("PHQ-9 items content mismatch. Updating...")
             from sqlalchemy.orm.attributes import flag_modified
+
             phq_9.items = phq_9_items
             flag_modified(phq_9, "items")
             db.commit()
@@ -372,13 +375,18 @@ def seed_users(db):
     else:
         logger.info("Psychologist user already exists.")
 
+
 def seed_academic_profiles(db):
     from app.models.academic_profile import AcademicProfile
-    
+
     # Add academic profile for some students (if any exist)
     students = db.query(User).filter(User.role == UserRole.STUDENT).all()
     for student in students:
-        profile = db.query(AcademicProfile).filter(AcademicProfile.user_id == student.id).first()
+        profile = (
+            db.query(AcademicProfile)
+            .filter(AcademicProfile.user_id == student.id)
+            .first()
+        )
         if not profile:
             logger.info(f"Creating AcademicProfile for student: {student.email}")
             profile = AcademicProfile(
@@ -390,10 +398,11 @@ def seed_academic_profiles(db):
                 units_approved=15,
                 current_gpa=85.5,
                 age_at_enrollment=19,
-                gender=1
+                gender=1,
             )
             db.add(profile)
     db.commit()
+
 
 def main():
     db = SessionLocal()

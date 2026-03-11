@@ -26,6 +26,7 @@ from app.schemas.emotional_checkin import EmotionalCheckin as Checkin
 from app.schemas.academic_profile import AcademicProfile
 from app.schemas.risk_summary import RiskSummary
 
+
 class StudentDetail(StudentSummary):
     risk_summary: Optional[RiskSummary] = None
     academic_profile: Optional[AcademicProfile] = None

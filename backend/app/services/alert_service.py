@@ -63,7 +63,7 @@ class AlertService:
         message = f"{risk_level.value} detectado durante: {context}."
         if risk_level == RiskLevel.CRITICAL:
             message = f"⚠️ RIESGO CRÍTICO detectado durante: {context}. Requiere atención inmediata."
-        
+
         AlertService._build_alert(
             db,
             user_id,
@@ -80,14 +80,17 @@ class AlertService:
             )
 
         # Notify Cabinet if consent was given and risk is significant
-        if notify_cabinet and risk_level in [RiskLevel.MEDIUM, RiskLevel.HIGH, RiskLevel.CRITICAL]:
+        if notify_cabinet and risk_level in [
+            RiskLevel.MEDIUM,
+            RiskLevel.HIGH,
+            RiskLevel.CRITICAL,
+        ]:
             await notification_service.notify_cabinet(
-                user_email=user_email,
-                risk_level=risk_level.value,
-                details=context
+                user_email=user_email, risk_level=risk_level.value, details=context
             )
-            logger.info(f"RiskAlert: Cabinet notified for user_id={user_id} (Consent given)")
-
+            logger.info(
+                f"RiskAlert: Cabinet notified for user_id={user_id} (Consent given)"
+            )
 
 
 alert_service = AlertService()

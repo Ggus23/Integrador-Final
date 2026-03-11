@@ -29,6 +29,7 @@ async def general_exception_handler(request: Request, exc: Exception):
     Prevents leaking internal stack traces to the client.
     """
     import traceback
+
     traceback.print_exc()
     print(f"Global error: {exc}")
 

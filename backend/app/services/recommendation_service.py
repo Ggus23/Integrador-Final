@@ -1,5 +1,3 @@
-
-
 import json
 import logging
 from typing import List, Optional, Any
@@ -96,26 +94,26 @@ class RecommendationService:
                 "Mantén tus hábitos saludables de sueño y alimentación.",
                 "Dedica tiempo a tus hobbies fuera de la universidad.",
                 "Organiza tus sesiones de estudio con descansos regulares.",
-                "Practica respiración profunda en momentos de tensión."
+                "Practica respiración profunda en momentos de tensión.",
             ],
             RiskLevel.MEDIUM: [
                 "Considera usar técnicas de gestión del tiempo como Pomodoro.",
                 "Habla con un amigo o familiar sobre tu carga académica.",
                 "Dedica 15 minutos diarios a la meditación o mindfulness.",
-                "Busca apoyo en grupos de estudio para compartir tareas."
+                "Busca apoyo en grupos de estudio para compartir tareas.",
             ],
             RiskLevel.HIGH: [
                 "Te sugerimos acudir al servicio de bienestar para orientación profesional.",
                 "Prioriza tus tareas y delega o pospone lo que no sea urgente.",
                 "Asegúrate de mantener contacto social y no aislarte del entorno.",
-                "Realiza actividad física ligera para liberar tensión acumulada."
+                "Realiza actividad física ligera para liberar tensión acumulada.",
             ],
             RiskLevel.CRITICAL: [
                 "⚠️ Por favor, solicita una cita de urgencia en el gabinete psicológico.",
                 "Comunícate de inmediato con el equipo de bienestar universitario.",
                 "Busca el apoyo de una persona de confianza ahora mismo.",
-                "No estás solo/a, el equipo de salud mental está para ayudarte."
-            ]
+                "No estás solo/a, el equipo de salud mental está para ayudarte.",
+            ],
         }
         return recs.get(risk_level, recs[RiskLevel.LOW])
 
@@ -158,11 +156,11 @@ Reglas:
 
 Formato: {{"recommendations": ["rec1", "rec2", "rec3", "rec4"]}}
 """
-        
+
         try:
             client = genai.Client(api_key="AIzaSyCA7xyOqhxBb-dFgojdhaorJAqCCgrrpXQ")
             response = client.models.generate_content(
-                model='gemini-2.0-flash',
+                model="gemini-2.0-flash",
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
@@ -170,7 +168,10 @@ Formato: {{"recommendations": ["rec1", "rec2", "rec3", "rec4"]}}
             )
             data = json.loads(response.text)
             recommendations_llm = data.get("recommendations", [])
-            if not isinstance(recommendations_llm, list) or len(recommendations_llm) == 0:
+            if (
+                not isinstance(recommendations_llm, list)
+                or len(recommendations_llm) == 0
+            ):
                 raise ValueError("Malformed response")
             return _deduplicate(recommendations_llm)
         except Exception as e:

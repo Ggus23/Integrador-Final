@@ -27,10 +27,10 @@ export function Navbar() {
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
           <Link href="/" className="group flex items-center gap-2">
-            <div className="relative h-8 w-8 md:h-10 md:w-10 overflow-hidden rounded-md shadow-sm">
+            <div className="relative h-8 w-8 overflow-hidden rounded-md shadow-sm md:h-10 md:w-10">
               <Image src="/icon_logo.png" alt="MentaLink Logo" fill className="object-cover" />
             </div>
-            <div className="text-foreground group-hover:text-primary font-serif text-xl md:text-2xl font-black tracking-tight transition-colors">
+            <div className="text-foreground group-hover:text-primary font-serif text-xl font-black tracking-tight transition-colors md:text-2xl">
               MENTA<span className="text-primary">-LINK</span>
             </div>
           </Link>

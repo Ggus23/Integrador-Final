@@ -1,4 +1,14 @@
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, Text, String, Date, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Text,
+    String,
+    Date,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -24,7 +34,7 @@ class EmotionalDiary(Base):
     wellbeing_level = Column(Integer, nullable=False)  # Scale 1-5
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
-    
+
     # AI Sentiment Analysis Fields
     emotion_ai = Column(String, nullable=True)  # Dominant emotion from AI
     emotion_scores = Column(JSON, nullable=True)  # JSON scores
@@ -34,6 +44,4 @@ class EmotionalDiary(Base):
     user = relationship("User", back_populates="emotional_diary_entries")
 
     # Restriction for one record per student per day
-    __table_args__ = (
-        UniqueConstraint("user_id", "date", name="uq_user_diary_date"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "date", name="uq_user_diary_date"),)

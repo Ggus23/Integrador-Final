@@ -2,7 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowRight, ShieldCheck, HeartPulse, BrainCircuit, CheckCircle2, AlertCircle, Activity, Heart, Sparkles, MessageCircle } from 'lucide-react';
+import {
+  ArrowRight,
+  ShieldCheck,
+  HeartPulse,
+  BrainCircuit,
+  CheckCircle2,
+  AlertCircle,
+  Activity,
+  Heart,
+  Sparkles,
+  MessageCircle,
+} from 'lucide-react';
 import { Layout } from '@/components/layout';
 import { useProtected } from '@/hooks/useProtected';
 import { apiClient } from '@/lib/api';
@@ -19,9 +30,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-
-
+} from '@/components/ui/alert-dialog';
 
 export default function AssessmentPage() {
   const { user } = useProtected();
@@ -37,7 +46,6 @@ export default function AssessmentPage() {
   const [hasStarted, setHasStarted] = useState(false);
   const [showResources, setShowResources] = useState(false);
   const [showConsentDialog, setShowConsentDialog] = useState(false);
-
 
   const assessmentKey = params.key as string;
 
@@ -123,7 +131,7 @@ export default function AssessmentPage() {
 
       // Check if any critical item was triggered
       const hasCriticalTrigger = assessment.items.some(
-        item => item.is_critical && responses[item.id] > 0
+        (item) => item.is_critical && responses[item.id] > 0
       );
 
       setCompleted(true);
@@ -141,31 +149,30 @@ export default function AssessmentPage() {
     }
   };
 
-
   if (completed) {
     const hasCriticalTrigger = assessment.items.some(
-      item => item.is_critical && responses[item.id] > 0
+      (item) => item.is_critical && responses[item.id] > 0
     );
 
     return (
       <Layout>
-        <div className="animate-fade-in flex min-h-[400px] flex-col items-center justify-center gap-6 py-12 px-4">
+        <div className="animate-fade-in flex min-h-[400px] flex-col items-center justify-center gap-6 px-4 py-12">
           {!hasCriticalTrigger ? (
             <Card className="border-border bg-card max-w-md p-10 text-center shadow-xl">
               <div className="bg-primary/10 mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full">
                 <CheckCircle2 className="text-primary h-10 w-10" />
               </div>
-              <h2 className="text-foreground font-serif text-3xl font-bold">¡Evaluación Completada!</h2>
+              <h2 className="text-foreground font-serif text-3xl font-bold">
+                ¡Evaluación Completada!
+              </h2>
               <p className="text-muted-foreground mt-4 text-lg">
-                Gracias por tu honestidad. Tus respuestas han sido registradas para el seguimiento preventivo.
+                Gracias por tu honestidad. Tus respuestas han sido registradas para el seguimiento
+                preventivo.
               </p>
-              <p className="text-primary mt-8 text-sm font-medium animate-pulse">
+              <p className="text-primary mt-8 animate-pulse text-sm font-medium">
                 Redirigiendo al panel principal...
               </p>
-              <Button
-                onClick={() => router.push('/dashboard')}
-                className="mt-8 w-full shadow-lg"
-              >
+              <Button onClick={() => router.push('/dashboard')} className="mt-8 w-full shadow-lg">
                 Ir al Dashboard
               </Button>
             </Card>
@@ -174,39 +181,45 @@ export default function AssessmentPage() {
               <div className="bg-card border-primary/20 rounded-3xl border p-8 text-center shadow-[0_20px_50px_rgba(var(--primary-rgb),0.1)] backdrop-blur-sm">
                 <div className="mb-6 flex justify-center">
                   <div className="bg-primary/10 rounded-full p-5 shadow-inner">
-                    <Heart className="h-12 w-12 text-primary animate-pulse" />
+                    <Heart className="text-primary h-12 w-12 animate-pulse" />
                   </div>
                 </div>
-                <h3 className="mb-4 text-3xl font-bold text-foreground font-serif">
+                <h3 className="text-foreground mb-4 font-serif text-3xl font-bold">
                   Tu bienestar nos importa
                 </h3>
-                <p className="text-muted-foreground mb-10 text-lg leading-relaxed max-w-lg mx-auto">
-                  Entendemos que hay días en los que todo parece pesar más de lo normal. Queremos que sepas que no tienes por qué llevar esa carga solo. Estamos aquí para escucharte y apoyarte.
+                <p className="text-muted-foreground mx-auto mb-10 max-w-lg text-lg leading-relaxed">
+                  Entendemos que hay días en los que todo parece pesar más de lo normal. Queremos
+                  que sepas que no tienes por qué llevar esa carga solo. Estamos aquí para
+                  escucharte y apoyarte.
                 </p>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Button
                     onClick={() => {
-                      window.open('https://wa.me/59179717725?text=Hola,%20necesito%20apoyo%20del%20Gabinete%20Psicológico%20de%20MentaLink', '_blank');
+                      window.open(
+                        'https://wa.me/59179717725?text=Hola,%20necesito%20apoyo%20del%20Gabinete%20Psicológico%20de%20MentaLink',
+                        '_blank'
+                      );
                     }}
-                    className="from-primary to-accent bg-gradient-to-r text-white shadow-xl h-auto min-h-[4rem] py-3 text-lg font-bold rounded-2xl transition-all hover:scale-[1.02] border-none whitespace-normal leading-tight"
+                    className="from-primary to-accent h-auto min-h-[4rem] rounded-2xl border-none bg-gradient-to-r py-3 text-lg leading-tight font-bold whitespace-normal text-white shadow-xl transition-all hover:scale-[1.02]"
                   >
                     <MessageCircle className="mr-2 h-5 w-5" /> Hablar con alguien
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() => setShowResources(!showResources)}
-                    className="border-primary/20 text-primary hover:bg-primary/5 h-auto min-h-[4rem] py-3 text-base sm:text-lg font-bold rounded-2xl transition-all whitespace-normal leading-tight px-4"
+                    className="border-primary/20 text-primary hover:bg-primary/5 h-auto min-h-[4rem] rounded-2xl px-4 py-3 text-base leading-tight font-bold whitespace-normal transition-all sm:text-lg"
                   >
-                    {showResources ? 'Ocultar formulario' : 'Generar una cita con el gabinete psicológico'}
+                    {showResources
+                      ? 'Ocultar formulario'
+                      : 'Generar una cita con el gabinete psicológico'}
                   </Button>
                 </div>
-
 
                 <Button
                   onClick={() => router.push('/dashboard')}
                   variant="ghost"
-                  className="mt-8 text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground mt-8"
                 >
                   Continuar al Dashboard más tarde
                 </Button>
@@ -217,7 +230,6 @@ export default function AssessmentPage() {
                   <AppointmentRequest />
                 </div>
               )}
-
             </div>
           )}
         </div>
@@ -287,7 +299,7 @@ export default function AssessmentPage() {
 
               <Button
                 onClick={() => setHasStarted(true)}
-                className="from-primary to-accent w-full bg-gradient-to-r py-6 text-lg text-primary-foreground shadow-md transition-all hover:opacity-90 hover:shadow-lg"
+                className="from-primary to-accent text-primary-foreground w-full bg-gradient-to-r py-6 text-lg shadow-md transition-all hover:opacity-90 hover:shadow-lg"
               >
                 Comenzar Prueba
               </Button>
@@ -367,7 +379,7 @@ export default function AssessmentPage() {
                 <Button
                   onClick={handleNext}
                   disabled={!(currentItem.id in responses)}
-                  className="from-primary to-accent flex-1 bg-gradient-to-r text-primary-foreground shadow-md hover:opacity-90"
+                  className="from-primary to-accent text-primary-foreground flex-1 bg-gradient-to-r shadow-md hover:opacity-90"
                 >
                   Siguiente
                 </Button>
@@ -375,7 +387,7 @@ export default function AssessmentPage() {
                 <Button
                   onClick={() => setShowConsentDialog(true)}
                   disabled={submitting || Object.keys(responses).length < assessment.items.length}
-                  className="from-primary to-accent flex-1 bg-gradient-to-r text-primary-foreground shadow-md hover:opacity-90"
+                  className="from-primary to-accent text-primary-foreground flex-1 bg-gradient-to-r shadow-md hover:opacity-90"
                 >
                   {submitting ? 'Enviando...' : 'Enviar Evaluación'}
                 </Button>
@@ -385,30 +397,34 @@ export default function AssessmentPage() {
             <AlertDialog open={showConsentDialog} onOpenChange={setShowConsentDialog}>
               <AlertDialogContent className="bg-card border-border">
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-foreground font-serif text-xl font-bold">¿Deseas compartir tus resultados?</AlertDialogTitle>
+                  <AlertDialogTitle className="text-foreground font-serif text-xl font-bold">
+                    ¿Deseas compartir tus resultados?
+                  </AlertDialogTitle>
                   <AlertDialogDescription className="text-muted-foreground text-sm leading-relaxed">
-                    Al aceptar, tus resultados serán enviados al <strong>Gabinete Psicológico</strong> para que un profesional pueda brindarte apoyo personalizado si el sistema detecta algún nivel de riesgo.
-                    <br /><br />
+                    Al aceptar, tus resultados serán enviados al{' '}
+                    <strong>Gabinete Psicológico</strong> para que un profesional pueda brindarte
+                    apoyo personalizado si el sistema detecta algún nivel de riesgo.
+                    <br />
+                    <br />
                     Toda la información se maneja con estricta confidencialidad.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter className="mt-4 flex flex-col sm:flex-row gap-3">
+                <AlertDialogFooter className="mt-4 flex flex-col gap-3 sm:flex-row">
                   <AlertDialogCancel
                     onClick={() => handleSubmit(false)}
-                    className="border-border text-foreground hover:bg-muted font-bold h-12 flex-1"
+                    className="border-border text-foreground hover:bg-muted h-12 flex-1 font-bold"
                   >
                     No, solo guardar
                   </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => handleSubmit(true)}
-                    className="bg-primary hover:bg-primary/90 text-white font-bold h-12 flex-1"
+                    className="bg-primary hover:bg-primary/90 h-12 flex-1 font-bold text-white"
                   >
                     Sí, compartir y recibir apoyo
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-
           </>
         )}
       </div>

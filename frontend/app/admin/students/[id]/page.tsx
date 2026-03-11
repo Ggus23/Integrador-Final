@@ -76,10 +76,14 @@ interface StudentDetails {
     course: string;
     current_gpa: number;
     units_approved: number;
-    hito2_procesual: number; hito2_nota: number;
-    hito3_procesual: number; hito3_nota: number;
-    hito4_procesual: number; hito4_nota: number;
-    hito5_procesual: number; hito5_nota: number;
+    hito2_procesual: number;
+    hito2_nota: number;
+    hito3_procesual: number;
+    hito3_nota: number;
+    hito4_procesual: number;
+    hito4_nota: number;
+    hito5_procesual: number;
+    hito5_nota: number;
   } | null;
 }
 
@@ -329,7 +333,7 @@ export default function StudentDetailPage() {
                         <span>Examen:</span>
                         <span className="font-bold">{nota}</span>
                       </div>
-                      <div className="text-primary mt-2 border-t pt-2 flex justify-between font-bold">
+                      <div className="text-primary mt-2 flex justify-between border-t pt-2 font-bold">
                         <span>Total:</span>
                         <span>{proc + nota}</span>
                       </div>

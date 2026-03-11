@@ -232,7 +232,7 @@ export default function CheckinsPage() {
                   style={{ animationDelay: `${idx * 0.1}s` }}
                 >
                   <div className="flex flex-col gap-3">
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                       <div className="flex flex-wrap items-center gap-2 md:gap-4">
                         <div className="bg-primary/10 flex min-w-[60px] flex-col items-center justify-center rounded-lg p-2">
                           <span className="text-primary text-xs font-bold uppercase">Ánimo</span>

@@ -3,9 +3,9 @@ import type { Metadata } from 'next';
 
 import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
-import "@fontsource/dm-sans";
-import "@fontsource/space-mono";
-import "@fontsource/source-serif-4";
+import '@fontsource/dm-sans';
+import '@fontsource/space-mono';
+import '@fontsource/source-serif-4';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 
@@ -50,9 +50,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <LanguageProvider>
-            <SidebarProvider>
-              {children}
-            </SidebarProvider>
+            <SidebarProvider>{children}</SidebarProvider>
             <Toaster />
             <Analytics />
           </LanguageProvider>

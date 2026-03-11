@@ -288,7 +288,10 @@ export default function DashboardPage() {
         )}
 
         {user?.role === 'student' && checkins.length > 0 && (
-          <div className="animate-slide-up grid gap-6 md:grid-cols-2" style={{ animationDelay: '0.4s' }}>
+          <div
+            className="animate-slide-up grid gap-6 md:grid-cols-2"
+            style={{ animationDelay: '0.4s' }}
+          >
             <div className="space-y-4">
               <h2 className="text-foreground font-serif text-xl font-bold">Bienestar Emocional</h2>
               <TrendChart data={checkins} />
@@ -327,7 +330,7 @@ export default function DashboardPage() {
           <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.45s' }}>
             <RecommendationsPanel
               recommendations={riskSummary?.recommendations || []}
-              completedCount={new Set(assessments.map(a => a.assessment_id)).size}
+              completedCount={new Set(assessments.map((a) => a.assessment_id)).size}
             />
           </div>
         )}
@@ -336,15 +339,17 @@ export default function DashboardPage() {
           <div className="space-y-8">
             <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.48s' }}>
               <div className="flex items-center gap-3">
-                <div className="h-8 w-1 bg-primary rounded-full" />
-                <h2 className="text-foreground font-serif text-2xl font-bold">Seguimiento Académico</h2>
+                <div className="bg-primary h-8 w-1 rounded-full" />
+                <h2 className="text-foreground font-serif text-2xl font-bold">
+                  Seguimiento Académico
+                </h2>
               </div>
               <AcademicProfileForm />
             </div>
 
             <div className="animate-slide-up space-y-4" style={{ animationDelay: '0.5s' }}>
               <div className="flex items-center gap-3">
-                <div className="h-8 w-1 bg-accent rounded-full" />
+                <div className="bg-accent h-8 w-1 rounded-full" />
                 <h2 className="text-foreground font-serif text-2xl font-bold">Apoyo Profesional</h2>
               </div>
               <div className="max-w-xl">
@@ -359,7 +364,7 @@ export default function DashboardPage() {
             <h2 className="text-foreground font-serif text-xl font-bold">Acceso Rápido</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Link href="/assessments">
-                <Button className="from-primary to-accent w-full bg-gradient-to-r text-primary-foreground shadow-md transition-all hover:opacity-90 hover:shadow-lg">
+                <Button className="from-primary to-accent text-primary-foreground w-full bg-gradient-to-r shadow-md transition-all hover:opacity-90 hover:shadow-lg">
                   Realizar Evaluación
                 </Button>
               </Link>

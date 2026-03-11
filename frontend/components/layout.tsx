@@ -18,9 +18,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <Navbar />
       <div className="flex flex-1">
         <Sidebar />
-        <main className="flex-1 p-4 transition-all md:ml-64 md:p-8">
-          {children}
-        </main>
+        <main className="flex-1 p-4 transition-all md:ml-64 md:p-8">{children}</main>
       </div>
     </div>
   );

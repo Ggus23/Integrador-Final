@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 # Emotions required: felicidad, tristeza, ansiedad, enojo, neutral
 EMOTIONS = ["felicidad", "tristeza", "ansiedad", "enojo", "neutral"]
 
+
 class EmotionAnalysisService:
     def __init__(self, api_key: str = "AIzaSyCA7xyOqhxBb-dFgojdhaorJAqCCgrrpXQ"):
         self.api_key = api_key
@@ -24,7 +25,7 @@ class EmotionAnalysisService:
             return {
                 "dominant_emotion": "neutral",
                 "emotion_scores": {e: 0.0 for e in EMOTIONS},
-                "analysis_created_at": datetime.now()
+                "analysis_created_at": datetime.now(),
             }
 
         prompt = f"""
@@ -53,13 +54,13 @@ class EmotionAnalysisService:
         try:
             client = genai.Client(api_key=self.api_key)
             response = client.models.generate_content(
-                model='gemini-2.0-flash',
+                model="gemini-2.0-flash",
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
                 ),
             )
-            
+
             result = json.loads(response.text)
             result["analysis_created_at"] = datetime.now()
             return result
@@ -69,7 +70,8 @@ class EmotionAnalysisService:
             return {
                 "dominant_emotion": "neutral",
                 "emotion_scores": {e: 0.2 for e in EMOTIONS},
-                "analysis_created_at": datetime.now()
+                "analysis_created_at": datetime.now(),
             }
+
 
 emotion_analysis_service = EmotionAnalysisService()

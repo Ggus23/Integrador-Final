@@ -28,7 +28,7 @@ class EmotionalDiary(EmotionalDiaryBase):
     user_id: int
     date: date_type
     created_at: datetime
-    
+
     # AI Analysis fields
     emotion_ai: Optional[str] = None
     emotion_scores: Optional[dict] = None

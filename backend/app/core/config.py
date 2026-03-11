@@ -48,7 +48,6 @@ class Settings(BaseSettings):
     EMAILS_FROM_NAME: str = "MENTA-LINK"
     EMAILS_CABINET_EMAIL: str = "cabinet@unifranz.edu.bo"  # Default cabinet email
 
-
     ML_MODEL_PATH: str = "app/models/risk_model.pkl"
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")

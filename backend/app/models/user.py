@@ -55,10 +55,16 @@ class User(Base):
     )
     alerts = relationship("Alert", back_populates="user", cascade="all, delete-orphan")
     academic_profile = relationship(
-        "AcademicProfile", back_populates="user", uselist=False, cascade="all, delete-orphan"
+        "AcademicProfile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
     )
     appointments = relationship(
-        "Appointment", foreign_keys="[Appointment.user_id]", back_populates="student", cascade="all, delete-orphan"
+        "Appointment",
+        foreign_keys="[Appointment.user_id]",
+        back_populates="student",
+        cascade="all, delete-orphan",
     )
     emotional_diary_entries = relationship(
         "EmotionalDiary", back_populates="user", cascade="all, delete-orphan"

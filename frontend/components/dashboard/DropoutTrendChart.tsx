@@ -1,4 +1,3 @@
-
 'use client';
 import {
   ResponsiveContainer,
@@ -28,11 +27,11 @@ export function DropoutTrendChart({ data }: DropoutTrendChartProps) {
   if (!formattedData.length)
     return (
       <Card>
-          <CardHeader>
-            <CardTitle>Evolución Riesgo de Abandono</CardTitle>
-          </CardHeader>
-        <CardContent className="py-10 text-center text-muted-foreground">
-            Aún no tienes suficientes evaluaciones para mostrar una tendencia.
+        <CardHeader>
+          <CardTitle>Evolución Riesgo de Abandono</CardTitle>
+        </CardHeader>
+        <CardContent className="text-muted-foreground py-10 text-center">
+          Aún no tienes suficientes evaluaciones para mostrar una tendencia.
         </CardContent>
       </Card>
     );
@@ -41,8 +40,8 @@ export function DropoutTrendChart({ data }: DropoutTrendChartProps) {
     <Card className="col-span-4 transition-all hover:shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-risk-high animate-pulse" />
-            Evolución Probabilidad de Abandono (%)
+          <span className="bg-risk-high h-2 w-2 animate-pulse rounded-full" />
+          Evolución Probabilidad de Abandono (%)
         </CardTitle>
       </CardHeader>
       <CardContent className="pl-2">
@@ -65,7 +64,11 @@ export function DropoutTrendChart({ data }: DropoutTrendChartProps) {
             />
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted opacity-30" />
             <Tooltip
-              contentStyle={{ backgroundColor: 'var(--background)', borderRadius: '8px', border: '1px solid var(--border)' }}
+              contentStyle={{
+                backgroundColor: 'var(--background)',
+                borderRadius: '8px',
+                border: '1px solid var(--border)',
+              }}
               itemStyle={{ color: 'var(--foreground)' }}
             />
             <Line

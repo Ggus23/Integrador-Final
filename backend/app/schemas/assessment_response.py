@@ -13,7 +13,6 @@ class AssessmentResponseCreate(AssessmentResponseBase):
     share_with_psychologist: bool = False
 
 
-
 class AssessmentResponse(AssessmentResponseBase):
     id: int
     user_id: int

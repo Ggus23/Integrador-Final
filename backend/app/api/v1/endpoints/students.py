@@ -64,7 +64,9 @@ def read_students(
                 "full_name": student.full_name,
                 "role": student.role,
                 "risk_level": (
-                    risk_summary.current_risk_level if risk_summary else RiskLevel.LOW.value
+                    risk_summary.current_risk_level
+                    if risk_summary
+                    else RiskLevel.LOW.value
                 ),
                 "active_alerts": active_alerts,
                 "last_assessment_date": (
@@ -149,7 +151,9 @@ def read_student_detail(
         "email": student.email,
         "full_name": student.full_name,
         "role": student.role,
-        "risk_level": risk_summary.current_risk_level if risk_summary else RiskLevel.LOW.value,
+        "risk_level": (
+            risk_summary.current_risk_level if risk_summary else RiskLevel.LOW.value
+        ),
         "active_alerts": active_alerts_count,
         "last_assessment_date": responses[0].created_at if responses else None,
         "risk_summary": risk_summary,
@@ -160,7 +164,7 @@ def read_student_detail(
         "recent_checkins": checkins,
         "risk_factors": {
             **risk_classifier.get_feature_importance(),
-            **dropout_predictor.get_feature_importance()
+            **dropout_predictor.get_feature_importance(),
         },
     }
 

@@ -1,4 +1,13 @@
-from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Integer, String, Boolean
+from sqlalchemy import (
+    JSON,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Boolean,
+)
 
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -36,7 +45,6 @@ class AssessmentResponse(Base):
     share_with_psychologist = Column(Boolean, default=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
-
 
     # Relationships
     user = relationship("User", back_populates="assessment_responses")

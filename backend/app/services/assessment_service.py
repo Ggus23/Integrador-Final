@@ -90,9 +90,7 @@ class AssessmentService:
         avg_mood = sum(c.mood_score for c in checkins) / len(checkins)
         bad_days = sum(1 for c in checkins if c.mood_score < 3)
         pressures = [
-            c.academic_pressure
-            for c in checkins
-            if c.academic_pressure is not None
+            c.academic_pressure for c in checkins if c.academic_pressure is not None
         ]
         avg_pressure = sum(pressures) / len(pressures) if pressures else 3.0
         return avg_mood, bad_days, avg_pressure
@@ -141,16 +139,14 @@ class AssessmentService:
         db.add(db_response)
 
         risk_summary = (
-            db.query(RiskSummary)
-            .filter(RiskSummary.user_id == user_id)
-            .first()
+            db.query(RiskSummary).filter(RiskSummary.user_id == user_id).first()
         )
         if not risk_summary:
             risk_summary = RiskSummary(user_id=user_id)
             db.add(risk_summary)
 
         avg_mood, bad_days, avg_pressure = self._get_checkin_context(db, user_id)
-        
+
         # Normalize score based on assessment type for ML model compatibility
         if assessment_type == "PSS-10":
             norm_emotional_score = score / 40.0
@@ -173,9 +169,7 @@ class AssessmentService:
         from app.models.academic_profile import AcademicProfile
 
         acad_profile = (
-            db.query(AcademicProfile)
-            .filter(AcademicProfile.user_id == user_id)
-            .first()
+            db.query(AcademicProfile).filter(AcademicProfile.user_id == user_id).first()
         )
 
         dropout_data: Dict = {
@@ -203,13 +197,20 @@ class AssessmentService:
             )
 
         d_risk_str, d_prob = dropout_predictor.predict_dropout(dropout_data)
-        d_risk = RiskLevel.from_str(d_risk_str) if d_risk_str != "Error" else RiskLevel.LOW
+        d_risk = (
+            RiskLevel.from_str(d_risk_str) if d_risk_str != "Error" else RiskLevel.LOW
+        )
 
         risk_summary.dropout_risk = d_risk.value
         risk_summary.dropout_probability = float(d_prob)
         db_response.dropout_probability = float(d_prob)
 
-        level_order = [RiskLevel.LOW, RiskLevel.MEDIUM, RiskLevel.HIGH, RiskLevel.CRITICAL]
+        level_order = [
+            RiskLevel.LOW,
+            RiskLevel.MEDIUM,
+            RiskLevel.HIGH,
+            RiskLevel.CRITICAL,
+        ]
         effective_risk = max(
             [emotional_risk, ml_risk],
             key=lambda r: level_order.index(r),
@@ -235,7 +236,7 @@ class AssessmentService:
                 acad_profile=acad_profile,
             )
             risk_summary.recommendations = recs
-        
+
         # Determine if we should notify the cabinet based on user consent
         # We use effective_risk here because for ALERTS we DO want the most severe risk
         source = (
@@ -244,7 +245,6 @@ class AssessmentService:
             else f"{assessment.title} + Contexto ML"
         )
 
-        
         # Determine if we should notify the cabinet based on user consent
         await alert_service.process_risk_alert(
             db=db,
@@ -252,13 +252,12 @@ class AssessmentService:
             user_email=user_email,
             risk_level=effective_risk,
             context=source,
-            notify_cabinet=response_in.share_with_psychologist
+            notify_cabinet=response_in.share_with_psychologist,
         )
 
         db.commit()
         db.refresh(db_response)
         return db_response
-
 
 
 assessment_service = AssessmentService()

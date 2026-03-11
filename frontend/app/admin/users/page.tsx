@@ -193,13 +193,19 @@ export default function AdminUsersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Email (Institucional para estudiantes)</label>
+                  <label className="text-sm font-medium">
+                    Email (Institucional para estudiantes)
+                  </label>
                   <Input
                     type="email"
                     value={newUserData.email}
                     onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
                     required
-                    placeholder={newUserData.role === 'student' ? "usuario@unifranz.edu.bo" : "usuario@gmail.com"}
+                    placeholder={
+                      newUserData.role === 'student'
+                        ? 'usuario@unifranz.edu.bo'
+                        : 'usuario@gmail.com'
+                    }
                   />
                   {newUserData.role === 'student' && (
                     <p className="text-primary text-[10px] font-bold">

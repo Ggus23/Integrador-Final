@@ -1,6 +1,6 @@
-
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
+
 
 class AcademicProfileBase(BaseModel):
     course: Optional[str] = None
@@ -9,7 +9,7 @@ class AcademicProfileBase(BaseModel):
     current_semester: int = 1
     units_approved: int = 0
     current_gpa: float = 0.0
-    
+
     # Hitos fields
     hito2_procesual: Optional[float] = 0.0
     hito2_nota: Optional[float] = 0.0
@@ -23,11 +23,14 @@ class AcademicProfileBase(BaseModel):
     age_at_enrollment: Optional[int] = None
     gender: Optional[int] = None
 
+
 class AcademicProfileCreate(AcademicProfileBase):
     pass
 
+
 class AcademicProfileUpdate(AcademicProfileBase):
     pass
+
 
 class AcademicProfile(AcademicProfileBase):
     id: int

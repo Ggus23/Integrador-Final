@@ -1,4 +1,3 @@
-
 import logging
 import os
 import joblib
@@ -83,16 +82,16 @@ class DropoutPredictor:
             pss = float(data.get("pss_score", 0.0))
             mood = float(data.get("mood_avg", 5.0))
             units = float(data.get("Curricular_units_approved", 6))
-            
+
             # PSS Contribution: scales linearly from 0 (at pss <= 13) to 0.25 (at pss >= 40)
             pss_weight = max(0.0, min((pss - 13.0) / 27.0 * 0.25, 0.25))
-            
+
             # Mood Contribution: scales linearly from 0 (at mood=4) to 0.25 (at mood <= 1)
             mood_weight = max(0.0, min((4.0 - mood) / 3.0 * 0.25, 0.25))
-            
+
             # Units Contribution: scales linearly from 0 (at units>=5) to 0.30 (at units=0)
             units_weight = max(0.0, min((5.0 - units) / 5.0 * 0.3, 0.3))
-            
+
             # Risk Level Contribution (0.0 to ~0.2)
             risk_weight = risk_encoded * 0.067
 
@@ -107,19 +106,21 @@ class DropoutPredictor:
 
         try:
             features_df = pd.DataFrame(
-                [[
-                    data.get("Course", 1),
-                    data.get("Scholarship_holder", 0),
-                    data.get("Tuition_fees_up_to_date", 1),
-                    data.get("Curricular_units_approved", 0),
-                    # grade: convert from 100-pt to 20-pt scale to match training data
-                    data.get("Curricular_units_grade", 0.0) / 5.0,
-                    data.get("Age_at_enrollment", 20),
-                    data.get("Gender", 1),
-                    data.get("pss_score", 0.0),
-                    data.get("mood_avg", 5.0),
-                    risk_encoded,
-                ]],
+                [
+                    [
+                        data.get("Course", 1),
+                        data.get("Scholarship_holder", 0),
+                        data.get("Tuition_fees_up_to_date", 1),
+                        data.get("Curricular_units_approved", 0),
+                        # grade: convert from 100-pt to 20-pt scale to match training data
+                        data.get("Curricular_units_grade", 0.0) / 5.0,
+                        data.get("Age_at_enrollment", 20),
+                        data.get("Gender", 1),
+                        data.get("pss_score", 0.0),
+                        data.get("mood_avg", 5.0),
+                        risk_encoded,
+                    ]
+                ],
                 columns=FEATURE_COLUMNS,
             )
 

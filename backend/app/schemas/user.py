@@ -28,7 +28,9 @@ class UserCreateBase(BaseModel):
         domain = v.lower().split("@")[-1]
         allowed_domains = ["unifranz.edu.bo", "gmail.com"]
         if domain not in allowed_domains:
-            raise ValueError("El correo debe ser institucional (@unifranz.edu.bo) o @gmail.com")
+            raise ValueError(
+                "El correo debe ser institucional (@unifranz.edu.bo) o @gmail.com"
+            )
         return v.lower()
 
     @field_validator("password")

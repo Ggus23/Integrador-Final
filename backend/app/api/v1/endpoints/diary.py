@@ -53,7 +53,7 @@ def create_diary_entry(
         user_id=current_user.id,
         date=entry_date,
     )
-    
+
     # Trigger AI Emotion Analysis
     if db_obj.experience:
         try:
@@ -139,7 +139,8 @@ def update_diary_entry(
 
     if entry.user_id != current_user.id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="No tiene permisos suficientes"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tiene permisos suficientes",
         )
 
     update_data = entry_in.model_dump(exclude_unset=True)
@@ -170,25 +171,114 @@ def get_word_cloud(
     """
     Generar nube de palabras a partir del historial de diarios.
     """
-    entries = db.query(models.EmotionalDiary).filter(
-        models.EmotionalDiary.user_id == current_user.id
-    ).all()
-    
+    entries = (
+        db.query(models.EmotionalDiary)
+        .filter(models.EmotionalDiary.user_id == current_user.id)
+        .all()
+    )
+
     text = " ".join([e.experience for e in entries if e.experience])
     if not text:
         return []
 
     # Basic cleaning and tokenization
-    words = re.findall(r'\w+', text.lower())
-    
+    words = re.findall(r"\w+", text.lower())
+
     # Spanish stopwords (minimal list)
     stopwords = {
-        "de", "la", "que", "el", "en", "y", "a", "los", "del", "se", "las", "por", "un", "para", "con", "no", "una", "su", "al", "lo", "como", "más", "pero", "sus", "le", "ya", "o", "este", "sí", "porque", "esta", "entre", "cuando", "muy", "sin", "sobre", "también", "me", "hasta", "hay", "donde", "quien", "desde", "todo", "nos", "durante", "todos", "uno", "les", "ni", "contra", "otros", "ese", "eso", "ante", "ellos", "e", "esto", "mí", "antes", "algunos", "qué", "unos", "yo", "otro", "otras", "otra", "él", "tanto", "esa", "estos", "mucho", "quienes", "nada", "muchos", "cual", "poco", "ella", "estar", "estas", "algunas", "algo", "nosotros", "mi", "mis", "tu", "tus", "ti"
+        "de",
+        "la",
+        "que",
+        "el",
+        "en",
+        "y",
+        "a",
+        "los",
+        "del",
+        "se",
+        "las",
+        "por",
+        "un",
+        "para",
+        "con",
+        "no",
+        "una",
+        "su",
+        "al",
+        "lo",
+        "como",
+        "más",
+        "pero",
+        "sus",
+        "le",
+        "ya",
+        "o",
+        "este",
+        "sí",
+        "porque",
+        "esta",
+        "entre",
+        "cuando",
+        "muy",
+        "sin",
+        "sobre",
+        "también",
+        "me",
+        "hasta",
+        "hay",
+        "donde",
+        "quien",
+        "desde",
+        "todo",
+        "nos",
+        "durante",
+        "todos",
+        "uno",
+        "les",
+        "ni",
+        "contra",
+        "otros",
+        "ese",
+        "eso",
+        "ante",
+        "ellos",
+        "e",
+        "esto",
+        "mí",
+        "antes",
+        "algunos",
+        "qué",
+        "unos",
+        "yo",
+        "otro",
+        "otras",
+        "otra",
+        "él",
+        "tanto",
+        "esa",
+        "estos",
+        "mucho",
+        "quienes",
+        "nada",
+        "muchos",
+        "cual",
+        "poco",
+        "ella",
+        "estar",
+        "estas",
+        "algunas",
+        "algo",
+        "nosotros",
+        "mi",
+        "mis",
+        "tu",
+        "tus",
+        "ti",
     }
-    
+
     filtered_words = [w for w in words if w not in stopwords and len(w) > 2]
     counts = Counter(filtered_words).most_common(50)
-    
+
     return [{"word": word, "frequency": freq} for word, freq in counts]
 
 
@@ -200,10 +290,12 @@ def get_phrase_cloud(
     """
     Generar nube de frases (bigramas/trigramas) a partir del historial de diarios.
     """
-    entries = db.query(models.EmotionalDiary).filter(
-        models.EmotionalDiary.user_id == current_user.id
-    ).all()
-    
+    entries = (
+        db.query(models.EmotionalDiary)
+        .filter(models.EmotionalDiary.user_id == current_user.id)
+        .all()
+    )
+
     # Collect sentences
     experiences = [e.experience for e in entries if e.experience]
     if not experiences:
@@ -212,15 +304,15 @@ def get_phrase_cloud(
     phrases = []
     for exp in experiences:
         # Simple phrase extraction (bigrams as representative phrases)
-        words = re.findall(r'\w+', exp.lower())
+        words = re.findall(r"\w+", exp.lower())
         if len(words) < 2:
             continue
         for i in range(len(words) - 1):
             phrases.append(f"{words[i]} {words[i+1]}")
-            
+
     # Optionally add trigrams
     for exp in experiences:
-        words = re.findall(r'\w+', exp.lower())
+        words = re.findall(r"\w+", exp.lower())
         if len(words) < 3:
             continue
         for i in range(len(words) - 2):
@@ -228,5 +320,5 @@ def get_phrase_cloud(
 
     # Common phrases filter (could be improved)
     counts = Counter(phrases).most_common(30)
-    
+
     return [{"phrase": phrase, "frequency": freq} for phrase, freq in counts]
