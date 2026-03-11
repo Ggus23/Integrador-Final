@@ -1,5 +1,6 @@
-from app.models.audit_log import AuditLog
 from sqlalchemy.orm import Session
+
+from app.models.audit_log import AuditLog
 
 
 def log_access(

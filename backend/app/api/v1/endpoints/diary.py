@@ -3,12 +3,13 @@ from collections import Counter
 from datetime import date
 from typing import Any, List
 
-from app import models, schemas
-from app.api import deps
-from app.modules.ai import emotion_analysis_service
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import exc
 from sqlalchemy.orm import Session
+
+from app import models, schemas
+from app.api import deps
+from app.modules.ai import emotion_analysis_service
 
 router = APIRouter()
 

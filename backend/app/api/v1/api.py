@@ -1,3 +1,5 @@
+from fastapi import APIRouter
+
 from app.api.v1.endpoints import (
     academic,
     alerts,
@@ -13,7 +15,6 @@ from app.api.v1.endpoints import (
     students,
     users,
 )
-from fastapi import APIRouter
 
 api_router = APIRouter()
 

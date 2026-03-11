@@ -1,9 +1,10 @@
 import logging
 
+from sqlalchemy.orm import Session
+
 from app.core.constants import RiskLevel
 from app.models.alert import Alert
 from app.services.notification_service import notification_service
-from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 

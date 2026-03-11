@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from app.core.constants import RiskLevel
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from app.core.constants import RiskLevel
 
 
 class RiskSummaryBase(BaseModel):

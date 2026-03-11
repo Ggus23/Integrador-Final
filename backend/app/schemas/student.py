@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Optional
 
-from app.core.constants import RiskLevel
 from pydantic import BaseModel, ConfigDict
+
+from app.core.constants import RiskLevel
 
 
 class StudentSummary(BaseModel):

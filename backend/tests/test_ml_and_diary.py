@@ -1,4 +1,5 @@
 import pytest
+
 from app import models
 from app.api.v1.endpoints.diary import get_phrase_cloud, get_word_cloud
 from app.ml.dropout_predictor import dropout_predictor
