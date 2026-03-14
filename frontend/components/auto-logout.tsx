@@ -30,7 +30,6 @@ export function AutoLogout() {
 
     // Event listeners
     const events = ['mousemove', 'keydown', 'scroll', 'click'];
-    
     events.forEach((event) => {
       window.addEventListener(event, resetTimer);
     });
