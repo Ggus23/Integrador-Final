@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 // Define the timeout duration (15 minutes = 15 * 60 * 1000 milliseconds)
-const INACTIVITY_TIMEOUT = 15 * 60 * 1000; 
+const INACTIVITY_TIMEOUT = 15 * 60 * 1000;
 
 export function AutoLogout() {
   const { user, logout } = useAuth();
