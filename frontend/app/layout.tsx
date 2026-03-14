@@ -11,6 +11,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 
 import { LanguageProvider } from '@/context/LanguageContext';
 import { SidebarProvider } from '@/context/sidebar-context';
+import { AutoLogout } from '@/components/auto-logout';
 
 export const metadata: Metadata = {
   title: 'MENTIS - Early Psychological Risk Detection',
@@ -50,7 +51,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <LanguageProvider>
-            <SidebarProvider>{children}</SidebarProvider>
+            <SidebarProvider>
+              <AutoLogout />
+              {children}
+            </SidebarProvider>
             <Toaster />
             <Analytics />
           </LanguageProvider>
