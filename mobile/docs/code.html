@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed": "#6bff8f",
+              "on-tertiary-fixed": "#002109",
+              "on-secondary": "#113819",
+              "on-tertiary": "#003915",
+              "surface-bright": "#2b3b4b",
+              "primary-container": "#e09a70",
+              "surface-container-highest": "#263647",
+              "on-secondary-container": "#98c399",
+              "on-secondary-fixed-variant": "#294f2e",
+              "on-primary-container": "#623210",
+              "surface-container": "#102130",
+              "primary": "#ffb68b",
+              "background": "#041424",
+              "tertiary-container": "#1ec35c",
+              "outline-variant": "#52443c",
+              "on-background": "#d3e4fa",
+              "on-tertiary-container": "#00491d",
+              "on-error": "#690005",
+              "primary-fixed-dim": "#ffb68b",
+              "tertiary": "#4ae176",
+              "on-surface": "#d3e4fa",
+              "on-primary-fixed": "#321200",
+              "inverse-surface": "#d3e4fa",
+              "surface-dim": "#041424",
+              "primary-fixed": "#ffdbc8",
+              "error": "#ffb4ab",
+              "on-primary": "#502404",
+              "outline": "#9f8d84",
+              "tertiary-fixed-dim": "#4ae176",
+              "inverse-primary": "#88502c",
+              "surface-container-high": "#1b2b3b",
+              "on-primary-fixed-variant": "#6c3a17",
+              "secondary": "#a6d1a6",
+              "on-secondary-fixed": "#002108",
+              "surface-tint": "#ffb68b",
+              "on-error-container": "#ffdad6",
+              "secondary-fixed": "#c2eec1",
+              "secondary-container": "#2b5130",
+              "surface-container-low": "#0c1d2c",
+              "surface-container-lowest": "#000f1e",
+              "error-container": "#93000a",
+              "secondary-fixed-dim": "#a6d1a6",
+              "surface-variant": "#263647",
+              "surface": "#041424",
+              "inverse-on-surface": "#223242",
+              "on-tertiary-fixed-variant": "#005321",
+              "on-surface-variant": "#d7c2b8"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-effect {
+            background: rgba(16, 33, 48, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body min-h-screen pb-32 overflow-x-hidden">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-[#102130]/75 backdrop-blur-xl shadow-xl rounded-b-[2rem]">
+<button class="text-[#ffb68b] active:scale-95 duration-200">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-2xl font-bold font-headline italic tracking-tight text-[#ffb68b]">MentaLink</h1>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant/20">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="profile picture of a calm person in a minimalist artistic style with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9EWaKzr_1pPuzUms-0WYtoYE8B8Nw6KLeg6-kvk654rpt9hDoKKmA82yxy2ssRqg0C8ki-WN_6LS78rj18FJ6MMOVIJ7oSOfZxgd8jZu0TrDpzr4aiO-7fpLxsR_3h0P_YpbgvbjKGn-oYSpq0cEHdzZfA6O-18N4yYDssV6qhgCejRHk6LsCieERCZF-1ro5u7bH3V55BTvAPNM5xfT3RYM5sKke7rv8UURZjUpu3ZcKa0XEj7wjOttNSH6zisRFhwEoj41MYIOc"/>
+</div>
+</header>
+<main class="mt-28 px-6 space-y-8 max-w-md mx-auto">
+<!-- Emotional Intro -->
+<section class="space-y-4">
+<h2 class="font-headline text-3xl italic text-on-surface">Hoy me siento...</h2>
+<div class="flex justify-between items-center py-2">
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<span class="text-4xl transition-transform duration-300 group-hover:scale-110">😢</span>
+<div class="h-1.5 w-6 rounded-full bg-error/40"></div>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<span class="text-4xl transition-transform duration-300 group-hover:scale-110">🙁</span>
+<div class="h-1.5 w-6 rounded-full bg-primary-container/40"></div>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer scale-125">
+<span class="text-4xl">😐</span>
+<div class="h-1.5 w-8 rounded-full bg-outline/60"></div>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<span class="text-4xl transition-transform duration-300 group-hover:scale-110">🙂</span>
+<div class="h-1.5 w-6 rounded-full bg-secondary/40"></div>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<span class="text-4xl transition-transform duration-300 group-hover:scale-110">😄</span>
+<div class="h-1.5 w-6 rounded-full bg-tertiary/40"></div>
+</div>
+</div>
+</section>
+<!-- Guided Journaling Card -->
+<section class="glass-effect rounded-lg p-6 shadow-2xl space-y-4">
+<div class="space-y-2">
+<label class="font-headline text-lg italic text-primary-container">Reflexión guiada</label>
+<textarea class="w-full min-h-[160px] bg-surface-container-low text-on-surface placeholder:text-outline/50 border-none rounded-lg p-4 focus:ring-1 focus:ring-primary/20 text-lg resize-none" placeholder="¿Hubo algo que te hizo sentir un reto?"></textarea>
+</div>
+<div class="space-y-3">
+<span class="text-xs uppercase tracking-[0.2em] font-bold text-outline">Actividades</span>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 rounded-full bg-surface-container-highest text-sm font-semibold border border-outline-variant/10 hover:bg-surface-variant transition-colors">Estudio</button>
+<button class="px-4 py-2 rounded-full bg-primary/20 text-primary text-sm font-semibold border border-primary/30 transition-colors">Programación</button>
+<button class="px-4 py-2 rounded-full bg-surface-container-highest text-sm font-semibold border border-outline-variant/10 hover:bg-surface-variant transition-colors">Ejercicio</button>
+<button class="px-4 py-2 rounded-full bg-surface-container-highest text-sm font-semibold border border-outline-variant/10 hover:bg-surface-variant transition-colors">Meditación</button>
+<button class="px-3 py-2 rounded-full bg-surface-container-highest text-outline transition-colors">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Save Action -->
+<div class="flex justify-center pt-2">
+<button class="w-full py-4 rounded-full bg-gradient-to-br from-[#ffb68b] to-[#e09a70] text-[#041424] font-bold text-lg shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                Guardar momento
+            </button>
+</div>
+<!-- History Section -->
+<section class="space-y-6 pt-4">
+<div class="flex justify-between items-end">
+<h3 class="font-headline text-2xl italic text-on-surface">Pasos recientes</h3>
+<span class="text-primary text-sm font-bold uppercase tracking-widest">Ver todo</span>
+</div>
+<div class="space-y-4">
+<!-- Timeline Card 1 -->
+<div class="group relative bg-surface-container-low p-4 rounded-lg flex items-center gap-4 transition-all hover:bg-surface-container overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary"></div>
+<div class="text-3xl">😄</div>
+<div class="flex-1 space-y-1">
+<div class="flex justify-between">
+<h4 class="font-bold text-on-surface">Gran progreso en UI</h4>
+<span class="text-[10px] text-outline uppercase font-bold">Ayer</span>
+</div>
+<p class="text-sm text-on-surface-variant line-clamp-1 italic">Logré terminar el sistema de diseño del Oasis...</p>
+</div>
+</div>
+<!-- Timeline Card 2 -->
+<div class="group relative bg-surface-container-low p-4 rounded-lg flex items-center gap-4 transition-all hover:bg-surface-container overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container"></div>
+<div class="text-3xl">🙁</div>
+<div class="flex-1 space-y-1">
+<div class="flex justify-between">
+<h4 class="font-bold text-on-surface">Cansancio mental</h4>
+<span class="text-[10px] text-outline uppercase font-bold">Lunes</span>
+</div>
+<p class="text-sm text-on-surface-variant line-clamp-1 italic">Día largo de reuniones y poca creatividad...</p>
+</div>
+</div>
+<!-- Timeline Card 3 -->
+<div class="group relative bg-surface-container-low p-4 rounded-lg flex items-center gap-4 transition-all hover:bg-surface-container overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary"></div>
+<div class="text-3xl">🙂</div>
+<div class="flex-1 space-y-1">
+<div class="flex justify-between">
+<h4 class="font-bold text-on-surface">Paseo nocturno</h4>
+<span class="text-[10px] text-outline uppercase font-bold">Domingo</span>
+</div>
+<p class="text-sm text-on-surface-variant line-clamp-1 italic">El aire fresco ayudó a despejar mis dudas...</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-end pb-6 pt-2 px-4 bg-[#102130]/80 backdrop-blur-2xl rounded-t-[2rem] shadow-[0_-10px_40px_rgba(4,20,36,0.8)] border-t border-[#52443c]/15">
+<div class="flex flex-col items-center justify-center text-[#e09a70]/50 p-2 hover:text-[#ffb68b] transition-all active:scale-90 duration-200">
+<span class="material-symbols-outlined">home</span>
+<span class="font-sans text-[10px] uppercase tracking-widest font-semibold mt-1">Reflect</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-gradient-to-br from-[#ffb68b] to-[#e09a70] text-[#041424] rounded-full p-3 mb-2 scale-110 shadow-lg shadow-[#ffb68b]/20 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="font-sans text-[10px] uppercase tracking-widest font-semibold mt-1">Journal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#e09a70]/50 p-2 hover:text-[#ffb68b] transition-all active:scale-90 duration-200">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-sans text-[10px] uppercase tracking-widest font-semibold mt-1">History</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#e09a70]/50 p-2 hover:text-[#ffb68b] transition-all active:scale-90 duration-200">
+<span class="material-symbols-outlined">person</span>
+<span class="font-sans text-[10px] uppercase tracking-widest font-semibold mt-1">Me</span>
+</div>
+</nav>
+</body></html>

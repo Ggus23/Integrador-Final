@@ -1,0 +1,273 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+
+:root {
+  /* ── Oasis: Versión Luminosa y Relajante (Espejo de Modo Oscuro) ──────────────── */
+  --background: #f0f4f8;          /* Azul hielo ultra suave (espejo de petrol blue) */
+  --foreground: #1a2a3a;          /* Azul petróleo oscuro para legibilidad sin ser negro puro */
+  --card: #ffffff;                /* Tarjetas blancas luminosas */
+  --card-foreground: #1a2a3a;
+  --popover: #ffffff;
+  --popover-foreground: #1a2a3a;
+
+  --primary: #e09a70;             /* Mismo Naranja/Coral suave del dark mode */
+  --primary-foreground: #ffffff;
+
+  --secondary: #e2e8f0;           /* Gris azulado muy suave */
+  --secondary-foreground: #1e293b;
+
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b;    
+
+  --accent: #9fca9f;              /* Verde Salvia suave (igual al dark) */
+  --accent-foreground: #1a2a3a;
+
+  --destructive: #e86060;         /* Mismo destructive del dark mode */
+  --destructive-foreground: #ffffff;
+
+  --border: #e2e8f0;              /* Borde sutil gris-azulado */
+  --input: #e2e8f0;
+  --ring: #e09a70;                
+  --radius: 1rem;
+
+  /* ── Estructura (Sidebar en modo claro) ──────────────── */
+  --sidebar: #ffffff;             
+  --sidebar-foreground: #1a2a3a;
+  --sidebar-primary: #e09a70;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0f4f8;
+  --sidebar-accent-foreground: #1e293b;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #e09a70;
+
+  /* ── Riesgo y Apoyo ──────────────────────────────────── */
+  --risk-low: #5a9e72;            /* Verde natural profundo */
+  --risk-medium: #d4894a;         /* Ocre terroso */
+  --risk-high: #b94040;           /* Óxido suave */
+
+  --support-low: #7a9e7e;         
+  --support-medium: #c08a5a;      
+  --coral: #f0a080;
+  /* ── Aurora Gradients (Modo Claro - Espejo del Oscuro) ──────────────── */
+  --aurora-1: #e0c3fc;            /* Lavanda suave (espejo de Violeta Amatista) */
+  --aurora-2: #ffcfcf;            /* Coral Pastel (espejo de Coral Vibrante) */
+  --aurora-3: #dcedff;            /* Azul hielo sutil para el centro */
+  --shadow-glow: 0 0 24px rgba(255, 107, 107, 0.15), inset 0 0 0 1px rgba(255, 107, 107, 0.2);
+}
+
+.dark {
+  /* ── Oasis: Versión Noche Vibrante ──────────────── */
+  --background: #1a2a3a;          /* Azul Petróleo Profundo */
+  --foreground: #f4f8fc;          /* Muy legible */
+  --card: #142332;                /* Base profunda para resaltar el Glow */
+  --card-foreground: #f4f8fc;
+  --popover: #142332;
+  --popover-foreground: #f4f8fc;
+
+  --primary: #e09a70;             
+  --primary-foreground: #1e1208;
+
+  --secondary: #243b53;
+  --secondary-foreground: #e2e8f0;
+
+  --muted: #1e3146;
+  --muted-foreground: #94a3b8;
+
+  --accent: #9fca9f;
+  --accent-foreground: #1e1208;
+
+  --destructive: #e86060;
+  --destructive-foreground: #ffffff;
+
+  --border: #6a4a38;
+  --input: #6a4a38;
+  --ring: #e09a70;
+
+  --risk-low: #8fcc9a;
+  --risk-medium: #e8b070;
+  --risk-high: #e07070;
+
+  --sidebar: #1a2a3a;             /* Petróleo en Sidebar */
+  --sidebar-foreground: #f4f8fc;
+  --sidebar-primary: #e09a70;
+  --sidebar-primary-foreground: #1e1208;
+  --sidebar-accent: #243b53;
+  --sidebar-accent-foreground: #a8e6cf;
+  --sidebar-border: #334e68;
+  --sidebar-ring: #e09a70;
+
+  --support-low: #9fca9f;
+  --support-low: #9fca9f;
+  --support-medium: #d4a870;
+  --support-high: #e09a70;
+
+  --coral: #f0a080;
+
+  /* ── Aurora Gradients (Modo Oscuro) ──────────────── */
+  --aurora-1: #5b2c6f;            /* Violeta Amatista Profundo */
+  --aurora-2: #ff6b6b;            /* Coral Vibrante */
+  --aurora-3: #2c1a3a;            /* Violoeta hiper oscuro para blending interior */
+  --shadow-glow: 0 0 24px rgba(255, 107, 107, 0.25), inset 0 0 0 1px rgba(255, 107, 107, 0.3); /* Coral Glow Fuerte */
+}
+
+@theme inline {
+  --font-sans: 'DM Sans', sans-serif;
+  --font-serif: 'Lora', Georgia, serif;
+  --font-mono: 'Space Mono', monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-coral: var(--coral);
+
+  --color-aurora-1: var(--aurora-1);
+  --color-aurora-2: var(--aurora-2);
+
+  --color-risk-low: var(--risk-low);
+  --color-risk-medium: var(--risk-medium);
+  --color-risk-high: var(--risk-high);
+
+  --color-support-low: var(--support-low);
+  --color-support-medium: var(--support-medium);
+  --color-support-high: var(--support-high);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --animate-fade-in: fade-in 0.9s ease-out;
+  --animate-slide-up: slide-up 0.9s ease-out;
+  --animate-slide-in-right: slide-in-right 0.7s ease-out;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-slow: float 8s ease-in-out infinite alternate;
+  --animate-blob: blob 15s infinite alternate;
+
+  @keyframes fade-in {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes slide-up {
+    0%   { transform: translateY(24px); opacity: 0; }
+    100% { transform: translateY(0);    opacity: 1; }
+  }
+
+  @keyframes slide-in-right {
+    0%   { transform: translateX(24px); opacity: 0; }
+    100% { transform: translateX(0);    opacity: 1; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-12px); }
+  }
+
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground selection:bg-primary/20 selection:text-primary antialiased;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+  }
+
+  /* En modo oscuro la textura permanece sutil */
+  .dark body::before {
+    opacity: 0.04;
+    mix-blend-mode: screen;
+  }
+}
+
+@layer utilities {
+  /* Sombra cálida terracota – compatible con todos los browsers */
+  .shadow-warm {
+    box-shadow: 0 4px 24px -4px rgba(192, 104, 74, 0.22);
+  }
+  
+  /* Sombra de neón suave para separar tarjetas del fondo Aurora */
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .animate-float {
+    animation: var(--animate-float);
+  }
+  .animate-float-slow {
+    animation: var(--animate-float-slow);
+  }
+  .animate-blob {
+    animation: var(--animate-blob);
+  }
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+  
+  /* Botones vibrantes */
+  .btn-radiant {
+    @apply bg-gradient-to-r from-primary to-coral text-primary-foreground hover:from-coral hover:to-primary transition-all duration-500 hover:scale-105;
+    box-shadow: 0 4px 24px -4px rgba(192, 104, 74, 0.22);
+  }
+  
+  /* Gradiente para gráficos (Glow) */
+  .chart-glow {
+    filter: drop-shadow(0 0 8px var(--color-support-medium));
+  }
+}

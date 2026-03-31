@@ -1,0 +1,11 @@
+Subject: Code Review Required: Security Audit and Optimization
+
+Hi Team,
+
+As part of our current development cycle, I need us to conduct a thorough review of our codebase. Please focus your efforts on the following two key areas:
+
+Security Vulnerabilities: Identify, document, and patch any potential security risks, flaws, or insecure practices in the code.
+
+Code Optimization: Refactor and optimize the code to improve overall performance, execution speed, and maintainability.
+
+Please let me know your estimated timeline for completing this review and if you need any additional tools or resources.
