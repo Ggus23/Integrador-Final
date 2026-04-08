@@ -16,3 +16,6 @@ ios/build/
 postgres_data/
 coverage/
 *.log
+Revision.txt
+code_review_report.md
+analisis_funcionalidades.md

@@ -10,8 +10,8 @@ El sistema opera bajo un modelo de **Control de Acceso Basado en Roles (RBAC)**,
 
 ### 1. 🎓 Módulo del Estudiante
 Herramientas para el autoconocimiento y la señalización temprana de riesgos.
-- **Emotional Check-ins**: Registro diario de estados de ánimo con notas personales.
-- **Análisis Emocional CNN**: Motor local que clasifica el texto del diario en 6 categorías (Feliz, Neutral, Triste, Ansioso, Frustrado, Motivado).
+- **Motor NLP de Emociones**: Análisis basado en procesamiento de lenguaje natural (regex y bigramas) que clasifica el texto del diario en 6 categorías (Feliz, Neutral, Triste, Ansioso, Frustrado, Motivado).
+- **Detección Facial CNN**: Red Neuronal Convolucional que procesará matices emocionales mediante expresiones faciales.
 - **Evaluaciones Psicométricas**: Rastreo preventivo para medir niveles de ansiedad, depresión o estrés (PHQ-9, GAD-7, PSS-10).
 - **Panel de Bienestar Personal**: Visualización de su propio nivel de riesgo y recomendaciones.
 
@@ -32,8 +32,8 @@ Control infraestructural y seguridad operativa.
 
 ## 🤖 Inteligencia Artificial y Modelos
 
-MenTaLink integra una arquitectura híbrida de IA:
-- **CNN de Emociones**: Red Neuronal Convolucional entrenada específicamente para detectar matices emocionales en lenguaje natural.
+- **NLP de Texto**: Motor basado en regex y estadísticos para detectar el estado emocional a partir de los diarios de los estudiantes.
+- **CNN Facial**: Red Neuronal Convolucional entrenada de forma independiente para predecir emociones a partir de microexpresiones faciales.
 - **Predictor de Abandono**: Modelo basado en Random Forest que cruza datos académicos y emocionales.
 - **ARI (Academic Risk Index)**: Algoritmo ponderado para la detección temprana de crisis basado en la frecuencia de indicadores negativos.
 
