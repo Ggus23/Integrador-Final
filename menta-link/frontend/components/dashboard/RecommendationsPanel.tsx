@@ -6,7 +6,7 @@ import { Sparkles, Lightbulb, Brain, Heart, Lock, CheckCircle2, AlertCircle } fr
 import { Progress } from '@/components/ui/progress';
 
 interface RecommendationsPanelProps {
-  recommendations: string[];
+  recommendations: any[];
   completedCount: number;
   totalAssessments?: number;
 }
@@ -91,7 +91,9 @@ export const RecommendationsPanel = ({
                 </div>
               </div>
               <div className="space-y-1">
-                <p className="text-foreground text-sm leading-relaxed lg:text-base">{rec}</p>
+                <p className="text-foreground text-sm leading-relaxed lg:text-base">
+                  {typeof rec === 'string' ? rec : (rec.metadata?.description || rec.metadata?.title || 'Sugerencia de Bienestar')}
+                </p>
               </div>
             </div>
           </Card>

@@ -142,6 +142,9 @@ def update_user_me(
     if user_in.password:
         current_user.hashed_password = get_password_hash(user_in.password)
 
+    if user_in.expo_push_token is not None:
+        current_user.expo_push_token = user_in.expo_push_token
+
     # Se guarda el usuario en la DB
     db.add(current_user)
     db.commit()

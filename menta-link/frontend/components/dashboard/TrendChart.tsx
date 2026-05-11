@@ -43,6 +43,10 @@ export function TrendChart({ data }: TrendChartProps) {
           <p className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
             Tendencia Semanal
           </p>
+          <p className="text-muted-foreground mt-2 max-w-[85%] text-xs leading-relaxed">
+            <b>¿En qué consiste esta medida?</b><br/>
+            Esta gráfica representa el promedio histórico (del 1 al 5) de cómo reportas tu estado de ánimo en cada check-in. La curva ascendente hacia el nivel 5 refleja sentimientos positivos (alegría, motivación), mientras que la zona baja (1) refleja fatiga emocional o estrés agudo.
+          </p>
         </div>
         <div className="bg-support-medium/10 rounded-full p-2">
           <Sparkles className="text-support-medium h-4 w-4" />

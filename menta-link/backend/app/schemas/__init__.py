@@ -9,10 +9,12 @@ from . import (
     assessment_response,
     clinical_note,
     consent,
+    emotion,
     emotional_checkin,
     emotional_diary,
     risk_summary,
     student,
+    subject,
     user,
 )
 from .auth import Token, TokenPayload  # noqa: F401

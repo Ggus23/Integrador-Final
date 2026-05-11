@@ -126,7 +126,8 @@ def create_or_update_subject_grade(
         db.query(models.AcademicSubjectGrade)
         .filter(
             models.AcademicSubjectGrade.user_id == current_user.id,
-            models.AcademicSubjectGrade.subject_name == grade_in.subject_name,
+            models.AcademicSubjectGrade.subject_id == grade_in.subject_id,
+            models.AcademicSubjectGrade.hito_number == grade_in.hito_number,
         )
         .first()
     )

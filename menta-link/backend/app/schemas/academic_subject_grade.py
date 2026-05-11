@@ -2,29 +2,31 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
+from app.schemas.subject import SubjectDB
+
 
 class AcademicSubjectGradeBase(BaseModel):
-    subject_name: str
-    hito2_procesual: float = 0.0
-    hito2_nota: float = 0.0
-    hito3_procesual: float = 0.0
-    hito3_nota: float = 0.0
-    hito4_procesual: float = 0.0
-    hito4_nota: float = 0.0
-    hito5_procesual: float = 0.0
-    hito5_nota: float = 0.0
+    subject_id: int
+    hito_number: int
+    procesual_score: float = 0.0
+    milestone_score: float = 0.0
 
 
 class AcademicSubjectGradeCreate(AcademicSubjectGradeBase):
     pass
 
 
-class AcademicSubjectGradeUpdate(AcademicSubjectGradeBase):
-    subject_name: Optional[str] = None  # When updating, subject_name is optional
+class AcademicSubjectGradeUpdate(BaseModel):
+    subject_id: Optional[int] = None
+    procesual_score: Optional[float] = None
+    milestone_score: Optional[float] = None
 
 
 class AcademicSubjectGrade(AcademicSubjectGradeBase):
     id: int
     user_id: int
+
+    # Relational data
+    subject: Optional["SubjectDB"] = None
 
     model_config = ConfigDict(from_attributes=True)

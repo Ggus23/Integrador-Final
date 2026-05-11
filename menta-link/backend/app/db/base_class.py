@@ -17,3 +17,8 @@ class Base:
     @declared_attr
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
+
+    def __init__(self, **kwargs: Any) -> None:
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)

@@ -8,7 +8,7 @@ from app.api import deps
 from app.core.constants import RiskLevel
 from app.ml.dropout_predictor import dropout_predictor
 from app.ml.risk_classifier import risk_classifier
-from app.services.audit_service import log_access
+
 
 router = APIRouter()
 
@@ -101,14 +101,7 @@ def read_student_detail(
     if not student:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
 
-    # Registra el acceso al perfil en el log de auditoría
-    log_access(
-        db=db,
-        actor_id=current_user.id,
-        action="VIEW_STUDENT_PROFILE",
-        resource_id=str(student_id),
-        details=f"Viewed full profile of {student.email}",
-    )
+
 
     risk_summary = (
         db.query(models.RiskSummary)

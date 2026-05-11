@@ -4,12 +4,14 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.emotion import EmotionDB
+
 
 class EmotionalDiaryBase(BaseModel):
     experience: Optional[str] = None
     activities: Optional[str] = None
-    emotion: str = Field(..., description="e.g., 'Muy feliz'")
-    emotion_color: str = Field(..., description="e.g., 'Verde'")
+    emotion: str = Field(..., description="Name of the emotion")
+    emotion_color: str = Field("#808080", description="Color hex code of the emotion")
     wellbeing_level: int = Field(..., ge=1, le=5, description="Scale 1-5")
 
 

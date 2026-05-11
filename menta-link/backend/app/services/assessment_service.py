@@ -1,6 +1,8 @@
 import logging
+from datetime import datetime, timezone
 from typing import Dict, Tuple
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app import schemas
@@ -113,6 +115,32 @@ class AssessmentService:
                 response_in.assessment_id,
             )
             return None
+
+        # Clinical Frequency Validation (14 days cooldown)
+        last_response = (
+            db.query(AssessmentResponse)
+            .filter(
+                AssessmentResponse.user_id == user_id,
+                AssessmentResponse.assessment_id == assessment.id
+            )
+            .order_by(AssessmentResponse.created_at.desc())
+            .first()
+        )
+        if last_response and last_response.created_at:
+            # Eliminar timezone de la fecha original para que coincida con datetime.utcnow() naive
+            now = datetime.utcnow()
+            last_created = last_response.created_at.replace(tzinfo=None)
+            days_passed = (now - last_created).days
+            
+            # BYPASS TEMPORAL: PSS-10 habilitado sin bloqueo para pruebas
+            required_wait_days = 0 if assessment.type == "PSS-10" else 14
+            
+            if days_passed < required_wait_days:
+                days_left = required_wait_days - days_passed
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Debes esperar {days_left} día(s) para volver a tomar el {assessment.title}."
+                )
 
         assessment_type: str = assessment.type
         answers: Dict[str, int] = response_in.answers

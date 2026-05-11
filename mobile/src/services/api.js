@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
-const DEV_PC_IP = '192.168.0.13'; // IP de tu PC en la red local
+const DEV_PC_IP = '192.168.0.20'; // IP de tu PC en la red WiFi detectada
 const BASE_URL = `http://${DEV_PC_IP}:8000`; // Cambiado para que funcione en celulares físicos (Android e iOS)
 const API_V1 = `${BASE_URL}/api/v1`;
 
@@ -97,5 +97,70 @@ export const api = {
       const data = await response.json();
       return Array.isArray(data) ? data : [];
     } catch (error) { return []; }
+  },
+
+  async getAdaptivePrompts() {
+    const token = await this.getToken();
+    if (!token) return [];
+    try {
+      const response = await fetch(`${API_V1}/insights/prompts`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    } catch (error) { return []; }
+  },
+
+  async getTimeCapsule() {
+    const token = await this.getToken();
+    if (!token) return null;
+    try {
+      const response = await fetch(`${API_V1}/insights/time-capsule`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      return data;
+    } catch (error) { return null; }
+  },
+
+  async getCognitiveReframe(text, emotionLabel) {
+    const token = await this.getToken();
+    if (!token) return null;
+    try {
+      const response = await fetch(`${API_V1}/insights/reframe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ text, emotionLabel })
+      });
+      const data = await response.json();
+      return data;
+    } catch (error) { return null; }
+  },
+
+  async getCrisisForecast() {
+    const token = await this.getToken();
+    if (!token) return null;
+    try {
+      const response = await fetch(`${API_V1}/insights/forecast`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      return data;
+    } catch (error) { return null; }
+  },
+
+  async updateUserMe(userData) {
+    const token = await this.getToken();
+    if (!token) throw new Error('Sesión expirada');
+    try {
+      const response = await fetch(`${API_V1}/users/me`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(userData)
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || 'Error al actualizar perfil');
+      return data;
+    } catch (error) { throw error; }
   }
 };

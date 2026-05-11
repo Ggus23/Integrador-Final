@@ -76,11 +76,13 @@ export default function AssessmentsPage() {
         icon: <Clock className="h-3 w-3" />,
       };
 
-    // Si han pasado más de 15 días, sugerir re-evaluación
+    // Sugerir re-evaluación poco después de expirar el bloqueo
     const daysSince = Math.floor(
       (new Date().getTime() - new Date(lastResponse.created_at).getTime()) / (1000 * 60 * 60 * 24)
     );
-    if (daysSince > 15)
+    // Recomendación PSS-10 a 0 temporalmente
+    const requiredWaitDays = type === 'PSS-10' ? 0 : 14;
+    if (daysSince > requiredWaitDays)
       return {
         label: 'Re-evaluación Sugerida',
         color: 'bg-risk-medium/10 text-risk-medium border-risk-medium/20',
@@ -177,6 +179,11 @@ export default function AssessmentsPage() {
           {assessments.map((assessment, index) => {
             const status = getAssessmentStatus(assessment.type);
             const history = getLastResult(assessment.type);
+            
+            // BYPASS PSS-10 temporal de 30 días a 0 para pruebas de hoy
+            const requiredWaitDays = assessment.type === 'PSS-10' ? 0 : 14;
+            const isLocked = history && history.daysAgo < requiredWaitDays;
+            const daysToUnlock = isLocked ? requiredWaitDays - history.daysAgo : 0;
 
             return (
               <Card
@@ -246,28 +253,41 @@ export default function AssessmentsPage() {
 
                 {/* Actions */}
                 <div className="mt-6 flex items-center gap-2">
-                  <Link href={`/assessments/${assessment.type}`} className="flex-1">
+                  {isLocked ? (
                     <Button
                       size="sm"
-                      className={`w-full text-[10px] font-black tracking-widest uppercase shadow-sm transition-all hover:shadow-lg ${
-                        history
-                          ? 'bg-muted text-foreground hover:bg-muted/80'
-                          : 'from-primary to-accent bg-gradient-to-r text-white'
-                      }`}
+                      disabled
+                      className="w-full bg-muted/50 text-muted-foreground text-[10px] font-black tracking-widest uppercase cursor-not-allowed border border-border/40"
                     >
-                      {history ? 'Repetir Test' : 'Comenzar Ahora'}
+                      <Clock className="mr-2 h-3 w-3" />
+                      Disponible en {daysToUnlock} {daysToUnlock === 1 ? 'día' : 'días'}
                     </Button>
-                  </Link>
-                  {history && (
-                    <Link href="/dashboard">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-border/60 hover:border-primary/40 hover:text-primary h-9 w-9 rounded-lg p-0 transition-all"
-                      >
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </Link>
+                  ) : (
+                    <>
+                      <Link href={`/assessments/${assessment.type}`} className="flex-1">
+                        <Button
+                          size="sm"
+                          className={`w-full text-[10px] font-black tracking-widest uppercase shadow-sm transition-all hover:shadow-lg ${
+                            history
+                              ? 'bg-muted text-foreground hover:bg-muted/80'
+                              : 'from-primary to-accent bg-gradient-to-r text-white'
+                          }`}
+                        >
+                          {history ? 'Repetir Test' : 'Comenzar Ahora'}
+                        </Button>
+                      </Link>
+                      {history && (
+                        <Link href="/dashboard">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-border/60 hover:border-primary/40 hover:text-primary h-9 w-9 rounded-lg p-0 transition-all"
+                          >
+                            <ArrowRight className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      )}
+                    </>
                   )}
                 </div>
               </Card>

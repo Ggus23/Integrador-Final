@@ -66,7 +66,7 @@ export interface RiskSummary {
   trend?: 'improving' | 'stable' | 'declining';
   last_assessment_date?: string;
   active_alerts?: number;
-  recommendations?: string[];
+   recommendations?: any[];
 }
 
 export interface StudentSummary {

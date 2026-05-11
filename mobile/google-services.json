@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "462649275727",
+    "project_id": "mobilemessage-9eb8e",
+    "storage_bucket": "mobilemessage-9eb8e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462649275727:android:2a7fee0520ea87cb8a013a",
+        "android_client_info": {
+          "package_name": "com.agustin.mentalink"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdkcF6cwVcy6SQTnrj9GjuYqTeYQIKTWE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

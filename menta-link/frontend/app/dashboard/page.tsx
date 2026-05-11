@@ -289,26 +289,27 @@ export default function DashboardPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   {riskSummary?.recommendations && riskSummary.recommendations.length > 0 ? (
                     riskSummary.recommendations.slice(0, 4).map((rec, i) => (
-                      <Card
-                        key={i}
-                        className="group bg-card/40 border-primary/10 hover:border-primary/30 relative overflow-hidden p-5 transition-all hover:shadow-sm"
-                      >
-                        <div className="absolute top-0 right-0 p-2 opacity-10 transition-opacity group-hover:opacity-20">
-                          {i % 2 === 0 ? (
-                            <Heart className="h-8 w-8" />
-                          ) : (
-                            <BrainCircuit className="h-8 w-8" />
-                          )}
-                        </div>
-                        <div className="flex items-start gap-4">
-                          <div
-                            className={`mt-1 flex h-2 w-2 shrink-0 rounded-full ${i % 2 === 0 ? 'bg-support-medium' : 'bg-support-low'}`}
-                          />
-                          <p className="text-foreground/90 text-sm leading-relaxed font-medium">
-                            {rec}
-                          </p>
-                        </div>
-                      </Card>
+                      <Link href={`/test-interventions?idx=${i}`} key={i} className="block">
+                        <Card
+                          className="group bg-card/40 border-primary/10 hover:border-primary/30 relative overflow-hidden p-5 transition-all hover:shadow-sm h-full"
+                        >
+                          <div className="absolute top-0 right-0 p-2 opacity-10 transition-opacity group-hover:opacity-20">
+                            {i % 2 === 0 ? (
+                              <Heart className="h-8 w-8" />
+                            ) : (
+                              <BrainCircuit className="h-8 w-8" />
+                            )}
+                          </div>
+                          <div className="flex items-start gap-4">
+                            <div
+                              className={`mt-1 flex h-2 w-2 shrink-0 rounded-full ${i % 2 === 0 ? 'bg-support-medium' : 'bg-support-low'}`}
+                            />
+                            <p className="text-foreground/90 text-sm leading-relaxed font-medium">
+                              {typeof rec === 'string' ? rec : (rec.metadata?.description || rec.metadata?.title || 'Sugerencia de Bienestar')}
+                            </p>
+                          </div>
+                        </Card>
+                      </Link>
                     ))
                   ) : (
                     <Card className="bg-support-medium/5 border-support-medium/20 col-span-2 flex flex-col items-center justify-center gap-3 border-dashed p-8 text-center">

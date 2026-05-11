@@ -342,6 +342,10 @@ class APIClient {
     return this.request('GET', '/visualizations/phrasecloud');
   }
 
+  async getAnalysis() {
+    return this.request('GET', `/visualizations/analysis?t=${Date.now()}`);
+  }
+
   // Student Analysis Endpoints
   async getStudentTrends(studentId: string) {
     return this.request('GET', `/students/${studentId}/trends`);
@@ -353,6 +357,10 @@ class APIClient {
 
   async analyzeEmotion(text: string) {
     return this.request('POST', '/emotion/analyze', { text });
+  }
+
+  async analyzeFacialEmotion(imageBase64: string) {
+    return this.request('POST', '/facial-emotion/analyze-frame', { image: imageBase64 });
   }
 }
 

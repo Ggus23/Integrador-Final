@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { DiaryEntry } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Brain, MessageSquare, Sparkles } from 'lucide-react';
+import { Brain, MessageSquare, Sparkles, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/lib/api';
+import { analyzeMoodRealtime } from '@/lib/mood-analyzer';
 
 const EMOTIONS = [
   {
@@ -93,10 +94,31 @@ export default function DiaryPage() {
     wellbeing_level: 3,
   });
 
+  const [realtimeAnalysis, setRealtimeAnalysis] = useState({
+    scores: { depresion: 0, ansiedad: 0, estres: 0 },
+    symptoms: [] as string[],
+    keyConcepts: [] as string[],
+    meaningfulPhrases: {} as Record<string, number>
+  });
+
+  useEffect(() => {
+    const analysis = analyzeMoodRealtime(formData.experience);
+    setRealtimeAnalysis(analysis);
+  }, [formData.experience]);
+
   const [todayEntry, setTodayEntry] = useState<DiaryEntry | null>(null);
   const [wordCloud, setWordCloud] = useState<
     { word: string; frequency: number; sentiment?: string }[]
   >([]);
+  const [analysisData, setAnalysisData] = useState<{
+    key_concepts: string[];
+    relevant_phrases: { phrase: string; count: number }[];
+    recurrent_patterns: { phrase: string; frequency: number; sentiment: string }[];
+  }>({
+    key_concepts: [],
+    relevant_phrases: [],
+    recurrent_patterns: []
+  });
   const [phraseCloud, setPhraseCloud] = useState<
     { phrase: string; frequency: number; sentiment?: string }[]
   >([]);
@@ -131,12 +153,14 @@ export default function DiaryPage() {
 
   const fetchVisualizations = async () => {
     try {
-      const [words, phrases] = await Promise.all([
+      const [words, phrases, analysis] = await Promise.all([
         apiClient.getWordCloud(),
         apiClient.getPhraseCloud(),
+        apiClient.getAnalysis(),
       ]);
       setWordCloud(words || []);
       setPhraseCloud(phrases || []);
+      setAnalysisData(analysis || { key_concepts: [], relevant_phrases: [] });
     } catch (e) {
       console.error('Error fetching clouds:', e);
     }
@@ -289,6 +313,70 @@ export default function DiaryPage() {
                       className="border-border/50 bg-background/50 focus:border-primary/50 focus:ring-primary/5 min-h-[140px] w-full rounded-2xl border-2 p-5 font-serif text-lg leading-relaxed placeholder:italic focus:ring-4 focus:outline-none"
                       placeholder="Cuéntame sobre tu día..."
                     />
+                    
+                    {/* Real-time Feedback */}
+                    <AnimatePresence>
+                      {formData.experience.length > 10 && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          className="bg-primary/5 flex items-center justify-between rounded-xl px-4 py-3"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <div className="bg-red-500 h-1.5 w-1.5 rounded-full" />
+                              <span className="text-[9px] font-black uppercase opacity-60">Depresión: {(realtimeAnalysis.scores.depresion * 100).toFixed(0)}%</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="bg-orange-500 h-1.5 w-1.5 rounded-full" />
+                              <span className="text-[9px] font-black uppercase opacity-60">Ansiedad: {(realtimeAnalysis.scores.ansiedad * 100).toFixed(0)}%</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="bg-yellow-500 h-1.5 w-1.5 rounded-full" />
+                              <span className="text-[9px] font-black uppercase opacity-60">Estrés: {(realtimeAnalysis.scores.estres * 100).toFixed(0)}%</span>
+                            </div>
+                          </div>
+                          <div className="text-[8px] font-black tracking-widest text-primary uppercase">
+                            Procesamiento IA en vivo
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* Real-time Insights Preview */}
+                    <AnimatePresence>
+                      {formData.experience.length > 20 && realtimeAnalysis.keyConcepts.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="space-y-4 pt-4"
+                        >
+                          <div className="flex flex-wrap gap-2">
+                            {realtimeAnalysis.keyConcepts.map((concept, i) => (
+                              <span 
+                                key={i}
+                                className="bg-primary/10 text-primary rounded-lg px-2 py-1 text-[10px] font-bold italic"
+                              >
+                                #{concept}
+                              </span>
+                            ))}
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-x-4 gap-y-2">
+                            {Object.keys(realtimeAnalysis.meaningfulPhrases).map((phrase, i) => (
+                              <div key={i} className="flex items-center gap-2">
+                                <Sparkles size={8} className="text-support-medium" />
+                                <span className="text-muted-foreground text-[9px] font-black uppercase tracking-tighter">
+                                  {phrase}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   <div className="space-y-3">
@@ -406,7 +494,41 @@ export default function DiaryPage() {
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                {/* Frases Relevantes */}
+                <Card className="bg-card/30 border-0 p-8 shadow-xl backdrop-blur-md">
+                  <div className="mb-8 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <MessageSquare className="text-primary h-5 w-5" />
+                      <h3 className="text-xs font-black tracking-widest uppercase opacity-60">
+                        Frases Relevantes
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    {analysisData.relevant_phrases.length > 0 ? (
+                      analysisData.relevant_phrases.map((item, i) => (
+                        <div key={i} className="group relative">
+                          <div className="bg-primary/5 absolute -inset-2 scale-95 rounded-xl opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100" />
+                          <div className="relative flex items-start gap-4">
+                            <div className="bg-primary/20 text-primary mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black">
+                              {item.count}
+                            </div>
+                            <p className="text-xs leading-relaxed opacity-80 italic">
+                              "{item.phrase}"
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-muted-foreground text-[10px] italic opacity-50">
+                        No hay suficientes datos para extraer frases.
+                      </p>
+                    )}
+                  </div>
+                </Card>
+
                 {/* Conceptos Clave */}
                 <Card className="bg-card/30 border-0 p-8 shadow-xl backdrop-blur-md">
                   <div className="mb-8 flex items-center justify-between">
@@ -416,30 +538,64 @@ export default function DiaryPage() {
                         Conceptos Clave
                       </h3>
                     </div>
+                  </div>
+
+                  <div className="flex flex-col gap-6">
+                    {analysisData.key_concepts.length > 0 ? (
+                      analysisData.key_concepts.map((concept, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          className="flex items-center gap-3"
+                        >
+                          <div className="bg-primary h-1.5 w-1.5 rounded-full" />
+                          <span className="text-primary/80 block text-2xl font-black italic tracking-tighter">
+                            {concept}
+                          </span>
+                        </motion.div>
+                      ))
+                    ) : (
+                      <p className="text-muted-foreground text-[10px] italic opacity-50 text-center">
+                        Esperando registros...
+                      </p>
+                    )}
+                  </div>
+                </Card>
+
+                {/* Patrones Recurrentes */}
+                <Card className="bg-card/30 border-0 p-8 shadow-xl backdrop-blur-md">
+                  <div className="mb-8 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Sparkles className="text-primary h-5 w-5" />
+                      <h3 className="text-xs font-black tracking-widest uppercase opacity-60">
+                        Patrones Recurrentes
+                      </h3>
+                    </div>
                     <div className="bg-primary/10 text-primary rounded-full px-3 py-1 text-[8px] font-black">
-                      AI INSIGHT
+                      PATTERNS
                     </div>
                   </div>
 
-                  <div className="flex min-h-[300px] flex-wrap items-center justify-center gap-6 p-4">
-                    {wordCloud.map((w, i) => (
-                      <motion.span
-                        key={i}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: i * 0.02 }}
-                        className="cursor-default transition-all hover:scale-110"
-                        style={{
-                          fontSize: `${Math.min(1.2 + w.frequency * 0.4, 3.5)}rem`,
-                          fontWeight: w.frequency > 1 ? 900 : 500,
-                          color: getSentimentColor(w.sentiment || ''),
-                          opacity: 0.6 + w.frequency * 0.1,
-                          fontFamily: w.frequency > 2 ? 'serif' : 'inherit',
-                          fontStyle: w.frequency > 2 ? 'italic' : 'normal',
-                        }}
-                      >
-                        {w.word}
-                      </motion.span>
+                  <div className="space-y-6">
+                    {analysisData.recurrent_patterns.map((p, i) => (
+                      <div key={i} className="space-y-2">
+                        <div className="flex justify-between text-[10px] font-black tracking-widest uppercase opacity-80">
+                          <span>"{p.phrase}"</span>
+                          <div
+                            className="h-1.5 w-1.5 rounded-full"
+                            style={{ backgroundColor: getSentimentColor(p.sentiment || '') }}
+                          />
+                        </div>
+                        <div className="bg-muted/30 h-1 w-full overflow-hidden rounded-full">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min(p.frequency * 20, 100)}%` }}
+                            className="bg-primary h-full rounded-full opacity-60"
+                          />
+                        </div>
+                      </div>
                     ))}
                   </div>
 
@@ -459,50 +615,6 @@ export default function DiaryPage() {
                           {leg.l}
                         </span>
                       </div>
-                    ))}
-                  </div>
-                </Card>
-
-                {/* Frases Recurrentes */}
-                <Card className="bg-card/30 border-0 p-8 shadow-xl backdrop-blur-md">
-                  <div className="mb-8 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <MessageSquare className="text-primary h-5 w-5" />
-                      <h3 className="text-xs font-black tracking-widest uppercase opacity-60">
-                        Patrones Recurrentes
-                      </h3>
-                    </div>
-                    <div className="bg-primary/10 text-primary rounded-full px-3 py-1 text-[8px] font-black">
-                      PATTERNS
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    {phraseCloud.slice(0, 8).map((p, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="group flex flex-col gap-1.5"
-                      >
-                        <div className="flex items-center justify-between px-2">
-                          <span className="text-foreground/80 text-[11px] font-black tracking-wider uppercase">
-                            "{p.phrase}"
-                          </span>
-                          <div
-                            className="h-2 w-2 rounded-full"
-                            style={{ backgroundColor: getSentimentColor(p.sentiment || '') }}
-                          />
-                        </div>
-                        <div className="bg-muted/30 relative h-2.5 w-full overflow-hidden rounded-full p-[2px]">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.min(p.frequency * 20, 100)}%` }}
-                            className="h-full rounded-full transition-all"
-                            style={{ backgroundColor: getSentimentColor(p.sentiment || '') }}
-                          />
-                        </div>
-                      </motion.div>
                     ))}
                   </div>
                 </Card>

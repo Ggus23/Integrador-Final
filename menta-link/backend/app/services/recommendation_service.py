@@ -10,111 +10,45 @@ from app.core.constants import RiskLevel
 
 logger = logging.getLogger(__name__)
 
-# ── Base recommendations by emotional risk level ──────────────────────────────
-_BASE: dict[str, List[str]] = {
-    RiskLevel.LOW.value: [
-        "Mantén tus rutinas actuales de sueño y actividad física.",
-        "Practica ejercicios de respiración profunda (inhalar 4 s, exhalar 6 s) "
-        "durante momentos de tensión.",
-        "Estructura tus sesiones de estudio con intervalos regulares: "
-        "45 minutos de trabajo seguidos de 10 de desconexión.",
-        "Limita el uso de pantallas al menos 30 minutos antes de dormir.",
-    ],
-    RiskLevel.MEDIUM.value: [
-        "Considera hablar con un tutor académico o consejero de tu facultad "
-        "para revisar tu carga curricular.",
-        "Implementa técnicas de gestión del tiempo (ej. método Pomodoro) "
-        "para reducir la sensación de acumulación.",
-        "Dedica al menos 20 minutos al día a una actividad que disfrutes "
-        "fuera del ámbito académico.",
-        "Practica técnicas de mindfulness o meditación guiada (5-10 minutos diarios) "
-        "para bajar el nivel de estrés percibido.",
-        "Busca el apoyo de compañeros de estudio para distribuir la carga académica.",
-    ],
-    RiskLevel.HIGH.value: [
-        "Te recomendamos solicitar una cita con el gabinete psicológico "
-        "a través de la plataforma.",
-        "Comunícate con el servicio de bienestar universitario para recibir "
-        "orientación profesional personalizada.",
-        "Reduce temporalmente compromisos extracurriculares para liberar carga cognitiva.",
-        "Habla con un familiar o persona de confianza sobre cómo te sientes; "
-        "compartir la carga emocional ayuda significativamente.",
-        "Evita el aislamiento: mantén contacto social aunque sea breve cada día.",
-    ],
-    RiskLevel.CRITICAL.value: [
-        "⚠️ Es importante que hables con un profesional de salud mental "
-        "lo antes posible. Puedes solicitar una cita de emergencia en el "
-        "gabinete psicológico.",
-        "Si en cualquier momento sientes que necesitas apoyo inmediato, "
-        "comunícate al servicio de crisis de tu institución o llama a una "
-        "línea de ayuda local.",
-        "No estás solo/a. El equipo de psicología está disponible para escucharte.",
-    ],
-}
-
-# ── Dropout-specific recommendations by risk band ─────────────────────────────
-_DROPOUT: dict[str, List[str]] = {
-    "low": [
-        "Tu probabilidad de abandono académico es baja. ¡Sigue así!",
-    ],
-    "medium": [
-        "Revisa con tu asesor académico si tu carga de materias es manejable "
-        "para el semestre actual.",
-        "Evalúa si existe alguna materia que puedas postergar para reducir la presión.",
-        "Consulta las becas o apoyos económicos disponibles si el factor financiero "
-        "te genera estrés.",
-    ],
-    "high": [
-        "El sistema detectó un riesgo elevado de abandono académico. "
-        "Te recomendamos agendar una reunión con tu coordinador de carrera.",
-        "Analiza con el equipo de bienestar universitario si existe un plan de "
-        "acompañamiento académico disponible para tu situación.",
-        "Recuerda que solicitar apoyo a tiempo es una decisión académicamente "
-        "inteligente, no una señal de debilidad.",
-    ],
-}
-
-
-def _deduplicate(items: List[str]) -> List[str]:
-    """Remove duplicates preserving insertion order."""
-    seen: set[str] = set()
-    result: List[str] = []
-    for item in items:
-        if item not in seen:
-            seen.add(item)
-            result.append(item)
-    return result
-
-
 class RecommendationService:
 
     @staticmethod
-    def _get_fallback_recommendations(risk_level: RiskLevel) -> List[str]:
-        """Simple fallback if LLM fails."""
+    def _get_fallback_recommendations(risk_level: RiskLevel) -> List[dict]:
+        """Simple fallback if LLM fails, now structured with 4 items and more types."""
         recs = {
             RiskLevel.LOW: [
-                "Mantén tus hábitos saludables de sueño y alimentación.",
-                "Dedica tiempo a tus hobbies fuera de la universidad.",
-                "Organiza tus sesiones de estudio con descansos regulares.",
-                "Practica respiración profunda en momentos de tensión.",
+                {"action_type": "BREATHING_EXERCISE", "metadata": {"description": "Mantén tus hábitos saludables de sueño y practica respiración profunda en momentos de tensión."}},
+                {"action_type": "JOURNALING_PROMPT", "metadata": {"description": "Escribir sobre tus logros diarios te ayudará a mantener el enfoque positivo.", "prompt": "¿Qué fue lo mejor que te pasó hoy?"}},
+                {"action_type": "READ_MORE", "metadata": {"title": "Actividad Física", "description": "Realizar al menos 30 minutos de ejercicio ligero ayuda a mantener el equilibrio emocional."}},
+                {"action_type": "COGNITIVE_REFRAME", "metadata": {"description": "Revisa tus logros semanales en lugar de enfocarte solo en lo pendiente.", "tasks": [
+                    {"id": "1", "text": "Listar 3 cosas logradas hoy", "completed": False},
+                    {"id": "2", "text": "Reconocer el esfuerzo invertido", "completed": False}
+                ]}},
             ],
             RiskLevel.MEDIUM: [
-                "Considera usar técnicas de gestión del tiempo como Pomodoro.",
-                "Habla con un amigo o familiar sobre tu carga académica.",
-                "Dedica 15 minutos diarios a la meditación o mindfulness.",
-                "Busca apoyo en grupos de estudio para compartir tareas.",
+                {"action_type": "BREATHING_EXERCISE", "metadata": {"description": "Usa técnicas de gestión del tiempo como Pomodoro y dedica 15 min diarios a la meditación."}},
+                {"action_type": "COGNITIVE_REFRAME", "metadata": {"description": "Cuestiona tus pensamientos de carga académica excesiva.", "tasks": [
+                    {"id": "1", "text": "Identificar pensamiento estresante", "completed": False},
+                    {"id": "2", "text": "Buscar evidencia objetiva", "completed": False},
+                    {"id": "3", "text": "Generar pensamiento alternativo", "completed": False}
+                ]}},
+                {"action_type": "JOURNALING_PROMPT", "metadata": {"description": "Tómate un momento para escribir y liberar la carga de tus preocupaciones diarias.", "prompt": "Escribe 3 cosas que te están generando presión ahora mismo y cómo podrías abordarlas."}},
+                {"action_type": "BREATHING_EXERCISE", "metadata": {"description": "Prueba la técnica de relajación muscular progresiva antes de dormir."}},
             ],
             RiskLevel.HIGH: [
-                "Te sugerimos acudir al servicio de bienestar para orientación profesional.",
-                "Prioriza tus tareas y delega o pospone lo que no sea urgente.",
-                "Asegúrate de mantener contacto social y no aislarte del entorno.",
-                "Realiza actividad física ligera para liberar tensión acumulada.",
+                {"action_type": "READ_MORE", "metadata": {"title": "Apoyo Profesional", "description": "Te sugerimos acudir al servicio de bienestar para orientación profesional.", "link": "/appointments"}},
+                {"action_type": "JOURNALING_PROMPT", "metadata": {"description": "Llevar un registro de tus niveles de ansiedad te ayudará a prever crisis.", "prompt": "¿En qué momentos del día sientes que el estrés aumenta?"}},
+                {"action_type": "COGNITIVE_REFRAME", "metadata": {"description": "Cuestiona la idea de que 'todo debe ser perfecto'.", "tasks": [
+                    {"id": "1", "text": "Aceptar que el aprendizaje es un proceso", "completed": False},
+                    {"id": "2", "text": "Permitirse cometer errores", "completed": False}
+                ]}},
+                {"action_type": "BREATHING_EXERCISE", "metadata": {"description": "Realiza actividad física ligera y practica la técnica 4-7-8 para liberar tensión."}},
             ],
             RiskLevel.CRITICAL: [
-                "⚠️ Por favor, solicita una cita de urgencia en el gabinete psicológico.",
-                "Comunícate de inmediato con el equipo de bienestar universitario.",
-                "Busca el apoyo de una persona de confianza ahora mismo.",
-                "No estás solo/a, el equipo de salud mental está para ayudarte.",
+                {"action_type": "READ_MORE", "metadata": {"title": "⚠️ ATENCIÓN INMEDIATA", "description": "Por favor, solicita una cita de urgencia en el gabinete psicológico.", "link": "/appointments"}},
+                {"action_type": "READ_MORE", "metadata": {"title": "Líneas de Ayuda", "description": "Comunícate de inmediato con el equipo de bienestar universitario o una persona de confianza."}},
+                {"action_type": "JOURNALING_PROMPT", "metadata": {"description": "En este momento crítico, es vital validar tus sentimientos sin juzgarlos.", "prompt": "¿Qué necesitas escuchar de ti mismo en este momento de crisis?"}},
+                {"action_type": "BREATHING_EXERCISE", "metadata": {"description": "Utiliza la respiración de caja (4-4-4-4) para estabilizar tu sistema nervioso ahora mismo."}},
             ],
         }
         return recs.get(risk_level, recs[RiskLevel.LOW])
@@ -131,54 +65,82 @@ class RecommendationService:
         bad_days: int = 0,
         avg_pressure: float = 0.0,
         acad_profile: Optional[Any] = None,
-    ) -> List[str]:
+    ) -> List[dict]:
         """
-        Returns an ordered, deduplicated list of recommendation strings.
+        Returns an ordered, deduplicated list of structured recommendations.
         Uses LLM ONLY for PSS-10 results.
-        Focuses ONLY on the current assessment results as per user request.
         """
         if assessment_type != "PSS-10":
-            return []  # Only PSS-10 provides automated recommendations currently
+            return []
 
-        # ── LLM Logic for PSS-10 ──────────────────────────────────────────────
         prompt = f"""
-Rol: Asistente de bienestar estudiantil
-Especialidad: Gestión del estrés académico (Basado en PSS-10)
+Rol: Asistente de bienestar estudiantil experto en intervenciones breves.
+Contexto: El estudiante completó el PSS-10 con nivel de estrés: {risk_level.value}.
 
-Contexto: El estudiante ha completado la escala de estrés percibido (PSS-10) con el siguiente resultado:
-- Nivel de Estrés Percibido: {risk_level.value}
+Tarea: Genera EXACTAMENTE 4 recomendaciones estructuradas.
+Debes usar obligatoriamente estos tipos de acción:
+1. "BREATHING_EXERCISE": Para relajación física.
+2. "COGNITIVE_REFRAME": Para manejar pensamientos estresantes.
+3. "JOURNALING_PROMPT": Para escritura reflexiva (pide al usuario que escriba algo).
+4. "READ_MORE": Para consejos generales o derivación.
 
-Tarea: Proporciona EXACTAMENTE 4 recomendaciones prácticas y breves para manejar este nivel de estrés.
 Reglas:
-1. Enfócate exclusivamente en el bienestar y manejo del estrés.
-2. Sé empático, amable y breve (máximo 15 palabras por recomendación).
-3. NUNCA diagnostiques ni hables en términos clínicos.
-4. Si el nivel es High o Critical, la primera recomendación DEBE ser sugerir una visita al gabinete psicológico.
-5. Devuelve ÚNICAMENTE un objeto JSON con la clave "recommendations" (arreglo de strings).
-
-Formato: {{"recommendations": ["rec1", "rec2", "rec3", "rec4"]}}
+- Sé empático y breve, pero proporciona contexto útil (no uses menos de 10 palabras en la descripción).
+- Si el nivel es High o Critical, la primera acción DEBE ser "READ_MORE" sugiriendo el gabinete psicológico.
+- Devuelve ÚNICAMENTE un JSON con este formato exacto:
+{{
+  "recommendations": [
+    {{
+      "action_type": "BREATHING_EXERCISE",
+      "metadata": {{ "description": "descripción de al menos 10 palabras" }}
+    }},
+    {{
+      "action_type": "JOURNALING_PROMPT",
+      "metadata": {{ "description": "por qué escribir esto", "prompt": "pregunta abierta" }}
+    }},
+    {{
+      "action_type": "COGNITIVE_REFRAME",
+      "metadata": {{ 
+         "description": "qué pensamiento cuestionar",
+         "tasks": [
+           {{"id": "t1", "text": "Tarea 1", "completed": false}},
+           {{"id": "t2", "text": "Tarea 2", "completed": false}}
+         ]
+      }}
+    }},
+    {{
+      "action_type": "READ_MORE",
+      "metadata": {{ "title": "Título", "description": "Consejo", "link": "/opcional" }}
+    }}
+  ]
+}}
 """
 
         try:
             client = genai.Client(api_key=settings.GEMINI_API_KEY)
             response = client.models.generate_content(
                 model="gemini-2.0-flash",
-                contents=prompt,
+                contents=prompt + '\nDevuelve SOLO el JSON, sin bloques de código markdown.\n{"recommendations": [ ... ]}',
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
                 ),
             )
-            data = json.loads(response.text)
-            recommendations_llm = data.get("recommendations", [])
-            if (
-                not isinstance(recommendations_llm, list)
-                or len(recommendations_llm) == 0
-            ):
-                raise ValueError("Malformed response")
-            return _deduplicate(recommendations_llm)
-        except Exception as e:
-            logger.error(f"Error LLM: {e}")
-            return RecommendationService._get_fallback_recommendations(risk_level)
+            raw_text = response.text.strip()
+            # Remove potential markdown block wrappers
+            if raw_text.startswith("```"):
+                raw_text = raw_text.split("\n", 1)[-1]
+            if raw_text.startswith("json"):
+                raw_text = raw_text[4:].strip()
+            if raw_text.endswith("```"):
+                raw_text = raw_text.rsplit("\n", 1)[0].strip()
 
+            data = json.loads(raw_text)
+            recommendations_llm = data.get("recommendations", [])
+            if not isinstance(recommendations_llm, list) or len(recommendations_llm) == 0:
+                raise ValueError("Malformed response")
+            return recommendations_llm
+        except Exception as e:
+            logger.error(f"Error LLM structured: {e}")
+            return RecommendationService._get_fallback_recommendations(risk_level)
 
 recommendation_service = RecommendationService()

@@ -11,7 +11,7 @@ class RiskSummaryBase(BaseModel):
     prediction_confidence: float
     dropout_probability: Optional[float] = 0.0
     dropout_risk: Optional[str] = RiskLevel.LOW.value
-    recommendations: List[str] = Field(default_factory=list)
+    recommendations: List[Any] = Field(default_factory=list)
 
     @field_validator("recommendations", mode="before")
     @classmethod

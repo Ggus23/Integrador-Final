@@ -13,6 +13,7 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import { SidebarProvider } from '@/context/sidebar-context';
 import { AutoLogout } from '@/components/auto-logout';
 import { AuroraBackground } from '@/components/aurora-background';
+import { BackgroundMusic } from '@/components/background-music';
 
 export const metadata: Metadata = {
   title: 'Mentalink - Early Psychological Risk Detection',
@@ -55,6 +56,7 @@ export default function RootLayout({
             <SidebarProvider>
               <AuroraBackground />
               <AutoLogout />
+              <BackgroundMusic />
               {children}
             </SidebarProvider>
             <Toaster />

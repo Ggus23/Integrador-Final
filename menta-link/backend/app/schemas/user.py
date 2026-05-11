@@ -4,8 +4,6 @@ from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 from app.models.user import UserRole
 
-
-# Shared properties across all user schemas
 class UserBase(BaseModel):
     email: Optional[EmailStr] = None
     is_active: Optional[bool] = True
@@ -13,10 +11,8 @@ class UserBase(BaseModel):
     role: Optional[UserRole] = UserRole.STUDENT
     consent_accepted: bool = False
     must_change_password: bool = False
+    expo_push_token: Optional[str] = None
 
-
-# Properties to receive via API on creation - Restricted to specified fields
-# Properties to receive via API on creation - Restricted to specified fields
 class UserCreateBase(BaseModel):
     full_name: str
     email: EmailStr
@@ -59,8 +55,6 @@ class UserCreate(UserCreateBase):
 class UserCreateAdmin(UserCreateBase):
     role: UserRole = UserRole.STUDENT
 
-
-# Properties to receive via API on update
 class UserUpdate(UserBase):
     password: Optional[str] = None
 
@@ -69,8 +63,6 @@ class UserInDBBase(UserBase):
     id: Optional[int] = None
     model_config = ConfigDict(from_attributes=True)
 
-
-# Additional properties to return via API (safe for client)
 class User(UserInDBBase):
     created_at: Optional[object] = None
     updated_at: Optional[object] = None

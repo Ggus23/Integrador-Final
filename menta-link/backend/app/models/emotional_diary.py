@@ -28,8 +28,8 @@ class EmotionalDiary(Base):
     date = Column(Date, nullable=False, default=func.current_date())
     experience = Column(Text, nullable=True)
     activities = Column(Text, nullable=True)
-    emotion = Column(String, nullable=False)  # e.g., "Muy feliz"
-    emotion_color = Column(String, nullable=False)  # e.g., "Verde"
+    emotion = Column(String, nullable=False)
+    emotion_color = Column(String, nullable=False)
     wellbeing_level = Column(Integer, nullable=False)  # Scale 1-5
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)

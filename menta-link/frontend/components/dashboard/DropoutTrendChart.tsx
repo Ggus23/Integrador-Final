@@ -37,6 +37,10 @@ export function DropoutTrendChart({ data }: DropoutTrendChartProps) {
           <p className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
             Proyección de Éxito (%)
           </p>
+          <p className="text-muted-foreground mt-2 max-w-[85%] text-xs leading-relaxed">
+            <b>¿En qué consiste esta medida?</b><br/>
+            Esta gráfica representa tu probabilidad matemática (0% al 100%) de completar tu carrera. Una Inteligencia Artificial calcula esta métrica cruzando tu historial emocional, tu historial de notas y condiciones de becas. Un puntaje alto significa bajo riesgo de deserción y éxito asegurado.
+          </p>
         </div>
         <div className="bg-support-low/10 rounded-full p-2">
           <Target className="text-support-low h-4 w-4" />

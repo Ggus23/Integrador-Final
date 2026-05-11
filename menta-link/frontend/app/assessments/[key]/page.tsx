@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowRight,
@@ -50,6 +50,59 @@ export default function AssessmentPage() {
   const [showConsentDialog, setShowConsentDialog] = useState(false);
   const [showCameraNotice, setShowCameraNotice] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
+  const [currentFacialEmotion, setCurrentFacialEmotion] = useState<string>('ANALIZANDO...');
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (cameraActive) {
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode: 'user' } })
+        .then((stream) => {
+          streamRef.current = stream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+
+          interval = setInterval(() => {
+            if (videoRef.current && videoRef.current.readyState >= 2) {
+              const canvas = document.createElement('canvas');
+              canvas.width = videoRef.current.videoWidth;
+              canvas.height = videoRef.current.videoHeight;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+                const base64Data = canvas.toDataURL('image/jpeg');
+                apiClient
+                  .analyzeFacialEmotion(base64Data)
+                  .then((res) => {
+                    if (res && res.emotion) {
+                      setCurrentFacialEmotion(res.emotion.toUpperCase());
+                    }
+                  })
+                  .catch((err) => console.error('Face emotion error', err));
+              }
+            }
+          }, 3000);
+        })
+        .catch((err) => {
+          console.error('Camera error', err);
+        });
+    } else {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((trk) => trk.stop());
+      }
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((trk) => trk.stop());
+      }
+    };
+  }, [cameraActive]);
 
   const assessmentKey = params.key as string;
 
@@ -425,12 +478,16 @@ export default function AssessmentPage() {
               {cameraActive && (
                 <div className="w-full md:w-56">
                   <div className="bg-card border-border relative aspect-video overflow-hidden rounded-2xl border shadow-lg md:aspect-square">
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/5">
-                      <Video className="text-primary/40 h-10 w-10 animate-pulse" />
-                    </div>
+                    <video 
+                        ref={videoRef} 
+                        autoPlay 
+                        playsInline 
+                        muted 
+                        className="w-full h-full object-cover" 
+                    />
                     <div className="bg-primary absolute top-3 right-3 h-2 w-2 animate-ping rounded-full" />
                     <div className="absolute bottom-3 left-3 rounded-md bg-black/40 px-2 py-1 text-[10px] font-bold tracking-widest text-white uppercase backdrop-blur-md">
-                      Live Analysis
+                      Live: {currentFacialEmotion}
                     </div>
                   </div>
                 </div>

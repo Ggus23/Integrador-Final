@@ -1,33 +1,20 @@
-def test_404_not_found(client):
-    """
-    Test that a non-existent route returns the custom 404 JSON.
-    """
-    response = client.get("/api/v1/non-existent-route-xyz")
+def prueba_error_404_no_encontrado(client):
+    response = client.get("/api/v1/ruta-inexistente-xyz")
     assert response.status_code == 404
     data = response.json()
     assert data["detail"] == "Resource not found"
 
-
-def test_500_internal_error(client):
-    """
-    Test that an internal error returns the custom 500 JSON.
-    """
+def prueba_error_500_interno(client):
     from app.main import app
-
-    @app.get("/force_error")
-    def force_error():
-        raise ValueError("Simulated failure")
-
-    # We use the app instance but ensure we don't trigger real DB initialization
-    # the client fixture already handled dependency overrides.
-    # Note: TestClient with app directly will still use the overrides if they are set in the global app object
-    # which the 'client' fixture does.
-
     from fastapi.testclient import TestClient
 
-    test_client_500 = TestClient(app, raise_server_exceptions=False)
+    @app.get("/forzar_error")
+    def forzar_error():
+        raise ValueError("Fallo simulado")
 
-    response = test_client_500.get("/force_error")
+    cliente_prueba_500 = TestClient(app, raise_server_exceptions=False)
+
+    response = cliente_prueba_500.get("/forzar_error")
     assert response.status_code == 500
     data = response.json()
     assert data["detail"] == "Internal server error. Please try again later."

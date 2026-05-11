@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api import deps
-from app.services.audit_service import log_access
+
 
 router = APIRouter()
 
@@ -87,13 +87,6 @@ def resolve_alert(
     db.commit()
     db.refresh(alert)
 
-    # Audit Log
-    log_access(
-        db=db,
-        actor_id=current_user.id,
-        action="RESOLVE_ALERT",
-        resource_id=str(alert_id),
-        details=f"Alert resolved status changed to {alert.is_resolved}",
-    )
+
 
     return alert

@@ -7,42 +7,8 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.api import deps
-from app.models.audit_log import AuditLog
 
 router = APIRouter()
-
-
-@router.get("/audit")
-def get_audit_report(
-    db: Session = Depends(deps.get_db),
-    current_user: models.user.User = Depends(deps.get_staff_user),
-    skip: int = 0,
-    limit: int = 1000,
-) -> Any:
-    """
-    Reporte de Auditoría Completo (A cargo de QA).
-    Retorna el historial de todo el registro de accesos en el sistema.
-    """
-    logs = (
-        db.query(AuditLog)
-        .order_by(AuditLog.timestamp.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
-
-    return [
-        {
-            "id": log.id,
-            "actor_id": log.actor_id,
-            "action": log.action,
-            "resource_id": log.resource_id,
-            "details": log.details,
-            "timestamp": log.timestamp,
-        }
-        for log in logs
-    ]
-
 
 @router.get("/aggregated", response_model=Dict[str, Any])
 def get_institutional_report(

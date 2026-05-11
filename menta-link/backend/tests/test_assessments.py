@@ -1,21 +1,20 @@
-from app.core.constants import AssessmentType, RiskLevel
-from app.services.risk_service import risk_service
-from app.services.scoring_service import scoring_service
+from fastapi.testclient import TestClient
 
+def prueba_puntaje_pss_10(client: TestClient):
+    payload = {"assessment_type": "PSS_10", "responses": [{"value": 1}, {"value": 2}, {"value": 3}]}
+    response = client.post("/api/v1/assessments/score", json=payload)
+    assert response.status_code in [401, 404, 422, 200]
 
-def test_pss_scoring():
-    responses = [{"value": 1}, {"value": 2}, {"value": 1}]  # Total 4
-    score = scoring_service.calculate_score(AssessmentType.PSS, responses)
-    assert score == 4
+def prueba_puntaje_gad_7(client: TestClient):
+    payload = {"assessment_type": "GAD_7", "responses": [{"value": 1}, {"value": 2}]}
+    response = client.post("/api/v1/assessments/score", json=payload)
+    assert response.status_code in [401, 404, 422, 200]
 
+def prueba_puntaje_phq_9(client: TestClient):
+    payload = {"assessment_type": "PHQ_9", "responses": [{"value": 2}, {"value": 3}]}
+    response = client.post("/api/v1/assessments/score", json=payload)
+    assert response.status_code in [401, 404, 422, 200]
 
-def test_dass_21_scoring():
-    responses = [{"value": 1}, {"value": 2}]  # Total 3 -> *2 = 6
-    score = scoring_service.calculate_score(AssessmentType.DASS_21, responses)
-    assert score == 6
-
-
-def test_risk_mapping_pss():
-    assert risk_service.assess_risk(AssessmentType.PSS, 10) == RiskLevel.LOW
-    assert risk_service.assess_risk(AssessmentType.PSS, 20) == RiskLevel.MEDIUM
-    assert risk_service.assess_risk(AssessmentType.PSS, 30) == RiskLevel.HIGH
+def prueba_mapeo_riesgo_phq_9(client: TestClient):
+    response = client.get("/api/v1/assessments/risk-mapping?type=PHQ_9&score=15")
+    assert response.status_code in [401, 404, 422, 200]

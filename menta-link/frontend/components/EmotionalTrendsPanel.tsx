@@ -56,7 +56,12 @@ export function EmotionalTrendsPanel({ data }: EmotionalTrendsPanelProps) {
               <Info className="h-3 w-3" /> Privado
             </div>
           </div>
-          <CardDescription>Tu estado general de bienestar actual</CardDescription>
+          <CardDescription className="text-xs mt-2 leading-relaxed">
+            Tu estado general de bienestar actual. 
+            <br/><br/>
+            <b>¿Cómo se mide?</b><br/>
+            Es un porcentaje que combina tu nivel de estrés (Test PSS-10) con tu estado de ánimo semanal y tu presión académica. Un valor alto (cerca al 100%) indica que tienes control y equilibrio, un valor bajo indica que podrías necesitar atención.
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center p-6">
           <div className="relative mb-4 flex items-center justify-center">

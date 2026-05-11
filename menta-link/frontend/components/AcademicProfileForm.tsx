@@ -147,9 +147,9 @@ export function AcademicProfileForm() {
               <Label className="text-xs font-bold uppercase">Materias del Semestre</Label>
               <Input
                 type="number"
-                value={record.enrolled_credits} // Usando el campo para 'total materias'
+                value={record.enrolled_credits ?? ''} // Usando el campo para 'total materias'
                 onChange={(e) =>
-                  setRecord({ ...record, enrolled_credits: parseInt(e.target.value) })
+                  setRecord({ ...record, enrolled_credits: parseInt(e.target.value) || 0 })
                 }
                 className="bg-muted/20 h-12"
               />
@@ -186,21 +186,33 @@ export function AcademicProfileForm() {
           {/* Listado de materias ya guardadas */}
           <div className="flex flex-wrap gap-3">
             {subjects.map((s, i) => (
-              <div
+              <button
                 key={i}
-                className="bg-primary/5 border-primary/20 flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold"
+                onClick={() => setCurrentSubject(s)}
+                className="bg-primary/5 border-primary/20 hover:bg-primary/10 flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition-colors"
+                title="Haz clic para editar esta materia"
               >
                 <CheckCircle2 className="text-primary h-4 w-4" /> {s.subject_name}
-              </div>
+              </button>
             ))}
           </div>
 
           <Card className="bg-muted/10 space-y-6 border-dashed p-6">
             <div className="grid grid-cols-1 gap-4">
-              <Label className="text-xs font-black uppercase">Nombre de la Materia</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-black uppercase">Nombre de la Materia</Label>
+                {currentSubject.subject_name && subjects.some(s => s.subject_name === currentSubject.subject_name) && (
+                  <button 
+                    onClick={() => setCurrentSubject({ subject_name: '' })}
+                    className="text-primary text-[10px] font-bold uppercase transition-all hover:underline"
+                  >
+                    + Agregar Materia Nueva
+                  </button>
+                )}
+              </div>
               <Input
                 placeholder="Ej. Análisis Matemático"
-                value={currentSubject.subject_name}
+                value={currentSubject.subject_name ?? ''}
                 onChange={(e) =>
                   setCurrentSubject({ ...currentSubject, subject_name: e.target.value })
                 }
@@ -218,13 +230,11 @@ export function AcademicProfileForm() {
                     <Input
                       placeholder="Proc."
                       type="number"
-                      value={
-                        currentSubject[`hito${h}_procesual` as keyof AcademicSubjectGrade] || 0
-                      }
+                      value={currentSubject[`hito${h}_procesual` as keyof AcademicSubjectGrade] ?? ''}
                       onChange={(e) =>
                         setCurrentSubject({
                           ...currentSubject,
-                          [`hito${h}_procesual`]: parseFloat(e.target.value),
+                          [`hito${h}_procesual`]: parseFloat(e.target.value) || 0,
                         })
                       }
                       className="h-8 text-xs"
@@ -232,11 +242,11 @@ export function AcademicProfileForm() {
                     <Input
                       placeholder="Nota"
                       type="number"
-                      value={currentSubject[`hito${h}_nota` as keyof AcademicSubjectGrade] || 0}
+                      value={currentSubject[`hito${h}_nota` as keyof AcademicSubjectGrade] ?? ''}
                       onChange={(e) =>
                         setCurrentSubject({
                           ...currentSubject,
-                          [`hito${h}_nota`]: parseFloat(e.target.value),
+                          [`hito${h}_nota`]: parseFloat(e.target.value) || 0,
                         })
                       }
                       className="h-8 text-xs"
@@ -251,7 +261,8 @@ export function AcademicProfileForm() {
               variant="outline"
               className="border-primary text-primary hover:bg-primary/5 h-12 w-full font-bold"
             >
-              <PlusCircle className="mr-2 h-4 w-4" /> Guardar Nota de Materia
+              <PlusCircle className="mr-2 h-4 w-4" /> 
+              {subjects.some(s => s.subject_name === currentSubject.subject_name) ? 'Actualizar Notas' : 'Guardar Nueva Materia'}
             </Button>
           </Card>
 
@@ -283,7 +294,7 @@ export function AcademicProfileForm() {
             <label className="flex cursor-pointer items-center gap-4">
               <input
                 type="checkbox"
-                checked={record.scholarship_holder}
+                checked={record.scholarship_holder ?? false}
                 onChange={(e) => setRecord({ ...record, scholarship_holder: e.target.checked })}
                 className="border-primary text-primary h-6 w-6 rounded"
               />
@@ -292,7 +303,7 @@ export function AcademicProfileForm() {
             <label className="flex cursor-pointer items-center gap-4">
               <input
                 type="checkbox"
-                checked={record.tuition_fees_up_to_date}
+                checked={record.tuition_fees_up_to_date ?? false}
                 onChange={(e) =>
                   setRecord({ ...record, tuition_fees_up_to_date: e.target.checked })
                 }

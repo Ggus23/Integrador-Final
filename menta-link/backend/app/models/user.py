@@ -34,6 +34,7 @@ class User(Base):
     is_active = Column(Boolean(), default=True)
     is_email_verified = Column(Boolean(), default=False)
     must_change_password = Column(Boolean(), default=False)
+    expo_push_token = Column(String, nullable=True)
 
     # Relationships with Full Cascade Delete
     # Academic Note: 'cascade="all, delete-orphan"' ensures that when a User is deleted,
@@ -89,10 +90,7 @@ class User(Base):
         "PasswordResetToken", back_populates="user", cascade="all, delete-orphan"
     )
 
-    # Audit related records
-    audit_logs = relationship(
-        "AuditLog", back_populates="actor", cascade="all, delete-orphan"
-    )
+
 
     # Clinical Notes relationships
     clinical_notes_received = relationship(
