@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.api.v1.endpoints import (
     academic,
     alerts,
+    analysis,
     appointment,
     assessments,
     auth,
@@ -51,3 +52,4 @@ api_router.include_router(
 )
 api_router.include_router(facial_emotion.router, prefix="/facial-emotion", tags=["facial-emotion"])
 api_router.include_router(insights.router, prefix="/insights", tags=["insights"])
+api_router.include_router(analysis.router, prefix="/analysis", tags=["analysis"])

@@ -440,7 +440,7 @@ export default function AssessmentPage() {
 
                 <Card className="border-border bg-card p-8 shadow-md">
                   <h2 className="text-foreground font-serif text-xl font-bold transition-all">
-                    {currentItem.question}
+                    {currentItem.text}
                   </h2>
 
                   <div className="mt-6 space-y-3">

@@ -1,5 +1,9 @@
 # Initialize NLTK resources
 import logging
+import os
+
+# Fix for PyTorch DLL initialization error (WinError 1114)
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 import nltk
 import sentry_sdk

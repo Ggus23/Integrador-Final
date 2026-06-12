@@ -1,34 +1,37 @@
-import torch.nn as nn
-import torch.nn.functional as F
+try:
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+    TORCH_AVAILABLE = True
+except (ImportError, OSError):
+    torch = None
+    nn = object
+    F = None
+    TORCH_AVAILABLE = False
 
+if TORCH_AVAILABLE:
+    class EmotionCNN(nn.Module):
+        def __init__(self, vocab_size, embedding_dim=128, num_classes=6):
+            super(EmotionCNN, self).__init__()
+            self.embedding = nn.Embedding(vocab_size, embedding_dim)
+            self.conv1 = nn.Conv1d(embedding_dim, 64, kernel_size=3, padding=1)
+            self.conv2 = nn.Conv1d(64, 128, kernel_size=3, padding=1)
+            self.pool = nn.MaxPool1d(2)
+            self.dropout = nn.Dropout(0.5)
+            self.fc1 = nn.Linear(128 * 25, 64)
+            self.fc2 = nn.Linear(64, num_classes)
 
-class EmotionCNN(nn.Module):
-    def __init__(
-        self,
-        vocab_size,
-        embedding_dim=128,
-        num_filters=128,
-        kernel_size=5,
-        num_classes=6,
-    ):
-        super(EmotionCNN, self).__init__()
-        self.embedding = nn.Embedding(vocab_size + 1, embedding_dim, padding_idx=0)
-        self.conv1d = nn.Conv1d(
-            in_channels=embedding_dim, out_channels=num_filters, kernel_size=kernel_size
-        )
-        self.dropout = nn.Dropout(0.5)
-        self.fc = nn.Linear(num_filters, num_classes)
-
-    def forward(self, x):
-        # x shape: (batch_size, seq_len)
-        x = self.embedding(x)  # (batch_size, seq_len, embedding_dim)
-        x = x.permute(0, 2, 1)  # (batch_size, embedding_dim, seq_len) for Conv1d
-
-        x = F.relu(self.conv1d(x))  # (batch_size, num_filters, seq_len - kernel + 1)
-        x = F.max_pool1d(x, x.shape[2])  # (batch_size, num_filters, 1)
-
-        x = x.squeeze(2)  # (batch_size, num_filters)
-        x = self.dropout(x)
-        x = self.fc(x)  # (batch_size, num_classes)
-
-        return x
+        def forward(self, x):
+            x = self.embedding(x).permute(0, 2, 1)
+            x = self.pool(F.relu(self.conv1(x)))
+            x = self.pool(F.relu(self.conv2(x)))
+            x = x.view(x.size(0), -1)
+            x = self.dropout(F.relu(self.fc1(x)))
+            x = self.fc2(x)
+            return x
+else:
+    class EmotionCNN:
+        def __init__(self, *args, **kwargs):
+            pass
+        def __call__(self, *args, **kwargs):
+            raise RuntimeError("Torch not available")

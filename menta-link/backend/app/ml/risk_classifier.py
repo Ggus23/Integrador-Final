@@ -44,6 +44,11 @@ class RiskClassifier:
         checkin_avg: float,
         bad_days_count: int,
         academic_pressure_avg: float,
+        student_id: str = None,
+        faculty: str = None,
+        pss_score_raw: float = None,
+        gad_score_raw: float = None,
+        phq_score_raw: float = None,
     ) -> Tuple[str, float]:
 
         if self.model:
@@ -71,7 +76,18 @@ class RiskClassifier:
                     1: RiskLevel.MEDIUM.value,
                     2: RiskLevel.HIGH.value,
                 }
-                return mapping.get(pred_class, RiskLevel.LOW.value), float(confidence)
+                risk_level = mapping.get(pred_class, RiskLevel.LOW.value)
+                conf = float(confidence)
+                
+                from app.utils.influx_logger import log_prediction_to_influx
+                log_prediction_to_influx(
+                    model_name="RiskClassifier",
+                    student_id=student_id,
+                    fields={"confidence": conf, "pss_score": pss_score, "mood_avg": checkin_avg},
+                    tags={"risk_level": risk_level, "facultad": faculty or "Unknown"}
+                )
+                
+                return risk_level, conf
             except Exception as e:
                 logger.error(f"Predicción ML falló: {e}. Recurriendo a heurística.")
 
@@ -87,11 +103,24 @@ class RiskClassifier:
         )
 
         if score < 0.3:
-            return RiskLevel.LOW.value, 1.0 - score
+            risk_level = RiskLevel.LOW.value
+            conf = 1.0 - score
         elif score < 0.6:
-            return RiskLevel.MEDIUM.value, score if score > 0.5 else 1.0 - score
+            risk_level = RiskLevel.MEDIUM.value
+            conf = score if score > 0.5 else 1.0 - score
         else:
-            return RiskLevel.HIGH.value, score
+            risk_level = RiskLevel.HIGH.value
+            conf = score
+            
+        from app.utils.influx_logger import log_prediction_to_influx
+        log_prediction_to_influx(
+            model_name="RiskClassifier",
+            student_id=student_id,
+            fields={"confidence": conf, "heuristic_score": score, "pss_score": pss_score, "mood_avg": checkin_avg},
+            tags={"risk_level": risk_level, "facultad": faculty or "Unknown"}
+        )
+
+        return risk_level, conf
 
     def get_feature_importance(self) -> Dict[str, float]:
         if self.model:

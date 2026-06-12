@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-export default function TestInterventionsPage() {
+function TestInterventionsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialIdx = parseInt(searchParams?.get('idx') || '0', 10);
@@ -60,7 +60,7 @@ export default function TestInterventionsPage() {
   const getActionDescription = (actionType: string) => {
     switch (actionType) {
       case 'BREATHING_EXERCISE': 
-        return 'Esta herramienta te guiará para regular tu ritmo cardíaco y disminuir la tensión física inmediata. Sigue el patrón visual.';
+         return 'Esta herramienta te guiará para regular tu ritmo cardíaco y disminuir la tensión física inmediata. Sigue el patrón visual.';
       case 'COGNITIVE_REFRAME': 
         return 'Toma control de tus pensamientos. Este ejercicio te ayuda a deconstruir ideas estresantes y verlas desde una perspectiva más objetiva.';
       case 'JOURNALING_PROMPT': 
@@ -183,5 +183,19 @@ export default function TestInterventionsPage() {
 
       </div>
     </Layout>
+  );
+}
+
+export default function TestInterventionsPage() {
+  return (
+    <React.Suspense fallback={
+      <Layout>
+        <div className="flex h-[60vh] items-center justify-center">
+          <div className="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+        </div>
+      </Layout>
+    }>
+      <TestInterventionsContent />
+    </React.Suspense>
   );
 }

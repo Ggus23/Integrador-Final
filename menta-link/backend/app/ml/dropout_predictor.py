@@ -103,7 +103,18 @@ class DropoutPredictor:
                 risk = RiskLevel.HIGH.value
             elif score > 0.4:
                 risk = RiskLevel.MEDIUM.value
-            return risk, min(round(score, 4), 1.0)
+            from app.utils.influx_logger import log_prediction_to_influx
+            student_id = data.get("student_id")
+            faculty = data.get("faculty", "Unknown")
+            
+            prob = min(round(score, 4), 1.0)
+            log_prediction_to_influx(
+                model_name="DropoutPredictor",
+                student_id=student_id,
+                fields={"dropout_probability": prob, "heuristic_score": score},
+                tags={"risk_level": risk, "facultad": faculty}
+            )
+            return risk, prob
 
         try:
             features_df = pd.DataFrame(
@@ -135,7 +146,20 @@ class DropoutPredictor:
             elif probability > 0.3:
                 risk = RiskLevel.MEDIUM.value
 
-            return risk, round(probability, 4)
+            prob_round = round(probability, 4)
+            
+            from app.utils.influx_logger import log_prediction_to_influx
+            student_id = data.get("student_id")
+            faculty = data.get("faculty", "Unknown")
+            
+            log_prediction_to_influx(
+                model_name="DropoutPredictor",
+                student_id=student_id,
+                fields={"dropout_probability": prob_round},
+                tags={"risk_level": risk, "facultad": faculty}
+            )
+
+            return risk, prob_round
 
         except Exception as e:
             logger.error("DropoutPredictor: Prediction failed: %s", e)

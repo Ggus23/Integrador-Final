@@ -99,7 +99,11 @@ class EmotionalTrendsService:
         )
 
         if not entries:
-            return {"ari": 0, "level": "Bajo Riesgo"}
+            return {
+                "ari_score": 0.0,
+                "risk_level": "Bajo Riesgo",
+                "interpretation": "Cálculo basado en tendencias emocionales del último mes.",
+            }
 
         total = len(entries)
         emotions = [e.emotion_ai for e in entries if e.emotion_ai]

@@ -61,6 +61,8 @@ describe('StudentDetailPage', () => {
 
     // Click the tab trigger
     const analyticalTab = screen.getByRole('tab', { name: /perfil analítico/i });
+    fireEvent.pointerDown(analyticalTab, { button: 0 });
+    fireEvent.mouseDown(analyticalTab);
     fireEvent.click(analyticalTab);
 
     // Check if the trends panel is visible

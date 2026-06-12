@@ -4,12 +4,12 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface RiskFactorsChartProps {
   factors: Record<string, number>;
@@ -22,9 +22,28 @@ const LABELS: Record<string, string> = {
   study_pressure: 'Presión Académica',
 };
 
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-card/95 border-border border rounded-2xl p-4 shadow-xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
+        <p className="text-foreground text-sm font-black">{data.name}</p>
+        <div className="mt-2 text-xs text-muted-foreground space-y-1">
+          <p>
+            Importancia / Impacto: <span className="text-foreground font-bold">{data.impact.toFixed(4)}</span>
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export function RiskFactorsChart({ factors }: RiskFactorsChartProps) {
+  const isMobile = useIsMobile();
+
   if (!factors || Object.keys(factors).length === 0) {
-    return <div className="text-sm text-gray-500">No hay datos de factores de riesgo.</div>;
+    return <div className="text-sm text-muted-foreground italic p-4 text-center">No hay datos de factores de riesgo.</div>;
   }
 
   // Transform data for Recharts
@@ -37,21 +56,42 @@ export function RiskFactorsChart({ factors }: RiskFactorsChartProps) {
     .sort((a, b) => b.impact - a.impact);
 
   return (
-    <div className="h-[300px] w-full">
+    <div className="h-[250px] sm:h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+        <BarChart 
+          data={data} 
+          layout="vertical" 
+          margin={{ 
+            top: 10, 
+            right: isMobile ? 10 : 30, 
+            left: isMobile ? -20 : 10, 
+            bottom: 5 
+          }}
+        >
+          <defs>
+            <linearGradient id="colorRiskBar" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.6} />
+              <stop offset="100%" stopColor="var(--primary)" stopOpacity={1} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" opacity={0.2} />
           <XAxis type="number" domain={[0, 'auto']} hide />
-          <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12 }} />
-          <Tooltip
-            formatter={(value: number) => [value.toFixed(4), 'Importancia']}
-            contentStyle={{
-              borderRadius: '8px',
-              border: 'none',
-              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-            }}
+          <YAxis 
+            type="category" 
+            dataKey="name" 
+            width={isMobile ? 100 : 130} 
+            tick={{ fontSize: isMobile ? 10 : 12, fill: 'var(--muted-foreground)' }} 
+            axisLine={false}
+            tickLine={false}
           />
-          <Bar dataKey="impact" fill="#0d9488" radius={[0, 4, 4, 0]} barSize={20} />
+          <Tooltip content={<CustomTooltip />} />
+          <Bar 
+            dataKey="impact" 
+            fill="url(#colorRiskBar)" 
+            radius={[0, 6, 6, 0]} 
+            barSize={isMobile ? 14 : 20} 
+            animationDuration={1500}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

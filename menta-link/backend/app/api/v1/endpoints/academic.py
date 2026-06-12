@@ -5,7 +5,18 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api import deps
+import os
+from functools import lru_cache
+from typing import Any
 
+import joblib
+import numpy as np
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from app import models
+from app.api import deps
 router = APIRouter()
 
 
@@ -244,3 +255,109 @@ async def upload_academic_records_csv(
         "records_created": records_created,
         "records_updated": records_updated,
     }
+
+MODEL_PATH = os.getenv("RISK_MODEL_PATH", "app/ml_models/risk_model.pkl")
+
+@lru_cache(maxsize=1)
+def get_risk_model():
+    """
+    Carga el modelo una sola vez y lo mantiene en memoria.
+    Si el archivo no existe lanza un error claro en arranque.
+    """
+    if not os.path.exists(MODEL_PATH):
+        raise RuntimeError(
+            f"Modelo no encontrado en '{MODEL_PATH}'. "
+            "Define la variable de entorno RISK_MODEL_PATH o coloca el archivo en la ruta por defecto."
+        )
+    return joblib.load(MODEL_PATH)
+
+
+# ── Schemas locales (o muévelos a app/schemas/ai_prediction.py) ────────────
+class PredictionRequest(BaseModel):
+    user_id: int
+    gpa: float
+    enrolled_credits: int
+    failed_classes: int
+    hito2_nota: float = 0.0
+    hito3_nota: float = 0.0
+    hito4_nota: float = 0.0
+    hito5_nota: float = 0.0
+    checkin_score: float = 0.0   # promedio de checkins del estudiante
+    test_score: float = 0.0      # promedio de tests/assessments
+
+
+class PredictionResponse(BaseModel):
+    user_id: int
+    risk_level: str
+    dropout_probability: float
+    prediction_id: int
+
+    class Config:
+        from_attributes = True
+
+
+# ── Endpoint ───────────────────────────────────────────────────────────────
+@router.post("/predict-risk", response_model=PredictionResponse)
+def predict_academic_risk(
+    *,
+    db: Session = Depends(deps.get_db),
+    payload: PredictionRequest,
+    current_user: models.user.User = Depends(deps.get_staff_user),
+) -> Any:
+    """
+    Ejecuta el modelo de riesgo académico y guarda el resultado en ai_predictions.
+    Solo accesible para staff/admin/psicólogo.
+    """
+    # 1. Cargar modelo
+    try:
+        model = get_risk_model()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+    # 2. Armar vector de features (el orden debe coincidir con el entrenamiento)
+    features = np.array([[
+        payload.gpa,
+        payload.enrolled_credits,
+        payload.failed_classes,
+        payload.hito2_nota,
+        payload.hito3_nota,
+        payload.hito4_nota,
+        payload.hito5_nota,
+        payload.checkin_score,
+        payload.test_score,
+    ]])
+
+    # 3. Predecir
+    dropout_prob = float(model.predict_proba(features)[0][1])
+    risk_level = (
+        "HIGH" if dropout_prob >= 0.7
+        else "MEDIUM" if dropout_prob >= 0.4
+        else "LOW"
+    )
+
+    # 4. Guardar en DB
+    prediction = models.AIPrediction(
+        user_id=payload.user_id,
+        model_name="DropoutPredictor",
+        gpa=payload.gpa,
+        enrolled_credits=payload.enrolled_credits,
+        failed_classes=payload.failed_classes,
+        hito2_nota=payload.hito2_nota,
+        hito3_nota=payload.hito3_nota,
+        hito4_nota=payload.hito4_nota,
+        hito5_nota=payload.hito5_nota,
+        checkin_score=payload.checkin_score,
+        test_score=payload.test_score,
+        risk_level=risk_level,
+        dropout_probability=dropout_prob,
+    )
+    db.add(prediction)
+    db.commit()
+    db.refresh(prediction)
+
+    return PredictionResponse(
+        user_id=prediction.user_id,
+        risk_level=prediction.risk_level,
+        dropout_probability=prediction.dropout_probability,
+        prediction_id=prediction.id,
+    )

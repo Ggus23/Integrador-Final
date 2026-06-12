@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { TrendChart } from '@/components/dashboard/TrendChart';
 import { DropoutTrendChart } from '@/components/dashboard/DropoutTrendChart';
 import { RiskDistributionChart } from '@/components/dashboard/RiskDistributionChart';
+import { LinearRegressionChart } from '@/components/dashboard/LinearRegressionChart';
 import { RecommendationsPanel } from '@/components/dashboard/RecommendationsPanel';
 import {
   Sparkles,
@@ -411,8 +412,11 @@ export default function DashboardPage() {
               </Link>
             </div>
             {aggregatedReport && (
-              <div className="max-w-md">
-                <RiskDistributionChart data={aggregatedReport.risk_distribution} />
+              <div className="space-y-6">
+                <div className="max-w-md">
+                  <RiskDistributionChart data={aggregatedReport.risk_distribution} />
+                </div>
+                <LinearRegressionChart />
               </div>
             )}
           </div>

@@ -104,6 +104,9 @@ class User(Base):
         foreign_keys="[ClinicalNote.psychologist_id]",
         back_populates="psychologist",
     )
+    ai_predictions = relationship(
+        "AIPrediction", back_populates="user", cascade="all, delete-orphan"
+    )
 
     # Audit timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())

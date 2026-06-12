@@ -185,20 +185,23 @@ class AssessmentService:
         else:
             norm_emotional_score = 0.5
 
-        ml_risk_str, confidence = risk_classifier.predict_risk(
-            norm_emotional_score, avg_mood, bad_days, avg_pressure
-        )
-        ml_risk = RiskLevel.from_str(ml_risk_str)
-
-        risk_summary.current_risk_level = ml_risk.value
-        risk_summary.prediction_confidence = float(confidence)
-
         from app.ml.dropout_predictor import dropout_predictor
         from app.models.academic_profile import AcademicProfile
 
         acad_profile = (
             db.query(AcademicProfile).filter(AcademicProfile.user_id == user_id).first()
         )
+        faculty_name = str(acad_profile.course) if acad_profile and acad_profile.course else "Unknown"
+
+        ml_risk_str, confidence = risk_classifier.predict_risk(
+            norm_emotional_score, avg_mood, bad_days, avg_pressure,
+            student_id=str(user_id),
+            faculty=faculty_name
+        )
+        ml_risk = RiskLevel.from_str(ml_risk_str)
+
+        risk_summary.current_risk_level = ml_risk.value
+        risk_summary.prediction_confidence = float(confidence)
 
         dropout_data: Dict = {
             "pss_score": norm_emotional_score * 40.0,
@@ -206,6 +209,8 @@ class AssessmentService:
             "bad_days_freq": bad_days,
             "academic_pressure": avg_pressure,
             "risk_level_encoded": emotional_risk.encode(),
+            "student_id": str(user_id),
+            "faculty": faculty_name,
         }
 
         if acad_profile:

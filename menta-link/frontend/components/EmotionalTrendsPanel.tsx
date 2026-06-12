@@ -5,7 +5,8 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { EmotionalEvolutionChart } from './EmotionalEvolutionChart';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, TrendingDown, TrendingUp, Info } from 'lucide-react';
+import { Info, TrendingDown, TrendingUp } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TrendsData {
   distribution: Record<string, number>;
@@ -27,28 +28,59 @@ const EMOTION_COLORS: Record<string, string> = {
   motivado: '#8b5cf6',
 };
 
+const CustomPieTooltip = ({ active, payload, total }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : 0;
+    return (
+      <div className="bg-card/95 border-border border rounded-2xl p-4 shadow-xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: data.color }} />
+          <p className="text-foreground text-sm font-black capitalize">{data.name}</p>
+        </div>
+        <div className="mt-2 text-xs text-muted-foreground space-y-1">
+          <p>
+            Registros: <span className="text-foreground font-bold">{data.value}</span>
+          </p>
+          <p>
+            Proporción: <span className="text-foreground font-bold">{percentage}%</span>
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export function EmotionalTrendsPanel({ data }: EmotionalTrendsPanelProps) {
+  const isMobile = useIsMobile();
+
   const pieData = Object.entries(data.distribution).map(([name, value]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
     value,
     color: EMOTION_COLORS[name] || '#94a3b8',
   }));
 
-  const getAriColor = (level: string) => {
-    switch (level) {
-      case 'Alto Riesgo':
-        return 'destructive';
-      case 'Riesgo Medio':
-        return 'warning';
-      default:
-        return 'success';
-    }
+  const totalEmotions = pieData.reduce((acc, curr) => acc + curr.value, 0);
+
+  const renderLegend = (value: string) => {
+    const item = pieData.find((d) => d.name === value);
+    const percentage = totalEmotions > 0 ? (((item?.value || 0) / totalEmotions) * 100).toFixed(0) : 0;
+    return (
+      <span className="text-foreground text-xs font-semibold ml-1 mr-3">
+        {value} ({percentage}%)
+      </span>
+    );
   };
+
+  const renderLabel = isMobile
+    ? undefined
+    : ({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`;
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
       {/* Wellness Summary Card */}
-      <Card className="border-t-primary border-t-4 shadow-lg transition-shadow hover:shadow-xl md:col-span-1">
+      <Card className="border-t-primary border-t-4 bg-card/30 border-border/40 backdrop-blur-md shadow-2xl transition-shadow hover:shadow-xl md:col-span-1">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl font-bold">Índice de Equilibrio Estudiantil</CardTitle>
@@ -60,7 +92,7 @@ export function EmotionalTrendsPanel({ data }: EmotionalTrendsPanelProps) {
             Tu estado general de bienestar actual. 
             <br/><br/>
             <b>¿Cómo se mide?</b><br/>
-            Es un porcentaje que combina tu nivel de estrés (Test PSS-10) con tu estado de ánimo semanal y tu presión académica. Un valor alto (cerca al 100%) indica que tienes control y equilibrio, un valor bajo indica que podrías necesitar atención.
+            Combina tu nivel de estrés (Test PSS-10) con tu estado de ánimo semanal y tu presión académica.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center p-6">
@@ -73,7 +105,7 @@ export function EmotionalTrendsPanel({ data }: EmotionalTrendsPanelProps) {
                 stroke="currentColor"
                 strokeWidth="8"
                 fill="transparent"
-                className="text-gray-200"
+                className="text-muted/10"
               />
               <circle
                 cx="64"
@@ -113,7 +145,7 @@ export function EmotionalTrendsPanel({ data }: EmotionalTrendsPanelProps) {
       </Card>
 
       {/* Emotion Distribution Card */}
-      <Card className="shadow-md md:col-span-2">
+      <Card className="shadow-2xl md:col-span-2 border-border/40 bg-card/30 backdrop-blur-md">
         <CardHeader>
           <CardTitle className="text-lg">Distribución Emocional Dominante</CardTitle>
           <CardDescription>Análisis de los últimos 30 días</CardDescription>
@@ -125,18 +157,26 @@ export function EmotionalTrendsPanel({ data }: EmotionalTrendsPanelProps) {
                 <Pie
                   data={pieData}
                   cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={70}
+                  cy="45%"
+                  innerRadius={isMobile ? 45 : 55}
+                  outerRadius={isMobile ? 65 : 75}
                   paddingAngle={8}
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={renderLabel}
+                  labelLine={!isMobile}
                 >
                   {pieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip content={<CustomPieTooltip total={totalEmotions} />} />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36} 
+                  iconType="circle"
+                  iconSize={8}
+                  formatter={renderLegend}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -144,7 +184,7 @@ export function EmotionalTrendsPanel({ data }: EmotionalTrendsPanelProps) {
       </Card>
 
       {/* Evolution Chart Card */}
-      <Card className="bg-gradient-to-br from-white to-gray-50 shadow-md md:col-span-3 dark:from-gray-900 dark:to-black">
+      <Card className="shadow-2xl md:col-span-3 border-border/40 bg-card/30 backdrop-blur-md">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>

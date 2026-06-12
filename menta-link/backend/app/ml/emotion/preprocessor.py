@@ -3,7 +3,12 @@ import pickle
 import re
 import unicodedata
 
-import torch
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except (ImportError, OSError):
+    torch = None
+    TORCH_AVAILABLE = False
 
 _SPECIAL_CHARS_RE = re.compile(r"[^a-zA-Z\s]")
 _EXTRA_SPACE_RE = re.compile(r"\s+")
@@ -14,8 +19,11 @@ class TextPreprocessor:
         self.max_len = max_len
         self.word_index = {}
         if vocab_path and os.path.exists(vocab_path):
-            with open(vocab_path, "rb") as f:
-                self.word_index = pickle.load(f)  # nosec B301
+            try:
+                with open(vocab_path, "rb") as f:
+                    self.word_index = pickle.load(f)  # nosec B301
+            except Exception:
+                self.word_index = {}
 
     def clean_text(self, text):
         if not isinstance(text, str):
@@ -55,7 +63,9 @@ class TextPreprocessor:
     def preprocess(self, text):
         seq = self.tokenize(text)
         padded = self.pad_sequence(seq)
-        return torch.tensor(padded, dtype=torch.long)
+        if TORCH_AVAILABLE:
+            return torch.tensor(padded, dtype=torch.long)
+        return padded
 
     def save_vocab(self, path):
         with open(path, "wb") as f:

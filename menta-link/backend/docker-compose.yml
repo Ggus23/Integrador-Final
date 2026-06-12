@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   db:
@@ -19,27 +18,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  api:                      
-    build:
-      context: .
-      dockerfile: ./docker/api.Dockerfile
-    container_name: mentalink-api
-    restart: unless-stopped     
-    depends_on:
-      db:
-        condition: service_healthy
-    env_file:
-      - .env.backend
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: mentalink-grafana
+    restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "3001:3000"
+    depends_on:
+      - db
+    environment:
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     volumes:
-      - .:/code              # Opcional para desarrollo (hot reload)
-    command: >
-      uvicorn app.main:app
-        --host 0.0.0.0
-        --port 8000
-        --reload
+      - grafana_data:/var/lib/grafana
 
 volumes:
   mentalink_db_data:
+#   influxdb_data:
+  grafana_data:

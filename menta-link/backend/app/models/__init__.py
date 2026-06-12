@@ -14,3 +14,4 @@ from .subject import Subject  # noqa: F401
 from .risk_summary import RiskSummary  # noqa: F401
 from .tokens import EmailVerificationToken, PasswordResetToken  # noqa: F401
 from .user import User, UserRole  # noqa: F401
+from .ai_prediction import AIPrediction  # noqa: F401
