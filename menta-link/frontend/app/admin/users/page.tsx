@@ -720,7 +720,7 @@ export default function AdminUsersPage() {
 
         {/* Native Analytics Dashboard Dialog */}
         <Dialog open={!!selectedGrafanaUser} onOpenChange={(open) => !open && setSelectedGrafanaUser(null)}>
-          <DialogContent className="dark max-w-5xl max-h-[90vh] flex flex-col p-6 bg-slate-900 border-slate-800 text-white rounded-xl shadow-2xl overflow-y-auto">
+          <DialogContent className="dark w-[95vw] sm:w-[90vw] md:w-full max-w-5xl max-h-[90vh] flex flex-col p-4 sm:p-6 bg-slate-900 border-slate-800 text-white rounded-xl shadow-2xl overflow-y-auto">
             <DialogHeader className="border-b border-slate-800 pb-4 mb-4">
               <DialogTitle className="text-2xl font-serif font-bold text-purple-400 flex items-center gap-2">
                 <span>📊</span> Panel de Analítica Inteligente

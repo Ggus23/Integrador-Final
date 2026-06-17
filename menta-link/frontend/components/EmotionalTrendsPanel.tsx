@@ -81,10 +81,10 @@ export function EmotionalTrendsPanel({ data }: EmotionalTrendsPanelProps) {
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
       {/* Wellness Summary Card */}
       <Card className="border-t-primary border-t-4 bg-card/30 border-border/40 backdrop-blur-md shadow-2xl transition-shadow hover:shadow-xl md:col-span-1">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-bold">Índice de Equilibrio Estudiantil</CardTitle>
-            <div className="text-muted-foreground bg-muted/50 flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+        <CardHeader className="pb-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle className="text-lg sm:text-xl font-bold">Índice de Equilibrio Estudiantil</CardTitle>
+            <div className="text-muted-foreground bg-muted/50 flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase self-start sm:self-auto">
               <Info className="h-3 w-3" /> Privado
             </div>
           </div>
