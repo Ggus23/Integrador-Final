@@ -720,13 +720,15 @@ export default function AdminUsersPage() {
 
         {/* Native Analytics Dashboard Dialog */}
         <Dialog open={!!selectedGrafanaUser} onOpenChange={(open) => !open && setSelectedGrafanaUser(null)}>
-          <DialogContent className="dark w-[95vw] sm:w-[90vw] md:w-full max-w-5xl max-h-[90vh] flex flex-col p-4 sm:p-6 bg-slate-900 border-slate-800 text-white rounded-xl shadow-2xl overflow-y-auto">
-            <DialogHeader className="border-b border-slate-800 pb-4 mb-4">
-              <DialogTitle className="text-2xl font-serif font-bold text-purple-400 flex items-center gap-2">
-                <span>📊</span> Panel de Analítica Inteligente
+          <DialogContent className="dark w-[95vw] sm:w-[90vw] md:w-full max-w-5xl max-h-[90vh] flex flex-col p-4 sm:p-6 bg-slate-950 border-slate-800 text-white rounded-xl shadow-2xl overflow-y-auto">
+            <DialogHeader className="border-b border-slate-800 pb-4 mb-2 shrink-0">
+              <DialogTitle className="text-xl font-serif font-bold text-white flex items-center gap-2">
+                📊 Analítica del Estudiante
               </DialogTitle>
               <DialogDescription className="text-slate-400 text-sm mt-1">
-                Visualización detallada de riesgo académico, emocional y rendimiento para: <span className="text-purple-350 font-bold">{selectedGrafanaUser?.full_name}</span> ({selectedGrafanaUser?.email})
+                <span className="text-white font-bold">{selectedGrafanaUser?.full_name}</span>
+                <span className="ml-2 text-slate-600">·</span>
+                <span className="ml-2">{selectedGrafanaUser?.email}</span>
               </DialogDescription>
             </DialogHeader>
 
@@ -749,129 +751,149 @@ export default function AdminUsersPage() {
                 <p className="text-sm">{analyticsData.error}</p>
               </div>
             ) : analyticsData.details && analyticsData.trends ? (
-              <div className="space-y-8 pr-1 text-slate-100">
-                {/* Executive Risk Badges */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-slate-800/50 border border-slate-700/50 p-4 rounded-xl shadow-sm hover:border-slate-600/50 transition-all">
-                    <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block">
-                      Estado de Riesgo General
-                    </span>
-                    <div className="text-2xl font-black text-white mt-1">
-                      {analyticsData.details.risk_level === 'high' ? '🚨 ALTO' : analyticsData.details.risk_level === 'medium' ? '⚠️ MEDIO' : '✅ BAJO'}
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-2">
-                      {analyticsData.details.risk_level === 'high'
-                        ? 'Requiere intervención prioritaria debido a múltiples alertas.'
-                        : analyticsData.details.risk_level === 'medium'
-                          ? 'Se recomienda seguimiento oportuno de los factores influyentes.'
-                          : 'El estudiante mantiene niveles estables de bienestar.'}
-                    </p>
-                  </div>
-                  
-                  <div className="bg-slate-800/50 border border-slate-700/50 p-4 rounded-xl shadow-sm hover:border-slate-600/50 transition-all">
-                    <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block">
-                      Probabilidad de Abandono (IA)
-                    </span>
-                    <div className="text-2xl font-black text-white mt-1">
-                      {analyticsData.details.risk_summary?.dropout_probability !== undefined ? (
-                        <>
-                          {(analyticsData.details.risk_summary.dropout_probability * 100).toFixed(0)}%
-                          <span className="text-xs font-medium text-slate-405 ml-2">
-                            ({analyticsData.details.risk_summary.dropout_risk === 'high' ? 'Alto' : analyticsData.details.risk_summary.dropout_risk === 'medium' ? 'Medio' : 'Bajo'})
-                          </span>
-                        </>
-                      ) : (
-                        'N/A'
-                      )}
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-2">
-                      Riesgo estimado de abandono escolar basado en GPA, reprobación e inactividad.
-                    </p>
-                  </div>
+              <div className="space-y-5 pr-1 text-slate-100">
 
-                  <div className="bg-slate-800/50 border border-slate-700/50 p-4 rounded-xl shadow-sm hover:border-slate-600/50 transition-all">
-                    <span className="text-slate-400 text-[10px] font-black uppercase tracking-wider block">
-                      Confianza de Predicción (IA)
-                    </span>
-                    <div className="text-2xl font-black text-white mt-1">
-                      {analyticsData.details.risk_summary?.prediction_confidence !== undefined ? (
-                        `${(analyticsData.details.risk_summary.prediction_confidence * 100).toFixed(0)}%`
-                      ) : (
-                        'N/A'
-                      )}
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-2">
-                      Precisión del modelo según la cantidad de datos e historial del alumno.
-                    </p>
-                  </div>
+                {/* ── KPI Cards ── */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+                  {/* Riesgo General */}
+                  {(() => {
+                    const lvl = analyticsData.details.risk_summary?.current_risk_level || analyticsData.details.risk_level;
+                    const isHigh = lvl === 'high' || lvl === 'alto';
+                    const isMed  = lvl === 'medium' || lvl === 'medio';
+                    return (
+                      <div className={`rounded-xl border p-4 space-y-2 ${
+                        isHigh ? 'bg-rose-500/10 border-rose-500/30'
+                        : isMed ? 'bg-amber-500/10 border-amber-500/30'
+                        : 'bg-emerald-500/10 border-emerald-500/30'
+                      }`}>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Estado de Riesgo</p>
+                        <p className={`text-2xl font-black ${
+                          isHigh ? 'text-rose-400' : isMed ? 'text-amber-400' : 'text-emerald-400'
+                        }`}>
+                          {isHigh ? '🚨 ALTO' : isMed ? '⚠️ MEDIO' : '✅ BAJO'}
+                        </p>
+                        <p className="text-[11px] text-slate-400 leading-snug">
+                          {isHigh ? 'Requiere intervención prioritaria.' : isMed ? 'Seguimiento recomendado.' : 'Bienestar estable.'}
+                        </p>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Probabilidad de Abandono */}
+                  {(() => {
+                    const prob = analyticsData.details.risk_summary?.dropout_probability;
+                    const pct  = prob !== undefined ? prob * 100 : null;
+                    const isHigh = pct !== null && pct >= 60;
+                    const isMed  = pct !== null && pct >= 30;
+                    return (
+                      <div className={`rounded-xl border p-4 space-y-2 ${
+                        isHigh ? 'bg-rose-500/10 border-rose-500/30'
+                        : isMed ? 'bg-amber-500/10 border-amber-500/30'
+                        : 'bg-emerald-500/10 border-emerald-500/30'
+                      }`}>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Prob. Abandono (IA)</p>
+                        <p className={`text-2xl font-black ${
+                          isHigh ? 'text-rose-400' : isMed ? 'text-amber-400' : 'text-emerald-400'
+                        }`}>
+                          {pct !== null ? `${pct.toFixed(0)}%` : '—'}
+                        </p>
+                        {pct !== null && (
+                          <div className="w-full bg-slate-800 rounded-full h-1.5">
+                            <div className={`h-1.5 rounded-full ${
+                              isHigh ? 'bg-rose-400' : isMed ? 'bg-amber-400' : 'bg-emerald-400'
+                            }`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                          </div>
+                        )}
+                        <p className="text-[11px] text-slate-400 leading-snug">Basado en GPA, reprobación e inactividad.</p>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Confianza Modelo */}
+                  {(() => {
+                    const conf = analyticsData.details.risk_summary?.prediction_confidence;
+                    const pct  = conf !== undefined ? conf * 100 : null;
+                    return (
+                      <div className="rounded-xl border border-slate-700/40 bg-slate-800/30 p-4 space-y-2">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Confianza del Modelo</p>
+                        <p className="text-2xl font-black text-purple-400">{pct !== null ? `${pct.toFixed(0)}%` : '—'}</p>
+                        {pct !== null && (
+                          <div className="w-full bg-slate-800 rounded-full h-1.5">
+                            <div className="h-1.5 rounded-full bg-purple-400" style={{ width: `${Math.min(pct, 100)}%` }} />
+                          </div>
+                        )}
+                        <p className="text-[11px] text-slate-400 leading-snug">Precisión según historial registrado.</p>
+                      </div>
+                    );
+                  })()}
                 </div>
 
-                {/* Factors Chart */}
-                <div className="bg-slate-800/30 border border-slate-850 p-6 rounded-xl shadow-sm">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4">
+                {/* ── Factores de Riesgo ── */}
+                <div className="rounded-xl border border-slate-700/40 bg-slate-900/60 p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-4">
                     <div>
-                      <h4 className="text-lg font-bold text-white">Análisis de Factores de Riesgo (IA)</h4>
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        Peso e impacto de cada variable en el diagnóstico del modelo.
-                      </p>
+                      <h4 className="text-sm font-bold text-white">⚖️ Factores de Riesgo (IA)</h4>
+                      <p className="text-[11px] text-slate-400 mt-1">Variables con mayor peso en el diagnóstico. Barra más larga = mayor impacto.</p>
                     </div>
-                    <span className="text-[10px] bg-slate-800 text-teal-400 font-bold px-2 py-1 rounded border border-teal-500/20">
-                      💡 Barra más larga = Mayor Impacto
+                    <span className="text-[10px] bg-teal-500/10 text-teal-400 font-bold px-2 py-1 rounded border border-teal-500/20 self-start shrink-0">
+                      💡 Mayor barra = Mayor impacto
                     </span>
                   </div>
                   <RiskFactorsChart factors={analyticsData.details.risk_factors || {}} />
                 </div>
 
-                {/* Emotional Trends */}
-                <div className="space-y-4">
-                  <div className="border-b border-slate-800 pb-2 mb-4">
-                    <h4 className="text-lg font-bold text-white">🧠 Tendencias Emocionales y Bienestar</h4>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Medición del equilibrio estudiantil, estado de ánimo semanal y evolución.
-                    </p>
+                {/* ── Tendencias Emocionales ── */}
+                <div className="rounded-xl border border-slate-700/40 bg-slate-900/60 p-5">
+                  <div className="border-b border-slate-700/50 pb-3 mb-5">
+                    <h4 className="text-sm font-bold text-white">🧠 Bienestar Emocional</h4>
+                    <p className="text-[11px] text-slate-400 mt-1">Índice de equilibrio, distribución de emociones y evolución semanal.</p>
                   </div>
                   <EmotionalTrendsPanel data={analyticsData.trends} />
                 </div>
 
-                {/* Academic Profile */}
+                {/* ── Rendimiento Académico ── */}
                 {analyticsData.details.academic_profile && (
-                  <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-xl shadow-sm">
-                    <h4 className="text-lg font-bold text-white mb-4">🎓 Rendimiento Académico Detallado</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
-                        <span className="text-slate-400 text-[10px] font-black uppercase">Carrera</span>
-                        <span className="text-lg font-bold block mt-1">
-                          {analyticsData.details.academic_profile.course || 'No especificada'}
-                        </span>
+                  <div className="rounded-xl border border-slate-700/40 bg-slate-900/60 p-5 space-y-4">
+                    <h4 className="text-sm font-bold text-white">🎓 Rendimiento Académico</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="bg-slate-800/60 border border-slate-700/40 rounded-xl p-3">
+                        <p className="text-[10px] font-black uppercase text-slate-500">Carrera</p>
+                        <p className="text-sm font-bold mt-1">{analyticsData.details.academic_profile.course || 'No especificada'}</p>
                       </div>
-                      <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
-                        <span className="text-slate-400 text-[10px] font-black uppercase">Materias Aprobadas</span>
-                        <span className="text-lg font-bold block mt-1">
-                          {analyticsData.details.academic_profile.units_approved} Unidades
-                        </span>
+                      <div className="bg-slate-800/60 border border-slate-700/40 rounded-xl p-3">
+                        <p className="text-[10px] font-black uppercase text-slate-500">Materias Aprobadas</p>
+                        <p className="text-sm font-bold mt-1">{analyticsData.details.academic_profile.units_approved} unidades</p>
                       </div>
-                      <div className="bg-purple-950/20 border border-purple-800/30 rounded-xl p-4">
-                        <span className="text-purple-400 text-[10px] font-black uppercase">Promedio Total (GPA)</span>
-                        <span className="text-purple-400 text-xl font-black block mt-1">
-                          {analyticsData.details.academic_profile.current_gpa}/100
-                        </span>
+                      <div className="bg-purple-950/30 border border-purple-700/30 rounded-xl p-3">
+                        <p className="text-[10px] font-black uppercase text-purple-400/70">GPA Total</p>
+                        <p className="text-xl font-black text-purple-300 mt-1">
+                          {analyticsData.details.academic_profile.current_gpa}
+                          <span className="text-sm font-normal text-purple-400/50"> / 100</span>
+                        </p>
+                        <div className="w-full bg-slate-700/50 rounded-full h-1.5 mt-2">
+                          <div className="h-1.5 rounded-full bg-purple-400" style={{ width: `${Math.min(analyticsData.details.academic_profile.current_gpa, 100)}%` }} />
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="border border-slate-800 overflow-hidden rounded-xl">
-                      <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 divide-x divide-slate-800 text-center bg-slate-900/55">
-                        {[2, 3, 4, 5].map((num) => {
-                          const proc = analyticsData.details.academic_profile[`hito${num}_procesual`] || 0;
-                          const nota = analyticsData.details.academic_profile[`hito${num}_nota`] || 0;
-                          return (
-                            <div key={num} className="p-4">
-                              <div className="text-slate-400 text-[10px] font-black uppercase">Hito {num}</div>
-                              <div className="text-purple-400 text-2xl font-black mt-1">{proc + nota}</div>
-                              <div className="text-slate-500 text-[10px]">Nota Final</div>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                      {[2, 3, 4, 5].map((num) => {
+                        const proc  = analyticsData.details.academic_profile[`hito${num}_procesual`] || 0;
+                        const nota  = analyticsData.details.academic_profile[`hito${num}_nota`] || 0;
+                        const total = proc + nota;
+                        const color = total >= 51 ? 'text-emerald-400' : total >= 31 ? 'text-amber-400' : 'text-rose-400';
+                        const bar   = total >= 51 ? 'bg-emerald-400' : total >= 31 ? 'bg-amber-400' : 'bg-rose-400';
+                        return (
+                          <div key={num} className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-3 text-center">
+                            <p className="text-[10px] font-black uppercase text-slate-500 mb-1">Hito {num}</p>
+                            <p className={`text-xl font-black ${color}`}>{total}</p>
+                            <p className="text-[10px] text-slate-600">/ 100 pts</p>
+                            <div className="w-full bg-slate-700/50 rounded-full h-1 mt-2">
+                              <div className={`h-1 rounded-full ${bar}`} style={{ width: `${Math.min(total, 100)}%` }} />
                             </div>
-                          );
-                        })}
-                      </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -882,13 +904,13 @@ export default function AdminUsersPage() {
               </div>
             )}
 
-            <DialogFooter className="border-t border-slate-800 pt-4 mt-6">
+            <DialogFooter className="border-t border-slate-800 pt-4 mt-4 shrink-0">
               <Button
                 variant="outline"
-                className="border-slate-700 bg-transparent text-white hover:bg-slate-800"
+                className="border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white"
                 onClick={() => setSelectedGrafanaUser(null)}
               >
-                Cerrar
+                Cerrar panel
               </Button>
             </DialogFooter>
           </DialogContent>

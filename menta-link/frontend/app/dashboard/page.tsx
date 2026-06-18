@@ -383,6 +383,74 @@ export default function DashboardPage() {
         {/* ADMIN / PSYCHOLOGIST VIEW (Simplified) */}
         {(user?.role === 'admin' || user?.role === 'psychologist') && (
           <div className="animate-slide-up space-y-8">
+
+            {/* HOW TO ACCESS AS ADMIN — Info Banner */}
+            <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5 shadow-sm">
+              <div className="flex flex-col md:flex-row gap-4 md:items-start">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-inner">
+                  <BrainCircuit className="h-5 w-5" />
+                </div>
+                <div className="flex-1 space-y-3">
+                  <div>
+                    <h2 className="text-foreground font-bold text-base">
+                      ¿Cómo acceder como Administrador?
+                    </h2>
+                    <p className="text-muted-foreground text-xs mt-0.5">
+                      Guía rápida de acceso y navegación para roles administrativos
+                    </p>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 text-xs">
+                    <div className="rounded-xl border border-border/30 bg-background/60 p-3 space-y-1">
+                      <div className="font-black text-foreground text-[10px] tracking-widest uppercase">
+                        1 · Inicio de Sesión
+                      </div>
+                      <p className="text-muted-foreground leading-snug">
+                        Ingresa a <strong>/login</strong> con tus credenciales de administrador
+                        (email institucional + contraseña asignada).
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-border/30 bg-background/60 p-3 space-y-1">
+                      <div className="font-black text-foreground text-[10px] tracking-widest uppercase">
+                        2 · Panel Principal
+                      </div>
+                      <p className="text-muted-foreground leading-snug">
+                        Al ingresar, el sistema detecta tu rol y carga este{' '}
+                        <strong>Panel de Administrador</strong> automáticamente con estadísticas
+                        globales.
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-border/30 bg-background/60 p-3 space-y-1">
+                      <div className="font-black text-foreground text-[10px] tracking-widest uppercase">
+                        3 · Módulos Disponibles
+                      </div>
+                      <p className="text-muted-foreground leading-snug">
+                        Navega a <strong>Control de Usuarios</strong> para gestionar cuentas,
+                        <strong> Seguimiento de Alumnos</strong> para ver perfiles y{' '}
+                        <strong>Reportes</strong> para estadísticas institucionales.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Link href="/admin/users">
+                      <button className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-primary/30 text-primary hover:bg-primary/10 transition-all">
+                        → Control de Usuarios
+                      </button>
+                    </Link>
+                    <Link href="/admin/students">
+                      <button className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-border/40 text-muted-foreground hover:bg-muted/20 transition-all">
+                        → Estudiantes
+                      </button>
+                    </Link>
+                    <Link href="/admin/reports">
+                      <button className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-border/40 text-muted-foreground hover:bg-muted/20 transition-all">
+                        → Reportes
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </section>
+
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Link href={user.role === 'admin' ? '/admin/users' : '/admin/alerts'}>
                 <Card className="border-border bg-card border-l-primary cursor-pointer border-l-4 p-6 shadow-sm transition-all hover:shadow-md">
