@@ -62,4 +62,49 @@ Desglose:
 
 ---
 
+## 🔐 Ingreso del Administrador a la Plataforma
+
+El inicio de sesión del administrador utiliza el mismo formulario de login que el resto de usuarios (estudiantes y psicólogos), accesible en la ruta `/login`. El flujo de autenticación es el siguiente:
+
+### 1. Formulario de Ingreso
+- El administrador ingresa su **correo electrónico** y **contraseña** en la página de login.
+- No existe una página de login separada para administradores; la diferenciación se hace por el **rol** asignado al usuario en la base de datos.
+
+### 2. Autenticación en el Backend
+- El frontend envía las credenciales al endpoint `POST /api/v1/auth/login` en formato `application/x-www-form-urlencoded` (estándar OAuth2).
+- El backend:
+  - Aplica **rate limiting** (5 intentos por minuto por IP).
+  - Busca al usuario por correo electrónico en la base de datos.
+  - Verifica la contraseña usando **Argon2** (con soporte legacy para bcrypt).
+  - Si falla la autenticación, retorna un error genérico ("Correo electrónico o contraseña incorrectos") para evitar enumeración de usuarios.
+  - Si el usuario está inactivo, rechaza el acceso.
+
+### 3. Generación de Tokens JWT
+- En caso exitoso, el backend genera un **access token** (expira en 15 minutos) y un **refresh token** (expira en 7 días).
+- Ambos tokens incluyen en su payload el **ID del usuario** y su **rol** (`admin`, `psychologist` o `student`).
+
+### 4. Almacenamiento y Sesión
+- El frontend almacena el access token en `localStorage` y en una cookie.
+- Inmediatamente después del login, solicita los datos del usuario (`GET /api/v1/users/me`) para obtener el perfil completo, incluyendo el rol.
+- Dependiendo del rol, el frontend redirige al dashboard correspondiente.
+
+### 5. Protección de Rutas Administrativas
+- Las rutas del panel de administración (`/admin/*`) están protegidas por el hook `useProtected()` que verifica que el usuario tenga rol `admin`.
+- Si un usuario sin rol admin intenta acceder, es redirigido automáticamente al `/dashboard`.
+- El backend refuerza la seguridad con el middleware `RoleChecker`, permitiendo solo a usuarios con rol `ADMIN` acceder a endpoints críticos como creación de usuarios, asignación de roles, activación/desactivación de cuentas, etc.
+
+### 6. Páginas del Panel Administrativo
+Una vez autenticado como administrador, se puede acceder a:
+| Ruta | Descripción |
+|------|-------------|
+| `/admin/users` | Gestión de usuarios (crear, editar rol, activar/desactivar) |
+| `/admin/students` | Listado de estudiantes con resumen de riesgo |
+| `/admin/alerts` | Alertas tempranas generadas por el sistema |
+| `/admin/appointments` | Gestión de citas psicológicas |
+| `/admin/reports` | Reportes y estadísticas |
+
+> **Nota:** El administrador no puede crearse a sí mismo desde el registro público. Las cuentas con rol `admin` son creadas directamente desde la base de datos o mediante el endpoint interno `POST /users/internal` por otro administrador.
+
+---
+
 **© 2026 MenTaLink** — *Desarrollado con 💚 para la gestión preventiva de bienestar y éxito académico estudiantil.*
