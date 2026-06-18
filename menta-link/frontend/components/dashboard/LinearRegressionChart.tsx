@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
-  ScatterChart,
+  ComposedChart,
   Scatter,
   Line,
   XAxis,
@@ -10,8 +10,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  ReferenceLine,
-  ReferenceArea,
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { AlertCircle, TrendingDown, TrendingUp, Minus, Info } from 'lucide-react';
@@ -48,44 +46,25 @@ interface LinearRegressionData {
   strength: string;
 }
 
-const getStressZoneColor = (x: number) => {
-  if (x <= 13) return '#10b981'; // bajo
-  if (x <= 26) return '#f59e0b'; // moderado
-  return '#ef4444'; // alto
-};
-
 const CustomDot = (props: any) => {
-  const { cx, cy, payload } = props;
-  const color = getStressZoneColor(payload.x);
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={7} fill={color} fillOpacity={0.75} stroke="white" strokeWidth={1.5} />
-    </g>
-  );
+  const { cx, cy } = props;
+  return <circle cx={cx} cy={cy} r={6} fill="#3b82f6" fillOpacity={0.5} stroke="none" />;
 };
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
-    const stressLevel = data.x <= 13 ? '🟢 Estrés Bajo' : data.x <= 26 ? '🟡 Estrés Moderado' : '🔴 Estrés Alto';
-    const gradeLevel = data.y >= 7 ? '📈 Buen rendimiento' : data.y >= 5 ? '⚠️ Rendimiento regular' : '📉 Rendimiento bajo';
     return (
-      <div className="bg-card/98 border-border border rounded-2xl p-4 shadow-2xl backdrop-blur-md max-w-[280px] animate-in fade-in zoom-in-95 duration-150">
-        <p className="text-foreground text-sm font-black truncate mb-1">{data.name}</p>
-        <p className="text-[9px] text-muted-foreground font-mono mb-2">ID: {data.id}</p>
-
-        <div className="space-y-2 border-t border-border/20 pt-2">
+      <div className="bg-card/98 border-border animate-in fade-in zoom-in-95 max-w-[260px] rounded-2xl border p-4 shadow-2xl backdrop-blur-md duration-150">
+        <p className="text-foreground mb-1 truncate text-sm font-black">{data.name}</p>
+        <div className="border-border/20 space-y-2 border-t pt-2">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-[11px] text-muted-foreground">Nivel de Estrés:</span>
-            <span className="text-foreground font-bold text-[11px]">{data.x} / 40</span>
+            <span className="text-muted-foreground text-[11px]">Estrés PSS-10:</span>
+            <span className="text-foreground text-[11px] font-bold">{data.x} / 40</span>
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-[11px] text-muted-foreground">Promedio Acad.:</span>
-            <span className="text-foreground font-bold text-[11px]">{data.y.toFixed(1)} / 10</span>
-          </div>
-          <div className="mt-2 pt-2 border-t border-border/10 space-y-1">
-            <p className="text-[10px] font-semibold">{stressLevel}</p>
-            <p className="text-[10px] font-semibold">{gradeLevel}</p>
+            <span className="text-muted-foreground text-[11px]">Promedio Acad.:</span>
+            <span className="text-foreground text-[11px] font-bold">{data.y.toFixed(1)} / 10</span>
           </div>
         </div>
       </div>
@@ -123,6 +102,49 @@ export function LinearRegressionChart() {
     }
   };
 
+  const scatterData = useMemo(() => {
+    if (!data) return [];
+    return data.points.map((point) => ({
+      x: point.stress_score,
+      y: point.academic_avg,
+      name: point.student_name,
+      id: point.student_id,
+    }));
+  }, [data]);
+
+  const lineData = useMemo(() => {
+    if (!data?.regression_line) return [];
+    const { slope, intercept } = data.regression_line;
+    const points: { x: number; y: number }[] = [];
+    // Genera puntos ordenados secuencialmente para que Recharts dibuje la recta sin alteraciones
+    for (let x = 0; x <= 40; x += 1) {
+      points.push({ x, y: slope * x + intercept });
+    }
+    return points;
+  }, [data]);
+
+  const rSquaredPct = data ? (data.r_squared * 100).toFixed(1) : '0';
+  const slope = data?.regression_line?.slope;
+  const correlationDir =
+    slope !== undefined && slope < -0.05
+      ? 'negativa'
+      : slope !== undefined && slope > 0.05
+        ? 'positiva'
+        : 'neutral';
+
+  const strengthLabel = data
+    ? data.strength?.toLowerCase().includes('fuerte') ||
+      data.strength?.toLowerCase().includes('strong')
+      ? 'Fuerte'
+      : data.strength?.toLowerCase().includes('modera') ||
+          data.strength?.toLowerCase().includes('moderate')
+        ? 'Moderada'
+        : data.strength?.toLowerCase().includes('débil') ||
+            data.strength?.toLowerCase().includes('weak')
+          ? 'Débil'
+          : data.strength || 'N/A'
+    : 'N/A';
+
   if (loading) {
     return (
       <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
@@ -149,141 +171,51 @@ export function LinearRegressionChart() {
     );
   }
 
-  const scatterData = data.points.map((point) => ({
-    x: point.stress_score,
-    y: point.academic_avg,
-    name: point.student_name,
-    id: point.student_id,
-  }));
-
-  const lineData = data.regression_line
-    ? [
-        { x: data.regression_line.x_min, y: data.regression_line.y_min },
-        { x: data.regression_line.x_max, y: data.regression_line.y_max },
-      ]
-    : [];
-
-  const rSquaredPct = (data.r_squared * 100).toFixed(1);
-  const slope = data.regression_line?.slope;
-  const correlationDir = slope !== undefined && slope < -0.05 ? 'negativa' : slope !== undefined && slope > 0.05 ? 'positiva' : 'neutral';
-
-  const strengthLabel =
-    data.strength?.toLowerCase().includes('fuerte') || data.strength?.toLowerCase().includes('strong')
-      ? 'Fuerte'
-      : data.strength?.toLowerCase().includes('modera') || data.strength?.toLowerCase().includes('moderate')
-      ? 'Moderada'
-      : data.strength?.toLowerCase().includes('débil') || data.strength?.toLowerCase().includes('weak')
-      ? 'Débil'
-      : data.strength || 'N/A';
-
   return (
-    <Card className="border-border/40 bg-card/30 shadow-2xl backdrop-blur-md overflow-hidden">
+    <Card className="border-border/40 bg-card/30 overflow-hidden shadow-2xl backdrop-blur-md">
       <CardHeader className="pb-2">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-foreground font-serif text-xl font-bold flex items-center gap-2">
-              📊 Estrés vs. Rendimiento Académico
+            <CardTitle className="text-foreground flex items-center gap-2 font-serif text-xl font-bold">
+              Estrés vs. Rendimiento Académico
             </CardTitle>
             <p className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
-              Regresión Lineal Global · {data.data_count} estudiantes
+              Regresión Lineal · {data.data_count} estudiantes
             </p>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground bg-muted/30 border border-border/20 rounded-lg px-2 py-1 self-start">
+          <div className="text-muted-foreground bg-muted/30 border-border/20 flex items-center gap-1.5 self-start rounded-lg border px-2 py-1 text-[10px]">
             <Info className="h-3 w-3 shrink-0" />
-            <span>Cada punto es un estudiante</span>
+            <span>Cada punto es un student</span>
           </div>
-        </div>
-
-        {/* Cómo leer el gráfico */}
-        <div className="mt-3 rounded-xl border border-border/20 bg-background/30 p-3 text-xs text-muted-foreground leading-relaxed">
-          <p className="font-bold text-foreground mb-1">¿Cómo leer este gráfico?</p>
-          <p>
-            El <strong>eje horizontal (X)</strong> muestra el nivel de estrés (0 = sin estrés, 40 = estrés máximo).
-            El <strong>eje vertical (Y)</strong> muestra el promedio de calificaciones (0–10).
-            La <strong>línea naranja</strong> es la tendencia estadística calculada por regresión lineal:
-            si baja de izquierda a derecha, más estrés se asocia con peores notas.
-          </p>
-        </div>
-
-        {/* Leyenda de colores */}
-        <div className="mt-2 flex flex-wrap gap-3 text-[11px]">
-          <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 inline-block" />
-            <span className="text-muted-foreground">Estrés Bajo (0–13)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-amber-500 inline-block" />
-            <span className="text-muted-foreground">Estrés Moderado (14–26)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-rose-500 inline-block" />
-            <span className="text-muted-foreground">Estrés Alto (27–40)</span>
-          </div>
-          {lineData.length === 2 && (
-            <div className="flex items-center gap-1.5">
-              <span className="inline-block h-0.5 w-5 bg-orange-400 rounded-full" style={{ background: 'linear-gradient(90deg, #fb923c, #f97316)' }} />
-              <span className="text-muted-foreground">Línea de tendencia</span>
-            </div>
-          )}
         </div>
       </CardHeader>
 
       <CardContent className="space-y-5 pt-2">
-        {/* Gráfico */}
-        <div className="h-[300px] sm:h-[380px] w-full rounded-2xl border border-border/20 bg-background/40 p-2 sm:p-4">
+        <div className="border-border/20 bg-background/40 h-[340px] w-full rounded-2xl border p-2 sm:h-[420px] sm:p-4">
           {scatterData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart
+              <ComposedChart
                 margin={{
                   top: 20,
-                  right: isMobile ? 10 : 25,
+                  right: isMobile ? 10 : 30,
                   bottom: isMobile ? 15 : 45,
                   left: isMobile ? -20 : 5,
                 }}
               >
-                <defs>
-                  <linearGradient id="trendLineGrad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#fb923c" stopOpacity={0.8} />
-                    <stop offset="100%" stopColor="#f97316" stopOpacity={1} />
-                  </linearGradient>
-                </defs>
-
-                {/* Zona de nota aprobatoria */}
-                <ReferenceArea y1={5} y2={10} fill="#10b981" fillOpacity={0.04} />
-                <ReferenceArea y1={0} y2={5} fill="#ef4444" fillOpacity={0.04} />
-
-                {/* Línea de nota mínima aprobatoria */}
-                <ReferenceLine
-                  y={5}
-                  stroke="#10b981"
-                  strokeDasharray="6 3"
-                  strokeOpacity={0.5}
-                  strokeWidth={1.5}
-                  label={isMobile ? undefined : { value: 'Nota mínima (5.0)', position: 'right', fontSize: 9, fill: '#10b981' }}
-                />
-
-                {/* Línea zona de estrés alto */}
-                <ReferenceLine
-                  x={26}
-                  stroke="#ef4444"
-                  strokeDasharray="6 3"
-                  strokeOpacity={0.4}
-                  strokeWidth={1.5}
-                  label={isMobile ? undefined : { value: 'Zona crítica', position: 'top', fontSize: 9, fill: '#ef4444' }}
-                />
-
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.25} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.2} />
                 <XAxis
                   type="number"
                   dataKey="x"
                   name="Estrés"
-                  label={
-                    isMobile
-                      ? undefined
-                      : { value: 'Nivel de Estrés PSS-10 (0–40)', position: 'bottom', offset: 15, fontSize: 11, fill: 'var(--muted-foreground)' }
-                  }
+                  label={{
+                    value: 'Nivel de Estrés PSS-10 (0–40)',
+                    position: 'bottom',
+                    offset: 15,
+                    fontSize: 11,
+                    fill: 'var(--muted-foreground)',
+                  }}
                   domain={[0, 40]}
-                  ticks={[0, 10, 13, 20, 26, 30, 40]}
+                  ticks={[0, 10, 20, 30, 40]}
                   stroke="var(--muted-foreground)"
                   fontSize={10}
                   tickLine={false}
@@ -293,90 +225,124 @@ export function LinearRegressionChart() {
                   type="number"
                   dataKey="y"
                   name="Promedio"
-                  label={
-                    isMobile
-                      ? undefined
-                      : { value: 'Promedio de Calificaciones (0–10)', angle: -90, position: 'insideLeft', offset: -5, fontSize: 11, fill: 'var(--muted-foreground)' }
-                  }
+                  label={{
+                    value: 'Promedio de Calificaciones',
+                    angle: -90,
+                    position: 'insideLeft',
+                    offset: -5,
+                    fontSize: 11,
+                    fill: 'var(--muted-foreground)',
+                  }}
                   domain={[0, 10]}
-                  ticks={[0, 2, 4, 5, 6, 8, 10]}
+                  ticks={[0, 2, 4, 6, 8, 10]}
                   stroke="var(--muted-foreground)"
                   fontSize={10}
                   tickLine={false}
                   axisLine={false}
                 />
-                <Tooltip cursor={{ strokeDasharray: '3 3', stroke: 'var(--muted-foreground)', strokeOpacity: 0.4 }} content={<CustomTooltip />} />
+                <Tooltip
+                  cursor={{
+                    strokeDasharray: '3 3',
+                    stroke: 'var(--muted-foreground)',
+                    strokeOpacity: 0.4,
+                  }}
+                  content={<CustomTooltip />}
+                />
+
                 <Scatter
                   name="Estudiantes"
                   data={scatterData}
                   shape={<CustomDot />}
                   className="cursor-pointer"
                 />
-                {lineData.length === 2 && (
+
+                {lineData.length > 1 && (
                   <Line
                     type="linear"
                     name="Tendencia"
                     data={lineData}
-                    stroke="#f97316"
-                    strokeWidth={3}
+                    dataKey="y"
+                    stroke="#ef4444"
+                    strokeWidth={2.5}
                     dot={false}
                     isAnimationActive={false}
-                    strokeDasharray="0"
                   />
                 )}
-              </ScatterChart>
+              </ComposedChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center text-muted-foreground text-sm italic gap-2">
+            <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-2 text-sm italic">
               <span className="text-3xl">📭</span>
               <span>No hay suficientes datos para mostrar el gráfico</span>
             </div>
           )}
         </div>
 
-        {/* KPI Cards */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-border/20 bg-background/40 p-3 hover:bg-background/60 transition-all">
-            <div className="text-muted-foreground text-[9px] font-black tracking-widest uppercase mb-1">Ecuación</div>
-            <div className="font-mono text-sm font-bold text-foreground truncate">{data.equation}</div>
-            <div className="text-muted-foreground text-[9px] mt-0.5">Fórmula de la línea</div>
+          <div className="border-border/20 bg-background/40 hover:bg-background/60 rounded-xl border p-3 transition-all">
+            <div className="text-muted-foreground mb-1 text-[9px] font-black tracking-widest uppercase">
+              Ecuación
+            </div>
+            <div className="text-foreground truncate font-mono text-sm font-bold">
+              {data.equation}
+            </div>
+            <div className="text-muted-foreground mt-0.5 text-[9px]">Fórmula de la recta</div>
           </div>
 
-          <div className="rounded-xl border border-border/20 bg-background/40 p-3 hover:bg-background/60 transition-all">
-            <div className="text-muted-foreground text-[9px] font-black tracking-widest uppercase mb-1">R² — Precisión</div>
-            <div className="text-lg font-bold text-foreground">{rSquaredPct}%</div>
-            <div className="text-muted-foreground text-[9px] mt-0.5">
-              {parseFloat(rSquaredPct) >= 50 ? 'El modelo explica bien los datos' : 'Correlación débil'}
+          <div className="border-border/20 bg-background/40 hover:bg-background/60 rounded-xl border p-3 transition-all">
+            <div className="text-muted-foreground mb-1 text-[9px] font-black tracking-widest uppercase">
+              R² — Precisión
+            </div>
+            <div className="text-foreground text-lg font-bold">{rSquaredPct}%</div>
+            <div className="text-muted-foreground mt-0.5 text-[9px]">
+              {parseFloat(rSquaredPct) >= 50
+                ? 'El modelo explica bien los datos'
+                : parseFloat(rSquaredPct) >= 25
+                  ? 'Correlación moderada'
+                  : 'Correlación débil'}
             </div>
           </div>
 
-          <div className="rounded-xl border border-border/20 bg-background/40 p-3 hover:bg-background/60 transition-all">
-            <div className="text-muted-foreground text-[9px] font-black tracking-widest uppercase mb-1">Dirección</div>
-            <div className="flex items-center gap-1.5 mt-1">
+          <div className="border-border/20 bg-background/40 hover:bg-background/60 rounded-xl border p-3 transition-all">
+            <div className="text-muted-foreground mb-1 text-[9px] font-black tracking-widest uppercase">
+              Dirección
+            </div>
+            <div className="mt-1 flex items-center gap-1.5">
               {getCorrelationIcon(slope)}
-              <span className="text-sm font-bold text-foreground capitalize">
-                {correlationDir === 'negativa' ? 'Negativa' : correlationDir === 'positiva' ? 'Positiva' : 'Neutra'}
+              <span className="text-foreground text-sm font-bold capitalize">
+                {correlationDir === 'negativa'
+                  ? 'Negativa'
+                  : correlationDir === 'positiva'
+                    ? 'Positiva'
+                    : 'Neutra'}
               </span>
             </div>
-            <div className="text-muted-foreground text-[9px] mt-0.5">
-              {correlationDir === 'negativa' ? '↑ Estrés → ↓ Notas' : correlationDir === 'positiva' ? '↑ Estrés → ↑ Notas' : 'Sin tendencia clara'}
+            <div className="text-muted-foreground mt-0.5 text-[9px]">
+              {correlationDir === 'negativa'
+                ? 'A mayor estrés, menor nota'
+                : correlationDir === 'positiva'
+                  ? 'A mayor estrés, mayor nota'
+                  : 'Sin tendencia clara'}
             </div>
           </div>
 
-          <div className="rounded-xl border border-border/20 bg-background/40 p-3 hover:bg-background/60 transition-all">
-            <div className="text-muted-foreground text-[9px] font-black tracking-widest uppercase mb-1">Fuerza</div>
-            <div className="text-sm font-bold text-foreground mt-1">{strengthLabel}</div>
-            <div className="text-muted-foreground text-[9px] mt-0.5">{data.data_count} estudiantes analizados</div>
+          <div className="border-border/20 bg-background/40 hover:bg-background/60 rounded-xl border p-3 transition-all">
+            <div className="text-muted-foreground mb-1 text-[9px] font-black tracking-widest uppercase">
+              Fuerza
+            </div>
+            <div className="text-foreground mt-1 text-sm font-bold">{strengthLabel}</div>
+            <div className="text-muted-foreground mt-0.5 text-[9px]">
+              {data.data_count} estudiantes analizados
+            </div>
           </div>
         </div>
 
-        {/* Interpretación */}
         <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
-          <div className="text-foreground text-xs font-black uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+          <div className="text-foreground mb-1.5 flex items-center gap-1.5 text-xs font-black tracking-wider uppercase">
             <Info className="h-3.5 w-3.5 text-amber-500" />
             Conclusión del Análisis:
           </div>
-          <p className="text-muted-foreground leading-relaxed text-xs">{data.interpretation}</p>
+          <p className="text-muted-foreground text-xs leading-relaxed">{data.interpretation}</p>
         </div>
       </CardContent>
     </Card>

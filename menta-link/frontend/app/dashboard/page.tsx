@@ -5,7 +5,6 @@ import { Layout } from '@/components/layout';
 import { useProtected } from '@/hooks/useProtected';
 import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { TrendChart } from '@/components/dashboard/TrendChart';
 import { DropoutTrendChart } from '@/components/dashboard/DropoutTrendChart';
 import { RiskDistributionChart } from '@/components/dashboard/RiskDistributionChart';
@@ -24,9 +23,24 @@ import {
   ClipboardList,
   Heart,
   BrainCircuit,
+  BarChart3,
+  Users,
+  Award,
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import {
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import { Progress } from '@/components/ui/progress';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import type { RiskSummary, AssessmentResponse, Checkin } from '@/lib/types';
 
 export default function DashboardPage() {
@@ -106,6 +120,32 @@ export default function DashboardPage() {
     return trends[trend.toLowerCase()] || trend.toUpperCase();
   };
 
+  // Static example data for admin dashboard
+  const emotionDistributionData = [
+    { name: 'Alegría', value: 35, color: '#10b981' },
+    { name: 'Tranquilidad', value: 25, color: '#3b82f6' },
+    { name: 'Ansiedad', value: 20, color: '#f59e0b' },
+    { name: 'Tristeza', value: 12, color: '#8b5cf6' },
+    { name: 'Estrés', value: 8, color: '#ef4444' },
+  ];
+
+  const weeklyMoodData = [
+    { day: 'Lun', mood: 3.2 },
+    { day: 'Mar', mood: 3.5 },
+    { day: 'Mié', mood: 2.8 },
+    { day: 'Jue', mood: 3.0 },
+    { day: 'Vie', mood: 3.8 },
+    { day: 'Sáb', mood: 4.1 },
+    { day: 'Dom', mood: 3.6 },
+  ];
+
+  const milestonesData = [
+    { hito: 'Hito 2', label: '1° Corte', procesual: 85, nota: 4.5, color: '#10b981' },
+    { hito: 'Hito 3', label: '2° Corte', procesual: 78, nota: 4.2, color: '#3b82f6' },
+    { hito: 'Hito 4', label: '3° Corte', procesual: 92, nota: 4.8, color: '#f59e0b' },
+    { hito: 'Hito 5', label: 'Final', procesual: 70, nota: 3.9, color: '#8b5cf6' },
+  ];
+
   return (
     <Layout>
       <div className="space-y-10 pb-12">
@@ -147,7 +187,7 @@ export default function DashboardPage() {
 
         {/* STUDENT VIEW */}
         {user?.role === 'student' && (
-          <div className="space-y-12">
+          <div className="space-y-8">
             {/* 1. KPIs Zone (Primary Indicators) */}
             <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Card className="border-border/40 flex flex-col justify-between p-5 transition-all hover:shadow-md">
@@ -266,6 +306,181 @@ export default function DashboardPage() {
               </div>
             </section>
 
+            {/* Equilibrium Progress Bar */}
+            <Card className="border-border/40 overflow-hidden">
+              <div className="p-5 pb-3">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="text-primary h-4 w-4" />
+                    <span className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                      Equilibrio Personal
+                    </span>
+                  </div>
+                  <span className="text-foreground text-sm font-black">67%</span>
+                </div>
+                <Progress value={67} className="bg-muted/50 h-3" />
+              </div>
+              <div className="border-border/20 bg-muted/10 text-muted-foreground flex items-center justify-between gap-4 border-t px-5 py-2.5 text-[10px]">
+                <span className="flex items-center gap-1.5">
+                  <span className="bg-risk-low h-2 w-2 rounded-full" /> Bajo riesgo
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="bg-risk-medium h-2 w-2 rounded-full" /> Atención moderada
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="bg-risk-high h-2 w-2 rounded-full" /> Atención urgente
+                </span>
+              </div>
+            </Card>
+
+            {/* Charts Row: Emotional Distribution + Weekly Evolution */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card className="border-border/40 bg-card/30 backdrop-blur-md">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-foreground font-serif text-lg font-bold">
+                    Distribución Emocional
+                  </CardTitle>
+                  <p className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                    Estado anímico general
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {emotionDistributionData.map((item) => (
+                      <div key={item.name} className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-foreground font-medium">{item.name}</span>
+                          <span className="text-muted-foreground font-bold">{item.value}%</span>
+                        </div>
+                        <div className="bg-muted h-3 w-full overflow-hidden rounded-full">
+                          <div
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{ width: `${item.value}%`, backgroundColor: item.color }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/40 bg-card/30 backdrop-blur-md">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-foreground font-serif text-lg font-bold">
+                    Evolución Semanal
+                  </CardTitle>
+                  <p className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                    Tendencia de ánimo de los últimos 7 días
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[220px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={weeklyMoodData}
+                        margin={{ top: 5, right: 5, left: -20, bottom: 5 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="var(--border)"
+                          opacity={0.15}
+                          vertical={false}
+                        />
+                        <XAxis
+                          dataKey="day"
+                          stroke="var(--muted-foreground)"
+                          fontSize={11}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          domain={[0, 5]}
+                          stroke="var(--muted-foreground)"
+                          fontSize={10}
+                          tickLine={false}
+                          axisLine={false}
+                          ticks={[0, 1, 2, 3, 4, 5]}
+                        />
+                        <Tooltip
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              return (
+                                <div className="bg-card/95 border-border rounded-xl border p-3 text-xs shadow-xl backdrop-blur-md">
+                                  <p className="text-foreground mb-1 font-bold">
+                                    {payload[0].payload.day}
+                                  </p>
+                                  <p className="text-muted-foreground">
+                                    Ánimo:{' '}
+                                    <span className="text-foreground font-bold">
+                                      {payload[0].value}
+                                    </span>{' '}
+                                    / 5
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Bar dataKey="mood" radius={[4, 4, 0, 0]} maxBarSize={36}>
+                          {weeklyMoodData.map((entry) => (
+                            <Cell
+                              key={entry.day}
+                              fill={
+                                entry.mood >= 3.5
+                                  ? '#10b981'
+                                  : entry.mood >= 2.5
+                                    ? '#f59e0b'
+                                    : '#ef4444'
+                              }
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Milestones (Hitos 2-5) */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Award className="text-support-medium h-4 w-4" />
+                <h2 className="text-lg font-bold">Rendimiento por Hitos Académicos</h2>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {milestonesData.map((m) => (
+                  <Card key={m.hito} className="border-border/40 bg-card/30 p-5 backdrop-blur-md">
+                    <div className="mb-3 flex items-center justify-between">
+                      <span
+                        className="text-[11px] font-black tracking-widest"
+                        style={{ color: m.color }}
+                      >
+                        {m.hito}
+                      </span>
+                      <span className="text-muted-foreground text-[9px] font-medium">
+                        {m.label}
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="mb-1 flex items-center justify-between text-[10px]">
+                          <span className="text-muted-foreground">Progreso</span>
+                          <span className="text-foreground font-bold">{m.procesual}%</span>
+                        </div>
+                        <Progress value={m.procesual} className="bg-muted/50 h-2" />
+                      </div>
+                      <div className="border-border/10 flex items-end justify-between border-t pt-2">
+                        <span className="text-muted-foreground text-[10px]">Calificación</span>
+                        <span className="text-foreground text-xl font-black">{m.nota}</span>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
             {/* 3. Quick Actions & Dynamic Insights Zone */}
             <section className="grid gap-8 lg:grid-cols-3">
               {/* Plan de Bienestar: Minimalista & Dinámico */}
@@ -291,9 +506,7 @@ export default function DashboardPage() {
                   {riskSummary?.recommendations && riskSummary.recommendations.length > 0 ? (
                     riskSummary.recommendations.slice(0, 4).map((rec, i) => (
                       <Link href={`/test-interventions?idx=${i}`} key={i} className="block">
-                        <Card
-                          className="group bg-card/40 border-primary/10 hover:border-primary/30 relative overflow-hidden p-5 transition-all hover:shadow-sm h-full"
-                        >
+                        <Card className="group bg-card/40 border-primary/10 hover:border-primary/30 relative h-full overflow-hidden p-5 transition-all hover:shadow-sm">
                           <div className="absolute top-0 right-0 p-2 opacity-10 transition-opacity group-hover:opacity-20">
                             {i % 2 === 0 ? (
                               <Heart className="h-8 w-8" />
@@ -306,7 +519,11 @@ export default function DashboardPage() {
                               className={`mt-1 flex h-2 w-2 shrink-0 rounded-full ${i % 2 === 0 ? 'bg-support-medium' : 'bg-support-low'}`}
                             />
                             <p className="text-foreground/90 text-sm leading-relaxed font-medium">
-                              {typeof rec === 'string' ? rec : (rec.metadata?.description || rec.metadata?.title || 'Sugerencia de Bienestar')}
+                              {typeof rec === 'string'
+                                ? rec
+                                : rec.metadata?.description ||
+                                  rec.metadata?.title ||
+                                  'Sugerencia de Bienestar'}
                             </p>
                           </div>
                         </Card>
@@ -380,77 +597,99 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* ADMIN / PSYCHOLOGIST VIEW (Simplified) */}
+        {/* ADMIN / PSYCHOLOGIST VIEW */}
         {(user?.role === 'admin' || user?.role === 'psychologist') && (
           <div className="animate-slide-up space-y-8">
-
-            {/* HOW TO ACCESS AS ADMIN — Info Banner */}
-            <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5 shadow-sm">
-              <div className="flex flex-col md:flex-row gap-4 md:items-start">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-inner">
-                  <BrainCircuit className="h-5 w-5" />
-                </div>
-                <div className="flex-1 space-y-3">
+            {/* Compact Admin Banner */}
+            <section className="border-primary/20 bg-primary/5 rounded-2xl border p-4 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 text-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                    <BrainCircuit className="h-4 w-4" />
+                  </div>
                   <div>
-                    <h2 className="text-foreground font-bold text-base">
-                      ¿Cómo acceder como Administrador?
+                    <h2 className="text-foreground text-sm leading-tight font-bold">
+                      Panel de Administración
                     </h2>
-                    <p className="text-muted-foreground text-xs mt-0.5">
-                      Guía rápida de acceso y navegación para roles administrativos
+                    <p className="text-muted-foreground text-[10px] leading-tight">
+                      Visión global del bienestar estudiantil
                     </p>
                   </div>
-                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 text-xs">
-                    <div className="rounded-xl border border-border/30 bg-background/60 p-3 space-y-1">
-                      <div className="font-black text-foreground text-[10px] tracking-widest uppercase">
-                        1 · Inicio de Sesión
-                      </div>
-                      <p className="text-muted-foreground leading-snug">
-                        Ingresa a <strong>/login</strong> con tus credenciales de administrador
-                        (email institucional + contraseña asignada).
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-border/30 bg-background/60 p-3 space-y-1">
-                      <div className="font-black text-foreground text-[10px] tracking-widest uppercase">
-                        2 · Panel Principal
-                      </div>
-                      <p className="text-muted-foreground leading-snug">
-                        Al ingresar, el sistema detecta tu rol y carga este{' '}
-                        <strong>Panel de Administrador</strong> automáticamente con estadísticas
-                        globales.
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-border/30 bg-background/60 p-3 space-y-1">
-                      <div className="font-black text-foreground text-[10px] tracking-widest uppercase">
-                        3 · Módulos Disponibles
-                      </div>
-                      <p className="text-muted-foreground leading-snug">
-                        Navega a <strong>Control de Usuarios</strong> para gestionar cuentas,
-                        <strong> Seguimiento de Alumnos</strong> para ver perfiles y{' '}
-                        <strong>Reportes</strong> para estadísticas institucionales.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <Link href="/admin/users">
-                      <button className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-primary/30 text-primary hover:bg-primary/10 transition-all">
-                        → Control de Usuarios
-                      </button>
-                    </Link>
-                    <Link href="/admin/students">
-                      <button className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-border/40 text-muted-foreground hover:bg-muted/20 transition-all">
-                        → Estudiantes
-                      </button>
-                    </Link>
-                    <Link href="/admin/reports">
-                      <button className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-border/40 text-muted-foreground hover:bg-muted/20 transition-all">
-                        → Reportes
-                      </button>
-                    </Link>
-                  </div>
+                </div>
+                <div className="flex gap-1.5">
+                  <Link href="/admin/users">
+                    <span className="border-primary/30 text-primary hover:bg-primary/10 cursor-pointer rounded-lg border px-2.5 py-1 text-[9px] font-black tracking-widest uppercase transition-all">
+                      Usuarios
+                    </span>
+                  </Link>
+                  <Link href="/admin/students">
+                    <span className="border-border/40 text-muted-foreground hover:bg-muted/20 cursor-pointer rounded-lg border px-2.5 py-1 text-[9px] font-black tracking-widest uppercase transition-all">
+                      Estudiantes
+                    </span>
+                  </Link>
+                  <Link href="/admin/reports">
+                    <span className="border-border/40 text-muted-foreground hover:bg-muted/20 cursor-pointer rounded-lg border px-2.5 py-1 text-[9px] font-black tracking-widest uppercase transition-all">
+                      Reportes
+                    </span>
+                  </Link>
                 </div>
               </div>
             </section>
 
+            {/* KPI Cards */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Card className="border-border/40 p-5">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                    Total Estudiantes
+                  </span>
+                  <Users className="text-muted-foreground/30 h-4 w-4" />
+                </div>
+                <p className="text-foreground mt-2 text-2xl font-black">
+                  {aggregatedReport?.total_population || 156}
+                </p>
+                <p className="text-muted-foreground mt-1 text-[9px]">Matriculados este semestre</p>
+              </Card>
+
+              <Card className="border-border/40 p-5">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                    Ánimo Promedio
+                  </span>
+                  <Activity className="text-support-medium h-4 w-4" />
+                </div>
+                <p className="text-foreground mt-2 text-2xl font-black">
+                  {aggregatedReport?.average_mood_score
+                    ? `${aggregatedReport.average_mood_score}/5`
+                    : '3.4/5'}
+                </p>
+                <p className="text-muted-foreground mt-1 text-[9px]">Check-ins recientes</p>
+              </Card>
+
+              <Card className="border-border/40 p-5">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                    Riesgo Alto
+                  </span>
+                  <AlertTriangle className="text-risk-high h-4 w-4" />
+                </div>
+                <p className="text-risk-high mt-2 text-2xl font-black">18%</p>
+                <p className="text-muted-foreground mt-1 text-[9px]">Estudiantes en zona crítica</p>
+              </Card>
+
+              <Card className="border-border/40 p-5">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+                    Intervenciones
+                  </span>
+                  <Heart className="text-support-low h-4 w-4" />
+                </div>
+                <p className="text-foreground mt-2 text-2xl font-black">12 activas</p>
+                <p className="text-muted-foreground mt-1 text-[9px]">Casos con seguimiento</p>
+              </Card>
+            </div>
+
+            {/* Navigation Cards */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Link href={user.role === 'admin' ? '/admin/users' : '/admin/alerts'}>
                 <Card className="border-border bg-card border-l-primary cursor-pointer border-l-4 p-6 shadow-sm transition-all hover:shadow-md">
@@ -479,8 +718,11 @@ export default function DashboardPage() {
                 </Card>
               </Link>
             </div>
+
+            {/* Conditional Real API Charts */}
             {aggregatedReport && (
               <div className="space-y-6">
+                <h2 className="text-lg font-bold">Datos en Vivo del Sistema</h2>
                 <div className="max-w-md">
                   <RiskDistributionChart data={aggregatedReport.risk_distribution} />
                 </div>

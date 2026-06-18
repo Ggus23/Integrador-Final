@@ -1,8 +1,8 @@
-'use client';
-
+/* eslint-disable prettier/prettier */
+'use client'
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Layout } from '@/components/layout';
+import { useRouter } from 'next/navigation'
+import { Layout } from '@/components/layout'
 import { useProtected } from '@/hooks/useProtected';
 import { apiClient } from '@/lib/api';
 import { Card } from '@/components/ui/card';
@@ -118,7 +118,10 @@ export default function AdminUsersPage() {
     try {
       setDataLoading(true);
       const data = await apiClient.getUsers();
-      setUsers(data);
+      const unique = data.filter(
+        (u: User, i: number, self: User[]) => self.findIndex((x) => x.id === u.id) === i
+      );
+      setUsers(unique);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar usuarios');
       toast.error('No se pudieron cargar los usuarios');
@@ -473,250 +476,7 @@ export default function AdminUsersPage() {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Confirmation Dialog for Permanent Delete */}
-        <AlertDialog
-          open={!!confirmDelete}
-          onOpenChange={(open) => !open && setConfirmDelete(null)}
-        >
-          <AlertDialogContent className="border-destructive/20">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-destructive font-serif text-2xl">
-                ¿ELIMINAR PERMANENTEMENTE?
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-4 pt-2">
-                  <p>
-                    Estás a punto de eliminar a <strong>{confirmDelete?.name}</strong> de forma
-                    irreversible.
-                  </p>
-                  <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border p-4 text-xs leading-relaxed">
-                    <strong className="mb-1 block">ADVERTENCIA:</strong>
-                    Esta acción borrará al usuario y TODA su información histórica (alertas,
-                    evaluaciones psicométricas, registros de bienestar) de la base de datos. No se
-                    puede deshacer.
-                  </div>
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={executeDeleteUser}
-                className="bg-destructive hover:bg-destructive/90"
-              >
-                Eliminar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
 
-        <Card className="border-border animate-slide-up overflow-hidden shadow-xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-muted/50 text-muted-foreground text-[10px] font-black tracking-widest uppercase">
-                <tr>
-                  <th className="px-6 py-5">Identidad del Usuario</th>
-                  <th className="px-6 py-5">Rol en el Sistema</th>
-                  <th className="px-6 py-5">Estado</th>
-                  <th className="px-6 py-5">Acciones Administrativas</th>
-                </tr>
-              </thead>
-              <tbody className="divide-border/50 divide-y">
-                {dataLoading && users.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="text-muted-foreground px-6 py-12 text-center italic">
-                      Cargando base de datos de usuarios...
-                    </td>
-                  </tr>
-                ) : (
-                  users.map((u) => (
-                    <tr
-                      key={u.id}
-                      className={`hover:bg-muted/5 group transition-colors ${!u.is_active ? 'bg-muted/10 opacity-60' : ''}`}
-                    >
-                      <td className="px-6 py-5">
-                        <div className="text-foreground group-hover:text-primary font-bold transition-colors">
-                          {u.full_name}
-                        </div>
-                        <div className="text-muted-foreground text-xs">{u.email}</div>
-                      </td>
-                      <td className="px-6 py-5">
-                        <Badge
-                          variant="outline"
-                          className={
-                            u.role === 'admin'
-                              ? 'border-purple-700 bg-purple-600 px-3 py-1 font-bold text-white'
-                              : u.role === 'psychologist'
-                                ? 'border-blue-700 bg-blue-600 px-3 py-1 font-bold text-white'
-                                : 'border-slate-700 bg-slate-600 px-3 py-1 font-bold text-white'
-                          }
-                        >
-                          {u.role === 'admin'
-                            ? 'ADMINISTRADOR'
-                            : u.role === 'psychologist'
-                              ? 'PSICÓLOGO'
-                              : 'ESTUDIANTE'}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-5">
-                        <Badge
-                          variant="outline"
-                          className={
-                            u.is_active
-                              ? 'border-green-200 bg-green-500/10 text-green-700'
-                              : 'border-red-200 bg-red-500/10 text-red-700'
-                          }
-                        >
-                          {u.is_active ? 'ACTIVO' : 'DESACTIVADO'}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-5">
-                        {u.id !== currentUser?.id && (
-                          <div className="flex flex-wrap gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className={`h-8 px-4 text-[10px] font-black uppercase transition-all ${
-                                u.is_active
-                                  ? 'border-amber-200 hover:bg-amber-50 hover:text-amber-600'
-                                  : 'border-green-200 hover:bg-green-50 hover:text-green-600'
-                              }`}
-                              onClick={() =>
-                                setConfirmToggle({
-                                  id: u.id,
-                                  name: u.full_name,
-                                  status: u.is_active,
-                                })
-                              }
-                            >
-                              {u.is_active ? 'Desactivar' : 'Activar'}
-                            </Button>
-
-                            {u.role !== 'psychologist' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 px-4 text-[10px] font-black font-bold uppercase transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
-                                onClick={() => handleRoleChange(u.id, 'psychologist')}
-                              >
-                                Hacer Psicólogo
-                              </Button>
-                            )}
-                            {u.role !== 'student' && u.role !== 'admin' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 px-4 text-[10px] font-black font-bold uppercase transition-all hover:bg-slate-50 hover:text-slate-600"
-                                onClick={() => handleRoleChange(u.id, 'student')}
-                              >
-                                Hacer Estudiante
-                              </Button>
-                            )}
-                            {u.role === 'student' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 px-4 text-[10px] font-black font-bold uppercase transition-all border-purple-200 hover:bg-purple-50 hover:text-purple-650"
-                                onClick={() => handleOpenAnalytics(u)}
-                              >
-                                Ver Gráficos
-                              </Button>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              className="shadow-destructive/10 h-8 px-4 text-[10px] font-black uppercase shadow-lg"
-                              onClick={() => setConfirmDelete({ id: u.id, name: u.full_name })}
-                            >
-                              Eliminar
-                            </Button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-
-        {/* Confirmation Dialog for Toggle Status */}
-        <AlertDialog
-          open={!!confirmToggle}
-          onOpenChange={(open) => !open && setConfirmToggle(null)}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Confirmar cambio de estado?</AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-3">
-                  <p>
-                    Estás a punto de{' '}
-                    <strong>{confirmToggle?.status ? 'desactivar' : 'activar'}</strong> la cuenta de{' '}
-                    <strong>{confirmToggle?.name}</strong>.
-                  </p>
-                  {confirmToggle?.status && (
-                    <div className="text-destructive bg-destructive/5 border-destructive/10 mt-2 rounded border p-2 text-xs font-bold">
-                      Nota: Al desactivar, se resolverán automáticamente todas sus alertas
-                      pendientes.
-                    </div>
-                  )}
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={executeToggleStatus}
-                className={
-                  confirmToggle?.status
-                    ? 'bg-amber-600 hover:bg-amber-700'
-                    : 'bg-green-600 hover:bg-green-700'
-                }
-              >
-                Confirmar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Confirmation Dialog for Permanent Delete */}
-        <AlertDialog
-          open={!!confirmDelete}
-          onOpenChange={(open) => !open && setConfirmDelete(null)}
-        >
-          <AlertDialogContent className="border-destructive/20">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-destructive font-serif text-2xl">
-                ¿ELIMINAR PERMANENTEMENTE?
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-4 pt-2">
-                  <p>
-                    Estás a punto de eliminar a <strong>{confirmDelete?.name}</strong> de forma
-                    irreversible.
-                  </p>
-                  <div className="bg-destructive/10 border-destructive/20 text-destructive rounded-lg border p-4 text-xs leading-relaxed">
-                    <strong className="mb-1 block">ADVERTENCIA:</strong>
-                    Esta acción borrará al usuario y TODA su información histórica (alertas,
-                    evaluaciones psicométricas, registros de bienestar) de la base de datos. No se
-                    puede deshacer.
-                  </div>
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={executeDeleteUser}
-                className="bg-destructive hover:bg-destructive/90 font-bold text-white"
-              >
-                ELIMINAR TODO
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
 
         {/* Native Analytics Dashboard Dialog */}
         <Dialog open={!!selectedGrafanaUser} onOpenChange={(open) => !open && setSelectedGrafanaUser(null)}>
