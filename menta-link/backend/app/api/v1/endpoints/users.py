@@ -1,6 +1,7 @@
 from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -265,6 +266,9 @@ def delete_user(
             status_code=400,
             detail="No puedes eliminar tu propia cuenta de administrador",
         )
+
+    # Elimina registros de auditoría existentes (tabla legacy sin modelo)
+    db.execute(text("DELETE FROM audit_logs WHERE actor_id = :uid"), {"uid": user_id})
 
     # Elimina el usuario de la DB
     db.delete(user)
