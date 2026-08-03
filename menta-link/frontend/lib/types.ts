@@ -19,7 +19,7 @@ export interface Assessment {
 
 export interface AssessmentItem {
   id: string;
-  question: string;
+  text: string;
   scale_min: number;
   scale_max: number;
   scale_min_label: string;
@@ -66,7 +66,7 @@ export interface RiskSummary {
   trend?: 'improving' | 'stable' | 'declining';
   last_assessment_date?: string;
   active_alerts?: number;
-   recommendations?: any[];
+  recommendations?: any[];
 }
 
 export interface StudentSummary {

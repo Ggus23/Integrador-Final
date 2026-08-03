@@ -98,7 +98,7 @@ export default function DiaryPage() {
     scores: { depresion: 0, ansiedad: 0, estres: 0 },
     symptoms: [] as string[],
     keyConcepts: [] as string[],
-    meaningfulPhrases: {} as Record<string, number>
+    meaningfulPhrases: {} as Record<string, number>,
   });
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function DiaryPage() {
   }>({
     key_concepts: [],
     relevant_phrases: [],
-    recurrent_patterns: []
+    recurrent_patterns: [],
   });
   const [phraseCloud, setPhraseCloud] = useState<
     { phrase: string; frequency: number; sentiment?: string }[]
@@ -313,11 +313,11 @@ export default function DiaryPage() {
                       className="border-border/50 bg-background/50 focus:border-primary/50 focus:ring-primary/5 min-h-[140px] w-full rounded-2xl border-2 p-5 font-serif text-lg leading-relaxed placeholder:italic focus:ring-4 focus:outline-none"
                       placeholder="Cuéntame sobre tu día..."
                     />
-                    
+
                     {/* Real-time Feedback */}
                     <AnimatePresence>
                       {formData.experience.length > 10 && (
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0 }}
@@ -325,19 +325,25 @@ export default function DiaryPage() {
                         >
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
-                              <div className="bg-red-500 h-1.5 w-1.5 rounded-full" />
-                              <span className="text-[9px] font-black uppercase opacity-60">Depresión: {(realtimeAnalysis.scores.depresion * 100).toFixed(0)}%</span>
+                              <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                              <span className="text-[9px] font-black uppercase opacity-60">
+                                Depresión: {(realtimeAnalysis.scores.depresion * 100).toFixed(0)}%
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <div className="bg-orange-500 h-1.5 w-1.5 rounded-full" />
-                              <span className="text-[9px] font-black uppercase opacity-60">Ansiedad: {(realtimeAnalysis.scores.ansiedad * 100).toFixed(0)}%</span>
+                              <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+                              <span className="text-[9px] font-black uppercase opacity-60">
+                                Ansiedad: {(realtimeAnalysis.scores.ansiedad * 100).toFixed(0)}%
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <div className="bg-yellow-500 h-1.5 w-1.5 rounded-full" />
-                              <span className="text-[9px] font-black uppercase opacity-60">Estrés: {(realtimeAnalysis.scores.estres * 100).toFixed(0)}%</span>
+                              <div className="h-1.5 w-1.5 rounded-full bg-yellow-500" />
+                              <span className="text-[9px] font-black uppercase opacity-60">
+                                Estrés: {(realtimeAnalysis.scores.estres * 100).toFixed(0)}%
+                              </span>
                             </div>
                           </div>
-                          <div className="text-[8px] font-black tracking-widest text-primary uppercase">
+                          <div className="text-primary text-[8px] font-black tracking-widest uppercase">
                             Procesamiento IA en vivo
                           </div>
                         </motion.div>
@@ -346,36 +352,37 @@ export default function DiaryPage() {
 
                     {/* Real-time Insights Preview */}
                     <AnimatePresence>
-                      {formData.experience.length > 20 && realtimeAnalysis.keyConcepts.length > 0 && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="space-y-4 pt-4"
-                        >
-                          <div className="flex flex-wrap gap-2">
-                            {realtimeAnalysis.keyConcepts.map((concept, i) => (
-                              <span 
-                                key={i}
-                                className="bg-primary/10 text-primary rounded-lg px-2 py-1 text-[10px] font-bold italic"
-                              >
-                                #{concept}
-                              </span>
-                            ))}
-                          </div>
-                          
-                          <div className="flex flex-wrap gap-x-4 gap-y-2">
-                            {Object.keys(realtimeAnalysis.meaningfulPhrases).map((phrase, i) => (
-                              <div key={i} className="flex items-center gap-2">
-                                <Sparkles size={8} className="text-support-medium" />
-                                <span className="text-muted-foreground text-[9px] font-black uppercase tracking-tighter">
-                                  {phrase}
+                      {formData.experience.length > 20 &&
+                        realtimeAnalysis.keyConcepts.length > 0 && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="space-y-4 pt-4"
+                          >
+                            <div className="flex flex-wrap gap-2">
+                              {realtimeAnalysis.keyConcepts.map((concept, i) => (
+                                <span
+                                  key={i}
+                                  className="bg-primary/10 text-primary rounded-lg px-2 py-1 text-[10px] font-bold italic"
+                                >
+                                  #{concept}
                                 </span>
-                              </div>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
+                              ))}
+                            </div>
+
+                            <div className="flex flex-wrap gap-x-4 gap-y-2">
+                              {Object.keys(realtimeAnalysis.meaningfulPhrases).map((phrase, i) => (
+                                <div key={i} className="flex items-center gap-2">
+                                  <Sparkles size={8} className="text-support-medium" />
+                                  <span className="text-muted-foreground text-[9px] font-black tracking-tighter uppercase">
+                                    {phrase}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
                     </AnimatePresence>
                   </div>
 
@@ -515,7 +522,7 @@ export default function DiaryPage() {
                             <div className="bg-primary/20 text-primary mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black">
                               {item.count}
                             </div>
-                            <p className="text-xs leading-relaxed opacity-80 italic">
+                            <p className="text-xs leading-relaxed italic opacity-80">
                               "{item.phrase}"
                             </p>
                           </div>
@@ -551,13 +558,13 @@ export default function DiaryPage() {
                           className="flex items-center gap-3"
                         >
                           <div className="bg-primary h-1.5 w-1.5 rounded-full" />
-                          <span className="text-primary/80 block text-2xl font-black italic tracking-tighter">
+                          <span className="text-primary/80 block text-2xl font-black tracking-tighter italic">
                             {concept}
                           </span>
                         </motion.div>
                       ))
                     ) : (
-                      <p className="text-muted-foreground text-[10px] italic opacity-50 text-center">
+                      <p className="text-muted-foreground text-center text-[10px] italic opacity-50">
                         Esperando registros...
                       </p>
                     )}

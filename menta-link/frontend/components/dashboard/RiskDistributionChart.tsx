@@ -13,12 +13,12 @@ const CustomTooltip = ({ active, payload, total }: any) => {
     const data = payload[0].payload;
     const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : 0;
     return (
-      <div className="bg-card/95 border-border border rounded-2xl p-4 shadow-xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-card/95 border-border animate-in fade-in zoom-in-95 rounded-2xl border p-4 shadow-xl backdrop-blur-md duration-150">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: data.color }} />
           <p className="text-foreground text-sm font-black">Riesgo {data.name}</p>
         </div>
-        <div className="mt-2 text-xs text-muted-foreground space-y-1">
+        <div className="text-muted-foreground mt-2 space-y-1 text-xs">
           <p>
             Alumnos: <span className="text-foreground font-bold">{data.value}</span>
           </p>
@@ -45,9 +45,10 @@ export function RiskDistributionChart({ data }: RiskDistributionChartProps) {
 
   const renderLegend = (value: string) => {
     const item = chartData.find((d) => d.name === value);
-    const percentage = totalStudents > 0 ? (((item?.value || 0) / totalStudents) * 100).toFixed(0) : 0;
+    const percentage =
+      totalStudents > 0 ? (((item?.value || 0) / totalStudents) * 100).toFixed(0) : 0;
     return (
-      <span className="text-foreground text-xs font-semibold ml-1 mr-3">
+      <span className="text-foreground mr-3 ml-1 text-xs font-semibold">
         {value} ({percentage}%)
       </span>
     );
@@ -91,7 +92,7 @@ export function RiskDistributionChart({ data }: RiskDistributionChartProps) {
       };
 
   return (
-    <Card className="col-span-4 md:col-span-2 lg:col-span-1 border-border/40 bg-card/30 shadow-2xl backdrop-blur-md">
+    <Card className="border-border/40 bg-card/30 col-span-4 shadow-2xl backdrop-blur-md md:col-span-2 lg:col-span-1">
       <CardHeader className="pb-2">
         <CardTitle className="text-foreground font-serif text-lg font-bold">
           Distribución de Riesgo (IA)
@@ -120,9 +121,9 @@ export function RiskDistributionChart({ data }: RiskDistributionChartProps) {
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip total={totalStudents} />} />
-              <Legend 
-                verticalAlign="bottom" 
-                height={36} 
+              <Legend
+                verticalAlign="bottom"
+                height={36}
                 iconType="circle"
                 iconSize={8}
                 formatter={renderLegend}

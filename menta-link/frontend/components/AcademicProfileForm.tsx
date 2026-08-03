@@ -149,7 +149,10 @@ export function AcademicProfileForm() {
                 type="number"
                 value={record.enrolled_credits ?? ''} // Usando el campo para 'total materias'
                 onChange={(e) =>
-                  setRecord({ ...record, enrolled_credits: parseInt(e.target.value) || 0 })
+                  setRecord({
+                    ...record,
+                    enrolled_credits: parseInt(e.target.value) || 0,
+                  })
                 }
                 className="bg-muted/20 h-12"
               />
@@ -201,20 +204,24 @@ export function AcademicProfileForm() {
             <div className="grid grid-cols-1 gap-4">
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-black uppercase">Nombre de la Materia</Label>
-                {currentSubject.subject_name && subjects.some(s => s.subject_name === currentSubject.subject_name) && (
-                  <button 
-                    onClick={() => setCurrentSubject({ subject_name: '' })}
-                    className="text-primary text-[10px] font-bold uppercase transition-all hover:underline"
-                  >
-                    + Agregar Materia Nueva
-                  </button>
-                )}
+                {currentSubject.subject_name &&
+                  subjects.some((s) => s.subject_name === currentSubject.subject_name) && (
+                    <button
+                      onClick={() => setCurrentSubject({ subject_name: '' })}
+                      className="text-primary text-[10px] font-bold uppercase transition-all hover:underline"
+                    >
+                      + Agregar Materia Nueva
+                    </button>
+                  )}
               </div>
               <Input
                 placeholder="Ej. Análisis Matemático"
                 value={currentSubject.subject_name ?? ''}
                 onChange={(e) =>
-                  setCurrentSubject({ ...currentSubject, subject_name: e.target.value })
+                  setCurrentSubject({
+                    ...currentSubject,
+                    subject_name: e.target.value,
+                  })
                 }
                 className="bg-background border-primary/20 h-12"
               />
@@ -228,9 +235,13 @@ export function AcademicProfileForm() {
                   </span>
                   <div className="space-y-3">
                     <Input
-                      placeholder="Proc."
+                      placeholder="Proc. (0-15)"
                       type="number"
-                      value={currentSubject[`hito${h}_procesual` as keyof AcademicSubjectGrade] ?? ''}
+                      min={0}
+                      max={15}
+                      value={
+                        currentSubject[`hito${h}_procesual` as keyof AcademicSubjectGrade] ?? ''
+                      }
                       onChange={(e) =>
                         setCurrentSubject({
                           ...currentSubject,
@@ -240,8 +251,10 @@ export function AcademicProfileForm() {
                       className="h-8 text-xs"
                     />
                     <Input
-                      placeholder="Nota"
+                      placeholder="Nota (0-10)"
                       type="number"
+                      min={0}
+                      max={10}
                       value={currentSubject[`hito${h}_nota` as keyof AcademicSubjectGrade] ?? ''}
                       onChange={(e) =>
                         setCurrentSubject({
@@ -261,8 +274,10 @@ export function AcademicProfileForm() {
               variant="outline"
               className="border-primary text-primary hover:bg-primary/5 h-12 w-full font-bold"
             >
-              <PlusCircle className="mr-2 h-4 w-4" /> 
-              {subjects.some(s => s.subject_name === currentSubject.subject_name) ? 'Actualizar Notas' : 'Guardar Nueva Materia'}
+              <PlusCircle className="mr-2 h-4 w-4" />
+              {subjects.some((s) => s.subject_name === currentSubject.subject_name)
+                ? 'Actualizar Notas'
+                : 'Guardar Nueva Materia'}
             </Button>
           </Card>
 
@@ -305,7 +320,10 @@ export function AcademicProfileForm() {
                 type="checkbox"
                 checked={record.tuition_fees_up_to_date ?? false}
                 onChange={(e) =>
-                  setRecord({ ...record, tuition_fees_up_to_date: e.target.checked })
+                  setRecord({
+                    ...record,
+                    tuition_fees_up_to_date: e.target.checked,
+                  })
                 }
                 className="border-primary text-primary h-6 w-6 rounded"
               />

@@ -2,43 +2,142 @@
 
 export const MOOD_PATTERNS = {
   depresion: {
-    tristeza: { regex: /\b(triste|deprimid[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo)\b/gi, weight: 1.0 },
-    desesperanza: { regex: /\b(desesperanz[oa]|sin esperanza|sin sentido|nada vale la pena|no hay salida)\b/gi, weight: 1.2 },
-    fatiga: { regex: /\b(cansanci[oa]|cansad[oa]|agotamient[oa]|sin energía|fatigad[oa]|sin fuerzas)\b/gi, weight: 0.8 },
-    inutilidad: { regex: /\b(inútil|fracasad[oa]|no valgo|no sirvo|incompetente)\b/gi, weight: 1.1 },
-    cambios_sueno: { regex: /\b(insomnio|duermo mucho|hipersomnia|despertar temprano)\b/gi, weight: 0.9 },
-    pensamientos_negativos: { regex: /\b(culpa|autocrític[oa]|odio a mí mismo|no merezco)\b/gi, weight: 1.0 },
+    tristeza: {
+      regex: /\b(triste|deprimid[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo)\b/gi,
+      weight: 1.0,
+    },
+    desesperanza: {
+      regex: /\b(desesperanz[oa]|sin esperanza|sin sentido|nada vale la pena|no hay salida)\b/gi,
+      weight: 1.2,
+    },
+    fatiga: {
+      regex: /\b(cansanci[oa]|cansad[oa]|agotamient[oa]|sin energía|fatigad[oa]|sin fuerzas)\b/gi,
+      weight: 0.8,
+    },
+    inutilidad: {
+      regex: /\b(inútil|fracasad[oa]|no valgo|no sirvo|incompetente)\b/gi,
+      weight: 1.1,
+    },
+    cambios_sueno: {
+      regex: /\b(insomnio|duermo mucho|hipersomnia|despertar temprano)\b/gi,
+      weight: 0.9,
+    },
+    pensamientos_negativos: {
+      regex: /\b(culpa|autocrític[oa]|odio a mí mismo|no merezco)\b/gi,
+      weight: 1.0,
+    },
   },
   ansiedad: {
-    nerviosismo: { regex: /\b(nervios[oa]|inquiet[oa]|tens[oa]|intranquil[oa]|agitad[oa])\b/gi, weight: 1.0 },
-    preocupacion: { regex: /\b(preocupad[oa]|angustiad[oa]|rumiando|pensando demasiado|anticipando lo peor)\b/gi, weight: 1.1 },
+    nerviosismo: {
+      regex: /\b(nervios[oa]|inquiet[oa]|tens[oa]|intranquil[oa]|agitad[oa])\b/gi,
+      weight: 1.0,
+    },
+    preocupacion: {
+      regex: /\b(preocupad[oa]|angustiad[oa]|rumiando|pensando demasiado|anticipando lo peor)\b/gi,
+      weight: 1.1,
+    },
     miedo: { regex: /\b(miedo|temor|pánico|aterrorizad[oa]|fobia)\b/gi, weight: 1.2 },
-    sintomas_fisicos: { regex: /\b(corazón acelerado|palpitaciones|sudor|temblor|falta de aire|opresión en el pecho)\b/gi, weight: 1.0 },
+    sintomas_fisicos: {
+      regex:
+        /\b(corazón acelerado|palpitaciones|sudor|temblor|falta de aire|opresión en el pecho)\b/gi,
+      weight: 1.0,
+    },
     evitacion: { regex: /\b(evito|escapo|no salgo|no quiero enfrentar)\b/gi, weight: 0.8 },
-    hipervigilancia: { regex: /\b(alerta constante|sobresalt[oa]|asustadizo|vigilando todo)\b/gi, weight: 0.9 },
+    hipervigilancia: {
+      regex: /\b(alerta constante|sobresalt[oa]|asustadizo|vigilando todo)\b/gi,
+      weight: 0.9,
+    },
   },
   estres: {
-    sobrecarga: { regex: /\b(sobrecargad[oa]|abrumad[oa]|colmad[oa]|no puedo más|demasiadas cosas)\b/gi, weight: 1.2 },
-    presion: { regex: /\b(presión|exigencia|plazos|obligaciones|debo hacer todo)\b/gi, weight: 1.0 },
-    irritabilidad: { regex: /\b(irritable|enfadad[oa]|frustrad[oa]|pierdo la paciencia|me enojo fácil)\b/gi, weight: 1.0 },
-    agotamiento: { regex: /\b(agotamient[oa]|quemad[oa]|burnout|sin motivación|desgaste)\b/gi, weight: 1.1 },
-    problemas_concentracion: { regex: /\b(desconcentrad[oa]|olvidadizo|bloqueo mental|no puedo enfocarme)\b/gi, weight: 0.9 },
-    cambios_apetito: { regex: /\b(como mucho|sin apetito|atracones|pierdo el hambre)\b/gi, weight: 0.8 },
-  }
+    sobrecarga: {
+      regex: /\b(sobrecargad[oa]|abrumad[oa]|colmad[oa]|no puedo más|demasiadas cosas)\b/gi,
+      weight: 1.2,
+    },
+    presion: {
+      regex: /\b(presión|exigencia|plazos|obligaciones|debo hacer todo)\b/gi,
+      weight: 1.0,
+    },
+    irritabilidad: {
+      regex: /\b(irritable|enfadad[oa]|frustrad[oa]|pierdo la paciencia|me enojo fácil)\b/gi,
+      weight: 1.0,
+    },
+    agotamiento: {
+      regex: /\b(agotamient[oa]|quemad[oa]|burnout|sin motivación|desgaste)\b/gi,
+      weight: 1.1,
+    },
+    problemas_concentracion: {
+      regex: /\b(desconcentrad[oa]|olvidadizo|bloqueo mental|no puedo enfocarme)\b/gi,
+      weight: 0.9,
+    },
+    cambios_apetito: {
+      regex: /\b(como mucho|sin apetito|atracones|pierdo el hambre)\b/gi,
+      weight: 0.8,
+    },
+  },
 };
 
-const NEGATIONS = new Set(["no", "ni", "nunca", "jamás", "sin", "tampoco", "ningún", "ninguna"]);
-const INTENSIFIERS = new Set(["muy", "mucho", "demasiado", "siempre", "constantemente", "extremadamente", "terriblemente"]);
+const NEGATIONS = new Set(['no', 'ni', 'nunca', 'jamás', 'sin', 'tampoco', 'ningún', 'ninguna']);
+const INTENSIFIERS = new Set([
+  'muy',
+  'mucho',
+  'demasiado',
+  'siempre',
+  'constantemente',
+  'extremadamente',
+  'terriblemente',
+]);
 const STOPWORDS_FINALES = new Set([
-  "y", "e", "ni", "o", "u", "de", "del", "la", "las", "lo", "los",
-  "el", "que", "por", "para", "con", "sin", "a", "ante", "bajo",
-  "cabe", "contra", "desde", "durante", "en", "entre", "hacia",
-  "hasta", "mediante", "para", "por", "según", "sin", "so", "sobre",
-  "tras", "ya", "también", "más", "pero", "aunque", "si", "no"
+  'y',
+  'e',
+  'ni',
+  'o',
+  'u',
+  'de',
+  'del',
+  'la',
+  'las',
+  'lo',
+  'los',
+  'el',
+  'que',
+  'por',
+  'para',
+  'con',
+  'sin',
+  'a',
+  'ante',
+  'bajo',
+  'cabe',
+  'contra',
+  'desde',
+  'durante',
+  'en',
+  'entre',
+  'hacia',
+  'hasta',
+  'mediante',
+  'para',
+  'por',
+  'según',
+  'sin',
+  'so',
+  'sobre',
+  'tras',
+  'ya',
+  'también',
+  'más',
+  'pero',
+  'aunque',
+  'si',
+  'no',
 ]);
 
 function cleanText(text: string) {
-  return text.toLowerCase().replace(/[^\wáéíóúüñ\s]/gi, ' ').replace(/\s+/g, ' ').trim();
+  return text
+    .toLowerCase()
+    .replace(/[^\wáéíóúüñ\s]/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function contieneEmocion(frase: string) {
@@ -83,12 +182,12 @@ export function getKeyConcepts(text: string, topN: number = 10): string[] {
   }
 
   const counts: Record<string, number> = {};
-  frasesCandidatas.forEach(f => counts[f] = (counts[f] || 0) + 1);
-  
+  frasesCandidatas.forEach((f) => (counts[f] = (counts[f] || 0) + 1));
+
   return Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, topN)
-    .map(e => e[0]);
+    .map((e) => e[0]);
 }
 
 export function extractMeaningfulPhrases(text: string, topN: number = 10): Record<string, number> {
@@ -97,12 +196,12 @@ export function extractMeaningfulPhrases(text: string, topN: number = 10): Recor
   if (tokens.length < 2) return {};
 
   const frasesCandidatas: string[] = [];
-  
+
   // Bigramas
   for (let i = 0; i < tokens.length - 1; i++) {
-    const bigrama = `${tokens[i]} ${tokens[i+1]}`;
+    const bigrama = `${tokens[i]} ${tokens[i + 1]}`;
     if (contieneEmocion(bigrama)) {
-      const ultima = tokens[i+1];
+      const ultima = tokens[i + 1];
       if (!STOPWORDS_FINALES.has(ultima)) {
         frasesCandidatas.push(bigrama);
       }
@@ -111,9 +210,9 @@ export function extractMeaningfulPhrases(text: string, topN: number = 10): Recor
 
   // Trigramas
   for (let i = 0; i < tokens.length - 2; i++) {
-    const trigrama = `${tokens[i]} ${tokens[i+1]} ${tokens[i+2]}`;
+    const trigrama = `${tokens[i]} ${tokens[i + 1]} ${tokens[i + 2]}`;
     if (contieneEmocion(trigrama)) {
-      const ultima = tokens[i+2];
+      const ultima = tokens[i + 2];
       if (!STOPWORDS_FINALES.has(ultima)) {
         frasesCandidatas.push(trigrama);
       }
@@ -121,30 +220,31 @@ export function extractMeaningfulPhrases(text: string, topN: number = 10): Recor
   }
 
   const counts: Record<string, number> = {};
-  frasesCandidatas.forEach(f => counts[f] = (counts[f] || 0) + 1);
-  
+  frasesCandidatas.forEach((f) => (counts[f] = (counts[f] || 0) + 1));
+
   const sorted = Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, topN);
-    
+
   return Object.fromEntries(sorted);
 }
 
 export function analyzeMoodRealtime(text: string) {
-  if (!text) return { 
-    scores: { depresion: 0, ansiedad: 0, estres: 0 }, 
-    symptoms: [],
-    keyConcepts: [],
-    meaningfulPhrases: {}
-  };
+  if (!text)
+    return {
+      scores: { depresion: 0, ansiedad: 0, estres: 0 },
+      symptoms: [],
+      keyConcepts: [],
+      meaningfulPhrases: {},
+    };
 
   const textoLimpio = cleanText(text);
   const tokens = textoLimpio.split(' ');
-  
+
   const scores = {
     depresion: 0,
     ansiedad: 0,
-    estres: 0
+    estres: 0,
   };
 
   const detectedSymptoms: string[] = [];
@@ -160,10 +260,10 @@ export function analyzeMoodRealtime(text: string) {
         const start = match.index;
         const context = textoLimpio.substring(Math.max(0, start - 50), start);
         const contextWords = context.split(/\s+/).filter(Boolean);
-        
-        const hasNegation = contextWords.some(w => NEGATIONS.has(w));
-        const hasIntensifier = contextWords.some(w => INTENSIFIERS.has(w));
-        
+
+        const hasNegation = contextWords.some((w) => NEGATIONS.has(w));
+        const hasIntensifier = contextWords.some((w) => INTENSIFIERS.has(w));
+
         if (!hasNegation) {
           let contribution = weight;
           if (hasIntensifier) contribution *= 1.5;
@@ -172,7 +272,7 @@ export function analyzeMoodRealtime(text: string) {
         }
       }
     }
-    
+
     // @ts-ignore
     scores[category] = Math.min(totalWeight / maxPossible, 1.0);
   }
@@ -181,6 +281,6 @@ export function analyzeMoodRealtime(text: string) {
     scores,
     symptoms: Array.from(new Set(detectedSymptoms)),
     keyConcepts: getKeyConcepts(text, 5),
-    meaningfulPhrases: extractMeaningfulPhrases(text, 8)
+    meaningfulPhrases: extractMeaningfulPhrases(text, 8),
   };
 }

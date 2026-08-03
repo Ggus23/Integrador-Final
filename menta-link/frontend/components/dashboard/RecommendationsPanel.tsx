@@ -92,7 +92,9 @@ export const RecommendationsPanel = ({
               </div>
               <div className="space-y-1">
                 <p className="text-foreground text-sm leading-relaxed lg:text-base">
-                  {typeof rec === 'string' ? rec : (rec.metadata?.description || rec.metadata?.title || 'Sugerencia de Bienestar')}
+                  {typeof rec === 'string'
+                    ? rec
+                    : rec.metadata?.description || rec.metadata?.title || 'Sugerencia de Bienestar'}
                 </p>
               </div>
             </div>

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -478,12 +479,12 @@ export default function AssessmentPage() {
               {cameraActive && (
                 <div className="w-full md:w-56">
                   <div className="bg-card border-border relative aspect-video overflow-hidden rounded-2xl border shadow-lg md:aspect-square">
-                    <video 
-                        ref={videoRef} 
-                        autoPlay 
-                        playsInline 
-                        muted 
-                        className="w-full h-full object-cover" 
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="h-full w-full object-cover"
                     />
                     <div className="bg-primary absolute top-3 right-3 h-2 w-2 animate-ping rounded-full" />
                     <div className="absolute bottom-3 left-3 rounded-md bg-black/40 px-2 py-1 text-[10px] font-bold tracking-widest text-white uppercase backdrop-blur-md">

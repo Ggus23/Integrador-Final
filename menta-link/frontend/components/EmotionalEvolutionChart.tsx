@@ -48,26 +48,44 @@ const CustomTooltip = ({ active, payload }: any) => {
     if (val === null || val === undefined) return null;
     const emoji = EMOTION_EMOJIS[data.emotion?.toLowerCase()] || '😐';
     const color = getWellbeingColor(val);
-    const label = val >= 4.5 ? 'Excelente' : val >= 3.5 ? 'Bueno' : val >= 2.5 ? 'Neutral' : val >= 1.5 ? 'Bajo' : 'Muy Bajo';
+    const label =
+      val >= 4.5
+        ? 'Excelente'
+        : val >= 3.5
+          ? 'Bueno'
+          : val >= 2.5
+            ? 'Neutral'
+            : val >= 1.5
+              ? 'Bajo'
+              : 'Muy Bajo';
 
     return (
-      <div className="bg-card/97 border-border border rounded-2xl p-4 shadow-2xl backdrop-blur-md max-w-[220px] animate-in fade-in zoom-in-95 duration-150">
-        <p className="text-muted-foreground text-[10px] font-black tracking-widest uppercase mb-2">
+      <div className="bg-card/97 border-border animate-in fade-in zoom-in-95 max-w-[220px] rounded-2xl border p-4 shadow-2xl backdrop-blur-md duration-150">
+        <p className="text-muted-foreground mb-2 text-[10px] font-black tracking-widest uppercase">
           {data.week}
         </p>
         <div className="flex items-center gap-3">
-          <span className="text-3xl" role="img">{emoji}</span>
+          <span className="text-3xl" role="img">
+            {emoji}
+          </span>
           <div>
-            <p className="text-sm font-black" style={{ color }}>{label}</p>
+            <p className="text-sm font-black" style={{ color }}>
+              {label}
+            </p>
             <p className="text-muted-foreground text-[11px]">
-              Bienestar: <span className="font-bold" style={{ color }}>{val.toFixed(1)}</span> / 5.0
+              Bienestar:{' '}
+              <span className="font-bold" style={{ color }}>
+                {val.toFixed(1)}
+              </span>{' '}
+              / 5.0
             </p>
           </div>
         </div>
         {data.emotion && data.emotion !== 'Sin datos' && (
-          <div className="mt-2 pt-2 border-t border-border/20">
-            <p className="text-[10px] text-muted-foreground">
-              Ánimo dominante: <span className="font-bold text-foreground capitalize">{data.emotion}</span>
+          <div className="border-border/20 mt-2 border-t pt-2">
+            <p className="text-muted-foreground text-[10px]">
+              Ánimo dominante:{' '}
+              <span className="text-foreground font-bold capitalize">{data.emotion}</span>
             </p>
           </div>
         )}
@@ -93,27 +111,25 @@ export function EmotionalEvolutionChart({ data }: EmotionalEvolutionChartProps) 
 
   if (!hasValidPoints) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 text-center bg-card/10 border border-border/10 rounded-2xl min-h-[200px] gap-2">
-        <span className="text-4xl mb-1">📊</span>
-        <p className="text-sm font-bold text-muted-foreground">Sin datos de evolución</p>
-        <p className="text-[11px] text-muted-foreground/80 max-w-[280px]">
-          El estudiante aún no tiene registros de bienestar en su diario emocional para este período.
+      <div className="bg-card/10 border-border/10 flex min-h-[200px] flex-col items-center justify-center gap-2 rounded-2xl border px-4 py-12 text-center">
+        <span className="mb-1 text-4xl">📊</span>
+        <p className="text-muted-foreground text-sm font-bold">Sin datos de evolución</p>
+        <p className="text-muted-foreground/80 max-w-[280px] text-[11px]">
+          El estudiante aún no tiene registros de bienestar en su diario emocional para este
+          período.
         </p>
       </div>
     );
   }
-
-  // Trend calculation
   const first = validPoints[0]?.avg_wellbeing ?? 0;
   const last = validPoints[validPoints.length - 1]?.avg_wellbeing ?? 0;
   const avgWell = validPoints.reduce((s, d) => s + (d.avg_wellbeing ?? 0), 0) / validPoints.length;
   const trend = last - first;
-
   return (
     <div className="space-y-3">
       {/* Trend summary row */}
       <div className="flex flex-wrap gap-3 text-xs">
-        <div className="flex items-center gap-1.5 bg-muted/30 border border-border/20 rounded-lg px-2.5 py-1">
+        <div className="bg-muted/30 border-border/20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1">
           {trend > 0.3 ? (
             <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
           ) : trend < -0.3 ? (
@@ -123,27 +139,32 @@ export function EmotionalEvolutionChart({ data }: EmotionalEvolutionChartProps) 
           )}
           <span className="text-muted-foreground">
             Tendencia:{' '}
-            <strong className={trend > 0.3 ? 'text-emerald-500' : trend < -0.3 ? 'text-rose-500' : 'text-slate-400'}>
+            <strong
+              className={
+                trend > 0.3 ? 'text-emerald-500' : trend < -0.3 ? 'text-rose-500' : 'text-slate-400'
+              }
+            >
               {trend > 0.3 ? 'Mejorando' : trend < -0.3 ? 'Decayendo' : 'Estable'}
             </strong>
           </span>
         </div>
-        <div className="flex items-center gap-1.5 bg-muted/30 border border-border/20 rounded-lg px-2.5 py-1">
-          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getWellbeingColor(avgWell) }} />
+        <div className="bg-muted/30 border-border/20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1">
+          <span
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: getWellbeingColor(avgWell) }}
+          />
           <span className="text-muted-foreground">
             Promedio del período:{' '}
             <strong className="text-foreground">{avgWell.toFixed(1)}/5.0</strong>
           </span>
         </div>
-        <div className="flex items-center gap-1.5 bg-muted/30 border border-border/20 rounded-lg px-2.5 py-1">
+        <div className="bg-muted/30 border-border/20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1">
           <span className="text-muted-foreground">
-            Semanas registradas:{' '}
-            <strong className="text-foreground">{validPoints.length}</strong>
+            Semanas registradas: <strong className="text-foreground">{validPoints.length}</strong>
           </span>
         </div>
       </div>
-
-      <div className="h-[260px] sm:h-[300px] w-full">
+      <div className="h-[260px] w-full sm:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={processedData}
@@ -162,10 +183,27 @@ export function EmotionalEvolutionChart({ data }: EmotionalEvolutionChartProps) 
             </defs>
 
             {/* Reference zones */}
-            <ReferenceLine y={4} stroke="#10b981" strokeDasharray="5 3" strokeOpacity={0.4} strokeWidth={1} />
-            <ReferenceLine y={2.5} stroke="#f59e0b" strokeDasharray="5 3" strokeOpacity={0.4} strokeWidth={1} />
+            <ReferenceLine
+              y={4}
+              stroke="#10b981"
+              strokeDasharray="5 3"
+              strokeOpacity={0.4}
+              strokeWidth={1}
+            />
+            <ReferenceLine
+              y={2.5}
+              stroke="#f59e0b"
+              strokeDasharray="5 3"
+              strokeOpacity={0.4}
+              strokeWidth={1}
+            />
 
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.2} />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              vertical={false}
+              stroke="var(--border)"
+              opacity={0.2}
+            />
             <XAxis
               dataKey="week"
               axisLine={false}
@@ -212,7 +250,7 @@ export function EmotionalEvolutionChart({ data }: EmotionalEvolutionChartProps) 
       </div>
 
       {/* Scale legend */}
-      <div className="flex flex-wrap gap-3 text-[10px] text-muted-foreground">
+      <div className="text-muted-foreground flex flex-wrap gap-3 text-[10px]">
         <div className="flex items-center gap-1">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
           <span>4–5 · Saludable</span>

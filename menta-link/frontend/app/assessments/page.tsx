@@ -179,7 +179,7 @@ export default function AssessmentsPage() {
           {assessments.map((assessment, index) => {
             const status = getAssessmentStatus(assessment.type);
             const history = getLastResult(assessment.type);
-            
+
             // BYPASS PSS-10 temporal de 30 días a 0 para pruebas de hoy
             const requiredWaitDays = assessment.type === 'PSS-10' ? 0 : 14;
             const isLocked = history && history.daysAgo < requiredWaitDays;
@@ -257,7 +257,7 @@ export default function AssessmentsPage() {
                     <Button
                       size="sm"
                       disabled
-                      className="w-full bg-muted/50 text-muted-foreground text-[10px] font-black tracking-widest uppercase cursor-not-allowed border border-border/40"
+                      className="bg-muted/50 text-muted-foreground border-border/40 w-full cursor-not-allowed border text-[10px] font-black tracking-widest uppercase"
                     >
                       <Clock className="mr-2 h-3 w-3" />
                       Disponible en {daysToUnlock} {daysToUnlock === 1 ? 'día' : 'días'}

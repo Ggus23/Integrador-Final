@@ -24,24 +24,26 @@ export function JournalingIntervention({ metadata }: JournalingInterventionProps
   };
 
   return (
-    <Card className="p-6 bg-card border-border/50 shadow-sm space-y-6">
+    <Card className="bg-card border-border/50 space-y-6 p-6 shadow-sm">
       <div className="flex items-center gap-4">
-        <div className="p-3 bg-primary/10 rounded-xl">
+        <div className="bg-primary/10 rounded-xl p-3">
           <BookOpen className="text-primary" size={24} />
         </div>
         <div>
           <h4 className="text-foreground font-medium">Reflexión Guiada</h4>
-          <p className="text-muted-foreground text-sm">{metadata.description || 'Tómate un momento para escribir lo que sientes.'}</p>
+          <p className="text-muted-foreground text-sm">
+            {metadata.description || 'Tómate un momento para escribir lo que sientes.'}
+          </p>
         </div>
       </div>
 
       <div className="space-y-4">
-        <label className="text-foreground/80 text-sm font-medium italic block">
+        <label className="text-foreground/80 block text-sm font-medium italic">
           "{metadata.prompt || '¿Qué es lo que más te preocupa en este momento y por qué?'}"
         </label>
-        
+
         <textarea
-          className="w-full bg-background border border-border/50 rounded-xl p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-colors"
+          className="bg-background border-border/50 text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:ring-primary/50 w-full rounded-xl border p-4 transition-colors focus:ring-1 focus:outline-none"
           placeholder="Escribe aquí tu reflexión..."
           rows={4}
           value={text}
@@ -49,10 +51,10 @@ export function JournalingIntervention({ metadata }: JournalingInterventionProps
         />
 
         <div className="flex justify-end">
-          <Button 
+          <Button
             onClick={handleSave}
             disabled={!text.trim() || saved}
-            className="rounded-xl px-6 flex items-center gap-2 transition-all"
+            className="flex items-center gap-2 rounded-xl px-6 transition-all"
           >
             {saved ? (
               <>

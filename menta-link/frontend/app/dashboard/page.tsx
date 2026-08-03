@@ -9,13 +9,11 @@ import { TrendChart } from '@/components/dashboard/TrendChart';
 import { DropoutTrendChart } from '@/components/dashboard/DropoutTrendChart';
 import { RiskDistributionChart } from '@/components/dashboard/RiskDistributionChart';
 import { LinearRegressionChart } from '@/components/dashboard/LinearRegressionChart';
-import { RecommendationsPanel } from '@/components/dashboard/RecommendationsPanel';
 import {
   Sparkles,
   ArrowRight,
   Calendar,
   BookOpen,
-  PlusCircle,
   AlertTriangle,
   TrendingUp,
   Activity,
@@ -23,24 +21,11 @@ import {
   ClipboardList,
   Heart,
   BrainCircuit,
-  BarChart3,
   Users,
-  Award,
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import {
-  BarChart,
-  Bar,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
-import { Progress } from '@/components/ui/progress';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import type { RiskSummary, AssessmentResponse, Checkin } from '@/lib/types';
 
 export default function DashboardPage() {
@@ -119,32 +104,6 @@ export default function DashboardPage() {
     };
     return trends[trend.toLowerCase()] || trend.toUpperCase();
   };
-
-  // Static example data for admin dashboard
-  const emotionDistributionData = [
-    { name: 'Alegría', value: 35, color: '#10b981' },
-    { name: 'Tranquilidad', value: 25, color: '#3b82f6' },
-    { name: 'Ansiedad', value: 20, color: '#f59e0b' },
-    { name: 'Tristeza', value: 12, color: '#8b5cf6' },
-    { name: 'Estrés', value: 8, color: '#ef4444' },
-  ];
-
-  const weeklyMoodData = [
-    { day: 'Lun', mood: 3.2 },
-    { day: 'Mar', mood: 3.5 },
-    { day: 'Mié', mood: 2.8 },
-    { day: 'Jue', mood: 3.0 },
-    { day: 'Vie', mood: 3.8 },
-    { day: 'Sáb', mood: 4.1 },
-    { day: 'Dom', mood: 3.6 },
-  ];
-
-  const milestonesData = [
-    { hito: 'Hito 2', label: '1° Corte', procesual: 85, nota: 4.5, color: '#10b981' },
-    { hito: 'Hito 3', label: '2° Corte', procesual: 78, nota: 4.2, color: '#3b82f6' },
-    { hito: 'Hito 4', label: '3° Corte', procesual: 92, nota: 4.8, color: '#f59e0b' },
-    { hito: 'Hito 5', label: 'Final', procesual: 70, nota: 3.9, color: '#8b5cf6' },
-  ];
 
   return (
     <Layout>
@@ -305,181 +264,6 @@ export default function DashboardPage() {
                 )}
               </div>
             </section>
-
-            {/* Equilibrium Progress Bar */}
-            <Card className="border-border/40 overflow-hidden">
-              <div className="p-5 pb-3">
-                <div className="mb-1.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="text-primary h-4 w-4" />
-                    <span className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
-                      Equilibrio Personal
-                    </span>
-                  </div>
-                  <span className="text-foreground text-sm font-black">67%</span>
-                </div>
-                <Progress value={67} className="bg-muted/50 h-3" />
-              </div>
-              <div className="border-border/20 bg-muted/10 text-muted-foreground flex items-center justify-between gap-4 border-t px-5 py-2.5 text-[10px]">
-                <span className="flex items-center gap-1.5">
-                  <span className="bg-risk-low h-2 w-2 rounded-full" /> Bajo riesgo
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="bg-risk-medium h-2 w-2 rounded-full" /> Atención moderada
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="bg-risk-high h-2 w-2 rounded-full" /> Atención urgente
-                </span>
-              </div>
-            </Card>
-
-            {/* Charts Row: Emotional Distribution + Weekly Evolution */}
-            <div className="grid gap-6 lg:grid-cols-2">
-              <Card className="border-border/40 bg-card/30 backdrop-blur-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-foreground font-serif text-lg font-bold">
-                    Distribución Emocional
-                  </CardTitle>
-                  <p className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
-                    Estado anímico general
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {emotionDistributionData.map((item) => (
-                      <div key={item.name} className="space-y-1.5">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-foreground font-medium">{item.name}</span>
-                          <span className="text-muted-foreground font-bold">{item.value}%</span>
-                        </div>
-                        <div className="bg-muted h-3 w-full overflow-hidden rounded-full">
-                          <div
-                            className="h-full rounded-full transition-all duration-700"
-                            style={{ width: `${item.value}%`, backgroundColor: item.color }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border/40 bg-card/30 backdrop-blur-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-foreground font-serif text-lg font-bold">
-                    Evolución Semanal
-                  </CardTitle>
-                  <p className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
-                    Tendencia de ánimo de los últimos 7 días
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[220px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={weeklyMoodData}
-                        margin={{ top: 5, right: 5, left: -20, bottom: 5 }}
-                      >
-                        <CartesianGrid
-                          strokeDasharray="3 3"
-                          stroke="var(--border)"
-                          opacity={0.15}
-                          vertical={false}
-                        />
-                        <XAxis
-                          dataKey="day"
-                          stroke="var(--muted-foreground)"
-                          fontSize={11}
-                          tickLine={false}
-                          axisLine={false}
-                        />
-                        <YAxis
-                          domain={[0, 5]}
-                          stroke="var(--muted-foreground)"
-                          fontSize={10}
-                          tickLine={false}
-                          axisLine={false}
-                          ticks={[0, 1, 2, 3, 4, 5]}
-                        />
-                        <Tooltip
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-card/95 border-border rounded-xl border p-3 text-xs shadow-xl backdrop-blur-md">
-                                  <p className="text-foreground mb-1 font-bold">
-                                    {payload[0].payload.day}
-                                  </p>
-                                  <p className="text-muted-foreground">
-                                    Ánimo:{' '}
-                                    <span className="text-foreground font-bold">
-                                      {payload[0].value}
-                                    </span>{' '}
-                                    / 5
-                                  </p>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <Bar dataKey="mood" radius={[4, 4, 0, 0]} maxBarSize={36}>
-                          {weeklyMoodData.map((entry) => (
-                            <Cell
-                              key={entry.day}
-                              fill={
-                                entry.mood >= 3.5
-                                  ? '#10b981'
-                                  : entry.mood >= 2.5
-                                    ? '#f59e0b'
-                                    : '#ef4444'
-                              }
-                            />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Milestones (Hitos 2-5) */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Award className="text-support-medium h-4 w-4" />
-                <h2 className="text-lg font-bold">Rendimiento por Hitos Académicos</h2>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {milestonesData.map((m) => (
-                  <Card key={m.hito} className="border-border/40 bg-card/30 p-5 backdrop-blur-md">
-                    <div className="mb-3 flex items-center justify-between">
-                      <span
-                        className="text-[11px] font-black tracking-widest"
-                        style={{ color: m.color }}
-                      >
-                        {m.hito}
-                      </span>
-                      <span className="text-muted-foreground text-[9px] font-medium">
-                        {m.label}
-                      </span>
-                    </div>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="mb-1 flex items-center justify-between text-[10px]">
-                          <span className="text-muted-foreground">Progreso</span>
-                          <span className="text-foreground font-bold">{m.procesual}%</span>
-                        </div>
-                        <Progress value={m.procesual} className="bg-muted/50 h-2" />
-                      </div>
-                      <div className="border-border/10 flex items-end justify-between border-t pt-2">
-                        <span className="text-muted-foreground text-[10px]">Calificación</span>
-                        <span className="text-foreground text-xl font-black">{m.nota}</span>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
 
             {/* 3. Quick Actions & Dynamic Insights Zone */}
             <section className="grid gap-8 lg:grid-cols-3">
@@ -646,7 +430,7 @@ export default function DashboardPage() {
                   <Users className="text-muted-foreground/30 h-4 w-4" />
                 </div>
                 <p className="text-foreground mt-2 text-2xl font-black">
-                  {aggregatedReport?.total_population || 156}
+                  {aggregatedReport?.total_population ?? '---'}
                 </p>
                 <p className="text-muted-foreground mt-1 text-[9px]">Matriculados este semestre</p>
               </Card>
@@ -659,9 +443,9 @@ export default function DashboardPage() {
                   <Activity className="text-support-medium h-4 w-4" />
                 </div>
                 <p className="text-foreground mt-2 text-2xl font-black">
-                  {aggregatedReport?.average_mood_score
+                  {aggregatedReport?.average_mood_score != null
                     ? `${aggregatedReport.average_mood_score}/5`
-                    : '3.4/5'}
+                    : '---'}
                 </p>
                 <p className="text-muted-foreground mt-1 text-[9px]">Check-ins recientes</p>
               </Card>
@@ -673,7 +457,11 @@ export default function DashboardPage() {
                   </span>
                   <AlertTriangle className="text-risk-high h-4 w-4" />
                 </div>
-                <p className="text-risk-high mt-2 text-2xl font-black">18%</p>
+                <p className="text-risk-high mt-2 text-2xl font-black">
+                  {aggregatedReport?.risk_distribution
+                    ? `${(((aggregatedReport.risk_distribution['alto'] || aggregatedReport.risk_distribution['high'] || 0) / Math.max(aggregatedReport.total_population, 1)) * 100).toFixed(0)}%`
+                    : '---'}
+                </p>
                 <p className="text-muted-foreground mt-1 text-[9px]">Estudiantes en zona crítica</p>
               </Card>
 
@@ -684,7 +472,7 @@ export default function DashboardPage() {
                   </span>
                   <Heart className="text-support-low h-4 w-4" />
                 </div>
-                <p className="text-foreground mt-2 text-2xl font-black">12 activas</p>
+                <p className="text-foreground mt-2 text-2xl font-black">---</p>
                 <p className="text-muted-foreground mt-1 text-[9px]">Casos con seguimiento</p>
               </Card>
             </div>

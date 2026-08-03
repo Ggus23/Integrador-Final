@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 'use client'
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Layout } from '@/components/layout'
@@ -51,8 +51,17 @@ export default function AdminUsersPage() {
   const { user: currentUser, loading } = useProtected();
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const filteredUsers = useMemo(
+    () =>
+      users.filter((u) =>
+        u.full_name.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [users, searchTerm]
+  );
 
   // Create User State
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -171,7 +180,13 @@ export default function AdminUsersPage() {
           </p>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between gap-4">
+          <Input
+            placeholder="Buscar por nombre..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-xs h-10"
+          />
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
               <Button className="bg-primary hover:bg-primary/90 font-bold text-white">
@@ -281,8 +296,14 @@ export default function AdminUsersPage() {
                       Cargando base de datos de usuarios...
                     </td>
                   </tr>
+                ) : filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-muted-foreground px-6 py-12 text-center italic">
+                      No se encontraron usuarios con ese nombre.
+                    </td>
+                  </tr>
                 ) : (
-                  users.map((u) => (
+                  filteredUsers.map((u) => (
                     <tr
                       key={u.id}
                       className={`hover:bg-muted/5 group transition-colors ${!u.is_active ? 'bg-muted/10 opacity-60' : ''}`}

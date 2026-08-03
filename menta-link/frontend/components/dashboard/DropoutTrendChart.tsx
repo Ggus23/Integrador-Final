@@ -21,10 +21,10 @@ const CustomTooltip = ({ active, payload }: any) => {
     const data = payload[0].payload;
     const value = parseFloat(payload[0].value);
     const { label, emoji, color } = getSuccessLevel(value);
-    
+
     return (
-      <div className="bg-card/95 border-border border rounded-2xl p-4 shadow-xl backdrop-blur-md max-w-[260px] animate-in fade-in zoom-in-95 duration-150">
-        <p className="text-muted-foreground text-[10px] font-black tracking-widest uppercase mb-1">
+      <div className="bg-card/95 border-border animate-in fade-in zoom-in-95 max-w-[260px] rounded-2xl border p-4 shadow-xl backdrop-blur-md duration-150">
+        <p className="text-muted-foreground mb-1 text-[10px] font-black tracking-widest uppercase">
           {new Date(data.created_at).toLocaleDateString('es-ES', {
             weekday: 'long',
             day: 'numeric',
@@ -36,9 +36,10 @@ const CustomTooltip = ({ active, payload }: any) => {
             {emoji}
           </span>
           <div>
-            <p className={`text-sm font-black leading-none ${color}`}>{label}</p>
+            <p className={`text-sm leading-none font-black ${color}`}>{label}</p>
             <p className="text-muted-foreground mt-1 text-[11px] leading-snug">
-              Éxito Proyectado: <span className="text-foreground font-bold">{value.toFixed(1)}%</span>
+              Éxito Proyectado:{' '}
+              <span className="text-foreground font-bold">{value.toFixed(1)}%</span>
             </p>
           </div>
         </div>
@@ -70,7 +71,7 @@ export function DropoutTrendChart({ data }: DropoutTrendChartProps) {
     );
 
   return (
-    <Card className="border-border/40 bg-card/30 shadow-2xl backdrop-blur-md overflow-hidden">
+    <Card className="border-border/40 bg-card/30 overflow-hidden shadow-2xl backdrop-blur-md">
       <CardHeader className="flex flex-col gap-2 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -85,25 +86,27 @@ export function DropoutTrendChart({ data }: DropoutTrendChartProps) {
             Proyección de Éxito (%)
           </p>
           <p className="text-muted-foreground mt-2 max-w-[95%] text-xs leading-relaxed">
-            <b>¿En qué consiste esta medida?</b><br/>
-            Esta gráfica representa tu probabilidad (0% al 100%) de completar tu carrera. Una IA calcula esta métrica cruzando tu historial emocional, notas y condiciones de becas.
+            <b>¿En qué consiste esta medida?</b>
+            <br />
+            Esta gráfica representa tu probabilidad (0% al 100%) de completar tu carrera. Una IA
+            calcula esta métrica cruzando tu historial emocional, notas y condiciones de becas.
           </p>
         </div>
-        <div className="bg-support-low/10 rounded-full p-2 hidden sm:block self-start">
+        <div className="bg-support-low/10 hidden self-start rounded-full p-2 sm:block">
           <Target className="text-support-low h-4 w-4" />
         </div>
       </CardHeader>
-      
-      <CardContent className="pl-0 pr-2 pb-4 sm:pr-4">
-        <div className="h-[260px] sm:h-[300px] w-full">
+
+      <CardContent className="pr-2 pb-4 pl-0 sm:pr-4">
+        <div className="h-[260px] w-full sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart 
-              data={formattedData} 
-              margin={{ 
-                top: 10, 
-                right: isMobile ? 10 : 20, 
-                left: isMobile ? -25 : -10, 
-                bottom: 5 
+            <AreaChart
+              data={formattedData}
+              margin={{
+                top: 10,
+                right: isMobile ? 10 : 20,
+                left: isMobile ? -25 : -10,
+                bottom: 5,
               }}
             >
               <defs>
@@ -139,10 +142,10 @@ export function DropoutTrendChart({ data }: DropoutTrendChartProps) {
                 }}
               />
               <Tooltip
-                cursor={{ 
-                  stroke: 'var(--support-low)', 
-                  strokeWidth: 1.5, 
-                  strokeDasharray: '4 4' 
+                cursor={{
+                  stroke: 'var(--support-low)',
+                  strokeWidth: 1.5,
+                  strokeDasharray: '4 4',
                 }}
                 content={<CustomTooltip />}
               />
@@ -160,10 +163,11 @@ export function DropoutTrendChart({ data }: DropoutTrendChartProps) {
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        
-        <div className="px-6 mt-4 border-t border-border/10 pt-3">
-          <p className="text-muted-foreground text-[10px] sm:text-[11px] leading-relaxed italic">
-            * Esta métrica estima tu estabilidad académica actual. ¡Completa tus evaluaciones periódicamente para mantener tu proyección al día!
+
+        <div className="border-border/10 mt-4 border-t px-6 pt-3">
+          <p className="text-muted-foreground text-[10px] leading-relaxed italic sm:text-[11px]">
+            * Esta métrica estima tu estabilidad académica actual. ¡Completa tus evaluaciones
+            periódicamente para mantener tu proyección al día!
           </p>
         </div>
       </CardContent>
