@@ -1,0 +1,39 @@
+
+services:
+  db:
+    image: postgres:16
+    container_name: mentalink-db
+    restart: unless-stopped                                               
+    environment:                                                                                        
+      POSTGRES_USER: postgres                   
+      POSTGRES_PASSWORD: postgresql
+      POSTGRES_DB: mentalink
+    ports:
+      - "5432:5432"
+    volumes:
+      - mentalink_db_data:/var/lib/postgresql/data
+      - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mentalink"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: mentalink-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    depends_on:
+      - db
+    environment:
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+volumes:
+  mentalink_db_data:
+#   influxdb_data:
+  grafana_data:
