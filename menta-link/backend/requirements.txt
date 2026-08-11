@@ -1,5 +1,5 @@
 --index-url https://pypi.org
---extra-index-url https://pytorch.orgg
+--extra-index-url https://pytorch.org
 alembic>=1.13.3
 annotated-doc==0.0.4
 annotated-types==0.7.0
