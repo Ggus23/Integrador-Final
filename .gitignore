@@ -31,3 +31,6 @@ mockups/
 .venv/
 backenddocs/
 .antigravitycli/
+menta-link/dataset/
+menta-link/docs/
+/expresion_regular.py
