@@ -113,6 +113,6 @@ wheel==0.43.0
 wrapt==1.16.0
 influxdb-client==1.44.0
 sentry-sdk==2.60.0
---index-url https://pytorch.org
+--extra-index-url https://pytorch.org
 torch==2.3.1
 google-genai
