@@ -104,6 +104,7 @@ SQLAlchemy==2.0.31
 starlette==0.37.2
 stevedore==5.2.0
 sympy==1.12.1
+sentry-sdk>=2.0.0
 tenacity==8.4.1
 tensorflow-cpu==2.16.1
 termcolor==2.4.0
