@@ -1,29 +1,24 @@
 import logging
 import os
+import warnings
 from contextlib import asynccontextmanager
 
-# Fix for PyTorch DLL initialization error (WinError 1114)
+# Fix para errores de PyTorch en Windows
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+# Silenciar advertencias de sklearn ANTES de importar los endpoints/modelos
+from sklearn.exceptions import InconsistentVersionWarning
+warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 
 import nltk
 import sentry_sdk
-
-from app.api.v1.api import api_router
-
-logger = logging.getLogger(__name__)
-try:
-    nltk.download("stopwords", quiet=True)
-    nltk.download("punkt", quiet=True)
-    nltk.download("punkt_tab", quiet=True)
-except Exception as e:
-    logger.warning("Failed to download some NLTK dictionaries: %s", e)
-
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.errors import (
     general_exception_handler,
@@ -34,10 +29,18 @@ from app.core.limiter import limiter
 from app.db.base import Base
 from app.db.session import engine
 
+logger = logging.getLogger(__name__)
+
+try:
+    nltk.download("stopwords", quiet=True)
+    nltk.download("punkt", quiet=True)
+    nltk.download("punkt_tab", quiet=True)
+except Exception as e:
+    logger.warning("Failed to download some NLTK dictionaries: %s", e)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Se ejecuta al arrancar el servidor
     Base.metadata.create_all(bind=engine)
     yield
 
