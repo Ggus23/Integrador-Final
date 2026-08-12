@@ -54,7 +54,7 @@ class Settings(BaseSettings):
         return url
 
     # Se usa List[str] para evitar fallos estrictos de validación con barras finales o puertos
-    BACKEND_CORS_ORIGINS: List[str] = []
+    BACKEND_CORS_ORIGINS: Union[List[str], str] = []
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
@@ -63,7 +63,6 @@ class Settings(BaseSettings):
             v = v.strip()
             if not v:
                 return []
-            # Procesa cadenas tipo JSON '["https://..."]'
             if v.startswith("[") and v.endswith("]"):
                 try:
                     parsed = json.loads(v)
@@ -71,7 +70,6 @@ class Settings(BaseSettings):
                         return [str(item).strip().rstrip("/") for item in parsed]
                 except Exception:
                     pass
-            # Procesa cadenas separadas por coma 'https://a.com,https://b.com'
             return [i.strip().rstrip("/") for i in v.split(",") if i.strip()]
         elif isinstance(v, list):
             return [str(item).strip().rstrip("/") for item in v]
