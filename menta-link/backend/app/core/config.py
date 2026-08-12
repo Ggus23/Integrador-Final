@@ -23,19 +23,34 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
     POSTGRES_DB: str = "mentalink"
+    
+    # Campo para capturar la variable inyectada por Railway
+    DATABASE_URL: str | None = None
     SQLALCHEMY_DATABASE_URI: str | None = None
 
     @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
     @classmethod
     def assemble_db_connection(cls, v: str | None, info: ValidationInfo) -> str:
-        if isinstance(v, str):
-            return v
-        return (
-            f"postgresql://{info.data.get('POSTGRES_USER')}:"
-            f"{info.data.get('POSTGRES_PASSWORD')}"
-            f"@{info.data.get('POSTGRES_SERVER')}/"
-            f"{info.data.get('POSTGRES_DB')}"
-        )
+        # 1. Si SQLALCHEMY_DATABASE_URI viene explícita en el entorno, usarla
+        if isinstance(v, str) and v.strip():
+            url = v
+        # 2. Si Railway inyectó DATABASE_URL, tomarla
+        elif info.data.get("DATABASE_URL"):
+            url = info.data.get("DATABASE_URL")
+        # 3. Fallback para desarrollo local
+        else:
+            url = (
+                f"postgresql://{info.data.get('POSTGRES_USER')}:"
+                f"{info.data.get('POSTGRES_PASSWORD')}"
+                f"@{info.data.get('POSTGRES_SERVER')}/"
+                f"{info.data.get('POSTGRES_DB')}"
+            )
+
+        # Corregir compatibilidad de dialecto para SQLAlchemy v2 (postgres:// -> postgresql://)
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://", 1)
+
+        return url
 
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
 
@@ -47,7 +62,7 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str | None = None
     EMAILS_FROM_EMAIL: str | None = None
     EMAILS_FROM_NAME: str = "MENTA-LINK"
-    EMAILS_CABINET_EMAIL: str = "cabinet@unifranz.edu.bo"  # Default cabinet email
+    EMAILS_CABINET_EMAIL: str = "cabinet@unifranz.edu.bo"
 
     ML_MODEL_PATH: str = "app/models/risk_model.pkl"
     GEMINI_API_KEY: str = ""

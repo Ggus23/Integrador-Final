@@ -3,15 +3,16 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
 
+# Garantiza formato string y corrige la compatibilidad de Railway con SQLAlchemy
+db_url = str(settings.SQLALCHEMY_DATABASE_URI)
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
 # Create the SQLAlchemy engine.
-# The engine is the main entry point to the database, handling connections and pools.
 engine = create_engine(
-    settings.SQLALCHEMY_DATABASE_URI,
-    # pool_pre_ping=True checks if the connection is alive before using it,
-    # preventing "server closed connection" errors.
+    db_url,
     pool_pre_ping=True,
 )
 
 # SessionLocal is a factory for database sessions.
-# each request will get its own session.
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

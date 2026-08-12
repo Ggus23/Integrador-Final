@@ -1,6 +1,6 @@
-# Initialize NLTK resources
 import logging
 import os
+from contextlib import asynccontextmanager
 
 # Fix for PyTorch DLL initialization error (WinError 1114)
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -17,6 +17,7 @@ try:
     nltk.download("punkt_tab", quiet=True)
 except Exception as e:
     logger.warning("Failed to download some NLTK dictionaries: %s", e)
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
@@ -32,7 +33,14 @@ from app.core.errors import (
 from app.core.limiter import limiter
 from app.db.base import Base
 from app.db.session import engine
-Base.metadata.create_all(bind=engine)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Se ejecuta al arrancar el servidor
+    Base.metadata.create_all(bind=engine)
+    yield
+
 
 if settings.SENTRY_DSN and settings.SENTRY_DSN.strip().startswith("http"):
     sentry_sdk.init(
@@ -41,7 +49,9 @@ if settings.SENTRY_DSN and settings.SENTRY_DSN.strip().startswith("http"):
     )
 
 app = FastAPI(
-    title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    title=settings.PROJECT_NAME,
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    lifespan=lifespan,
 )
 
 app.state.limiter = limiter
