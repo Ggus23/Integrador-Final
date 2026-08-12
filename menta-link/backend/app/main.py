@@ -30,6 +30,9 @@ from app.core.errors import (
     not_found_handler,
 )
 from app.core.limiter import limiter
+from app.db.base import Base
+from app.db.session import engine
+Base.metadata.create_all(bind=engine)
 
 if settings.SENTRY_DSN and settings.SENTRY_DSN.strip().startswith("http"):
     sentry_sdk.init(

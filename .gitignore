@@ -34,3 +34,5 @@ backenddocs/
 menta-link/dataset/
 menta-link/docs/
 /expresion_regular.py
+menta-link/backend/migracion_mentalink.sql
+menta-link/backend/estructura_mentalink.sql
