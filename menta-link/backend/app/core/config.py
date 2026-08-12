@@ -1,6 +1,7 @@
+import json
 from typing import List, Union
 
-from pydantic import AnyHttpUrl, ValidationInfo, field_validator
+from pydantic import ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,7 +24,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
     POSTGRES_DB: str = "mentalink"
-    
+
     # Campo para capturar la variable inyectada por Railway
     DATABASE_URL: str | None = None
     SQLALCHEMY_DATABASE_URI: str | None = None
@@ -52,7 +53,29 @@ class Settings(BaseSettings):
 
         return url
 
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    # Se usa List[str] para evitar fallos estrictos de validación con barras finales o puertos
+    BACKEND_CORS_ORIGINS: List[str] = []
+
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
+            # Procesa cadenas tipo JSON '["https://..."]'
+            if v.startswith("[") and v.endswith("]"):
+                try:
+                    parsed = json.loads(v)
+                    if isinstance(parsed, list):
+                        return [str(item).strip().rstrip("/") for item in parsed]
+                except Exception:
+                    pass
+            # Procesa cadenas separadas por coma 'https://a.com,https://b.com'
+            return [i.strip().rstrip("/") for i in v.split(",") if i.strip()]
+        elif isinstance(v, list):
+            return [str(item).strip().rstrip("/") for item in v]
+        return []
 
     EMAIL_ENABLED: bool = False
     SMTP_TLS: bool = True
@@ -66,15 +89,6 @@ class Settings(BaseSettings):
 
     ML_MODEL_PATH: str = "app/models/risk_model.pkl"
     GEMINI_API_KEY: str = ""
-
-    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    @classmethod
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
-            return v
-        raise ValueError(v)
 
 
 settings = Settings()
