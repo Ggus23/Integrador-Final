@@ -36,3 +36,5 @@ menta-link/docs/
 /expresion_regular.py
 menta-link/backend/migracion_mentalink.sql
 menta-link/backend/estructura_mentalink.sql
+menta-link\backend\insert_assessments.sql
+menta-link\backend\insert_assessments_fixed.sql
