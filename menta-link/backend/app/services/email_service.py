@@ -1,12 +1,29 @@
 import logging
 import smtplib
+import socket
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+# Context Manager para forzar IPv4 y evitar el error [Errno 101] en Railway
+@contextmanager
+def force_ipv4():
+    old_getaddrinfo = socket.getaddrinfo
+
+    def ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+        return old_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+
+    socket.getaddrinfo = ipv4_getaddrinfo
+    try:
+        yield
+    finally:
+        socket.getaddrinfo = old_getaddrinfo
 
 
 class EmailService(ABC):
@@ -21,7 +38,6 @@ class EmailService(ABC):
 
 class MockEmailService(EmailService):
     def send_verification_email(self, to_email: str, token: str):
-        # Fallback to logging
         base_url = (
             settings.BACKEND_CORS_ORIGINS[0]
             if settings.BACKEND_CORS_ORIGINS
@@ -64,12 +80,23 @@ class SMTPEmailService(EmailService):
         msg.attach(MIMEText(html_content, "html", "utf-8"))
 
         try:
-            server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT)
-            if settings.SMTP_TLS:
-                server.starttls()
-            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-            server.send_message(msg)
-            server.quit()
+            # Forzamos IPv4 y timeout de 10s para evitar congelamientos
+            with force_ipv4():
+                port = int(settings.SMTP_PORT or 587)
+
+                if port == 465:
+                    # Puerto 465 usa conexión SSL directa
+                    server = smtplib.SMTP_SSL(settings.SMTP_HOST, port, timeout=10)
+                else:
+                    # Puerto 587 usa conexión TLS (STARTTLS)
+                    server = smtplib.SMTP(settings.SMTP_HOST, port, timeout=10)
+                    if settings.SMTP_TLS:
+                        server.starttls()
+
+                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+                server.send_message(msg)
+                server.quit()
+
             logger.info(f"Email sent successfully to {to_email}")
             return True
         except Exception as e:
@@ -77,7 +104,6 @@ class SMTPEmailService(EmailService):
             return False
 
     def send_verification_email(self, to_email: str, token: str):
-        # Assuming frontend is on localhost:3000 or the first allowed origin
         base_url = (
             settings.BACKEND_CORS_ORIGINS[0]
             if settings.BACKEND_CORS_ORIGINS
