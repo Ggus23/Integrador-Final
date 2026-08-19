@@ -1,29 +1,11 @@
+import json
 import logging
-import smtplib
-import socket
+import urllib.request
 from abc import ABC, abstractmethod
-from contextlib import contextmanager
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
-
-
-# Context Manager para forzar IPv4 y evitar el error [Errno 101] en Railway
-@contextmanager
-def force_ipv4():
-    old_getaddrinfo = socket.getaddrinfo
-
-    def ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
-        return old_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
-
-    socket.getaddrinfo = ipv4_getaddrinfo
-    try:
-        yield
-    finally:
-        socket.getaddrinfo = old_getaddrinfo
 
 
 class EmailService(ABC):
@@ -66,41 +48,64 @@ class MockEmailService(EmailService):
         )
 
 
-class SMTPEmailService(EmailService):
+class BrevoEmailService(EmailService):
     def _send_email(self, to_email: str, subject: str, html_content: str) -> bool:
-        if not settings.SMTP_HOST or not settings.SMTP_USER:
-            logger.error("SMTP credentials not configured.")
+        # Clave API de Brevo (extraída de SMTP_PASSWORD o BREVO_API_KEY)
+        api_key = getattr(settings, "BREVO_API_KEY", None) or settings.SMTP_PASSWORD
+
+        if not api_key:
+            logger.error("Brevo API Key no configurada.")
             return False
 
-        msg = MIMEMultipart()
-        msg["From"] = f"{settings.EMAILS_FROM_NAME} <{settings.EMAILS_FROM_EMAIL}>"
-        msg["To"] = to_email
-        msg["Subject"] = subject
+        payload = {
+            "sender": {
+                "name": settings.EMAILS_FROM_NAME or "MENTA-LINK",
+                "email": settings.EMAILS_FROM_EMAIL or "pacaragustin@gmail.com",
+            },
+            "to": [
+                {
+                    "email": to_email,
+                }
+            ],
+            "subject": subject,
+            "htmlContent": html_content,
+        }
 
-        msg.attach(MIMEText(html_content, "html", "utf-8"))
+        headers = {
+            "api-key": api_key,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
 
         try:
-            # Forzamos IPv4 y timeout de 10s para evitar congelamientos
-            with force_ipv4():
-                port = int(settings.SMTP_PORT or 587)
+            # Petición HTTPS pura (Puerto 443 - Imposible de bloquear por Railway)
+            req = urllib.request.Request(
+                "https://api.brevo.com/v3/smtp/email",
+                data=json.dumps(payload).encode("utf-8"),
+                headers=headers,
+                method="POST",
+            )
 
-                if port == 465:
-                    # Puerto 465 usa conexión SSL directa
-                    server = smtplib.SMTP_SSL(settings.SMTP_HOST, port, timeout=10)
+            with urllib.request.urlopen(req, timeout=10) as response:
+                if response.status in (200, 201):
+                    logger.info(
+                        f"Correo enviado exitosamente vía Brevo API a {to_email}"
+                    )
+                    return True
                 else:
-                    # Puerto 587 usa conexión TLS (STARTTLS)
-                    server = smtplib.SMTP(settings.SMTP_HOST, port, timeout=10)
-                    if settings.SMTP_TLS:
-                        server.starttls()
+                    logger.error(
+                        f"Brevo API devolvió estado HTTP: {response.status}"
+                    )
+                    return False
 
-                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-                server.send_message(msg)
-                server.quit()
-
-            logger.info(f"Email sent successfully to {to_email}")
-            return True
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode("utf-8")
+            logger.error(
+                f"Failed to send email via Brevo to {to_email}: {e.code} - {error_body}"
+            )
+            return False
         except Exception as e:
-            logger.error(f"Failed to send email to {to_email}: {str(e)}")
+            logger.error(f"Failed to send email via Brevo to {to_email}: {str(e)}")
             return False
 
     def send_verification_email(self, to_email: str, token: str):
@@ -115,13 +120,12 @@ class SMTPEmailService(EmailService):
         html = f"""
         <h1>Bienvenido a MENTA-LINK</h1>
         <p>Por favor verifica tu correo haciendo clic en el siguiente enlace:</p>
-        <a href="{link}">Verificar Cuenta</a>
+        <p><a href="{link}">Verificar Cuenta</a></p>
         <p>Si no puedes hacer clic, copia este enlace:</p>
         <p>{link}</p>
         """
         success = self._send_email(to_email, subject, html)
 
-        # Fallback if SMTP fails
         if not success:
             MockEmailService().send_verification_email(to_email, token)
 
@@ -137,20 +141,18 @@ class SMTPEmailService(EmailService):
         html = f"""
         <h1>Restablecer Contraseña</h1>
         <p>Has solicitado restablecer tu contraseña. Haz clic aquí:</p>
-        <a href="{link}">Restablecer Contraseña</a>
+        <p><a href="{link}">Restablecer Contraseña</a></p>
         <p>Este enlace expira en 15 minutos.</p>
         """
         success = self._send_email(to_email, subject, html)
 
-        # Fallback if SMTP fails
         if not success:
             MockEmailService().send_password_reset_email(to_email, token)
 
 
-# Factory logic
 def get_email_service() -> EmailService:
-    if settings.EMAIL_ENABLED and settings.SMTP_HOST:
-        return SMTPEmailService()
+    if settings.EMAIL_ENABLED:
+        return BrevoEmailService()
     return MockEmailService()
 
 
