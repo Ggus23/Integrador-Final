@@ -227,7 +227,7 @@ export function AcademicProfileForm() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-4 lg:grid-cols-4">
               {[2, 3, 4, 5].map((h) => (
                 <div key={h} className="bg-background rounded-xl border p-4 shadow-sm">
                   <span className="text-primary mb-3 block text-[10px] font-black uppercase">

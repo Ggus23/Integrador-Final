@@ -67,7 +67,7 @@ export default function AdminAppointmentsPage() {
             appointments.map((apt) => (
               <Card
                 key={apt.id}
-                className="border-border bg-card flex items-center justify-between p-6"
+                className="border-border bg-card flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-3">
@@ -92,7 +92,7 @@ export default function AdminAppointmentsPage() {
                   </p>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                   {apt.status === 'pending' && (
                     <>
                       <Button

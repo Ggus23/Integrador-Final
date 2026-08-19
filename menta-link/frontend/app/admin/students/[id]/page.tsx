@@ -454,8 +454,8 @@ export default function StudentDetailPage() {
                   <h3 className="mb-6 font-serif text-2xl font-bold">
                     📝 Evaluaciones Psicométricas
                   </h3>
-                  <div className="border-border overflow-hidden rounded-xl border">
-                    <table className="w-full text-left text-sm">
+                  <div className="border-border overflow-x-auto rounded-xl border">
+                    <table className="w-full min-w-[500px] text-left text-sm">
                       <thead className="text-muted-foreground bg-muted/50 text-[10px] font-black uppercase">
                         <tr>
                           <th className="px-4 py-4">Fecha</th>

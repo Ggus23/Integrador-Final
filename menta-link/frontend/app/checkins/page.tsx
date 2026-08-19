@@ -133,7 +133,7 @@ export default function CheckinsPage() {
                     transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                     onClick={() => setFormData({ ...formData, mood_score: val })}
                     className={cn(
-                      'group relative flex h-14 w-14 flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300',
+                      'group relative flex h-10 w-10 min-[400px]:h-12 min-[400px]:w-12 sm:h-14 sm:w-14 flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300',
                       formData.mood_score === val
                         ? 'bg-primary border-primary z-10 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]'
                         : 'bg-muted/40 border-border/40 hover:border-primary/40 hover:bg-muted/60'
@@ -212,7 +212,7 @@ export default function CheckinsPage() {
                     transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                     onClick={() => setFormData({ ...formData, energy_level: val })}
                     className={cn(
-                      'group relative flex h-14 w-14 flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300',
+                      'group relative flex h-10 w-10 min-[400px]:h-12 min-[400px]:w-12 sm:h-14 sm:w-14 flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300',
                       formData.energy_level === val
                         ? 'bg-accent border-accent z-10 shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)]'
                         : 'bg-muted/40 border-border/40 hover:border-accent/40 hover:bg-muted/60'
@@ -294,7 +294,7 @@ export default function CheckinsPage() {
                     transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                     onClick={() => setFormData({ ...formData, academic_pressure: val })}
                     className={cn(
-                      'group relative flex h-14 w-14 flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300',
+                      'group relative flex h-10 w-10 min-[400px]:h-12 min-[400px]:w-12 sm:h-14 sm:w-14 flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300',
                       formData.academic_pressure === val
                         ? 'bg-risk-high border-risk-high z-10 shadow-[0_0_20px_rgba(var(--risk-high-rgb),0.3)]'
                         : 'bg-muted/40 border-border/40 hover:border-risk-high/40 hover:bg-muted/60'

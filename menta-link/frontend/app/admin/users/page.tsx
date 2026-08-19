@@ -280,7 +280,7 @@ export default function AdminUsersPage() {
 
         <Card className="border-border animate-slide-up overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full min-w-[700px] text-left">
               <thead className="bg-muted/50 text-muted-foreground text-[10px] font-black tracking-widest uppercase">
                 <tr>
                   <th className="px-6 py-5">Identidad del Usuario</th>

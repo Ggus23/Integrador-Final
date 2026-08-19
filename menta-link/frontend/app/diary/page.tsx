@@ -321,9 +321,9 @@ export default function DiaryPage() {
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0 }}
-                          className="bg-primary/5 flex items-center justify-between rounded-xl px-4 py-3"
+                          className="bg-primary/5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-xl px-4 py-3"
                         >
-                          <div className="flex items-center gap-4">
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                             <div className="flex items-center gap-2">
                               <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
                               <span className="text-[9px] font-black uppercase opacity-60">
@@ -424,14 +424,13 @@ export default function DiaryPage() {
                   </div>
                 </div>
 
-                <div className="border-border/40 flex items-center justify-between gap-6 border-t pt-10">
+                <div className="border-border/40 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-t pt-10">
                   {error && <p className="text-destructive text-sm font-black">{error}</p>}
                   {success && <p className="text-sm font-black text-green-500">{success}</p>}
-                  <div />
                   <Button
                     type="submit"
                     disabled={submitting}
-                    className="bg-primary h-16 flex-1 rounded-2xl text-base font-black tracking-widest uppercase shadow-xl transition-all hover:scale-[1.02] hover:shadow-2xl active:scale-95"
+                    className="bg-primary h-16 w-full sm:flex-1 rounded-2xl text-base font-black tracking-widest uppercase shadow-xl transition-all hover:scale-[1.02] hover:shadow-2xl active:scale-95"
                   >
                     {submitting ? 'Guardando...' : 'Finalizar Reflexión'}
                   </Button>
