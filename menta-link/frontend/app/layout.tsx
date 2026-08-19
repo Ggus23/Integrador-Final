@@ -1,7 +1,6 @@
 import type React from 'react';
 import type { Metadata } from 'next';
 
-import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import '@fontsource/dm-sans';
 import '@fontsource/space-mono';
@@ -60,7 +59,6 @@ export default function RootLayout({
               {children}
             </SidebarProvider>
             <Toaster />
-            <Analytics />
           </LanguageProvider>
         </ThemeProvider>
       </body>
