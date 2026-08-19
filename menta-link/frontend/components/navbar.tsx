@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
 import { useSidebar } from '@/context/sidebar-context';
 
 export function Navbar() {
@@ -15,8 +15,9 @@ export function Navbar() {
 
   return (
     <nav className="border-border/50 bg-background/80 sticky top-0 z-50 border-b backdrop-blur-md transition-all">
-      <div className="flex h-16 items-center justify-between px-4 md:px-6">
-        <div className="flex items-center gap-4">
+      <div className="flex h-16 items-center justify-between px-3 sm:px-4 md:px-6">
+        {/* Lado Izquierdo: Menú Móvil + Logo */}
+        <div className="flex items-center gap-2 sm:gap-4">
           <Button
             variant="ghost"
             size="icon"
@@ -26,27 +27,35 @@ export function Navbar() {
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
+
           <Link
             href="/"
-            className="group flex items-center gap-3 transition-transform hover:scale-105"
+            className="group flex items-center gap-2 transition-transform hover:scale-105 sm:gap-3"
           >
-            <div className="bg-primary/5 group-hover:bg-primary/10 relative h-10 w-10 overflow-hidden rounded-xl shadow-sm transition-colors md:h-11 md:w-11">
+            <div className="bg-primary/5 group-hover:bg-primary/10 relative h-9 w-9 overflow-hidden rounded-xl shadow-sm transition-colors sm:h-10 sm:w-10 md:h-11 md:w-11">
               <Image src="/icon_logo.png" alt="MentaLink Logo" fill className="object-cover" />
             </div>
-            <div className="text-foreground font-serif text-xl font-bold tracking-tight transition-colors md:text-2xl">
+            <div className="text-foreground font-serif text-lg font-bold tracking-tight sm:text-xl md:text-2xl">
               MenTaLink
             </div>
           </Link>
         </div>
 
-        <div className="flex items-center gap-4">
-          <span className="text-muted-foreground text-sm">{user.full_name}</span>
+        {/* Lado Derecho: Usuario + Botón de Salida */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          <span className="text-muted-foreground hidden max-w-[120px] truncate text-sm sm:inline-block sm:max-w-[200px] md:max-w-none">
+            {user.full_name}
+          </span>
+
           <Button
             onClick={logout}
             variant="ghost"
-            className="text-muted-foreground hover:bg-secondary hover:text-primary font-medium transition-all"
+            size="sm"
+            className="text-muted-foreground hover:bg-secondary hover:text-primary px-2 font-medium transition-all sm:px-4"
+            aria-label="Cerrar Sesión"
           >
-            Cerrar Sesión
+            <LogOut className="h-5 w-5 sm:hidden" />
+            <span className="hidden sm:inline">Cerrar Sesión</span>
           </Button>
         </div>
       </div>
