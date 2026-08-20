@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "80ead4b2-9113-473e-b92c-b78455f7654e"
+      }
+    },
+    "android": {
+      "package": "com.agustin25.proyectointegrador"
+    }
+  }
+}

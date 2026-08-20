@@ -102,8 +102,11 @@ export default function DiaryPage() {
   });
 
   useEffect(() => {
-    const analysis = analyzeMoodRealtime(formData.experience);
-    setRealtimeAnalysis(analysis);
+    const timer = setTimeout(() => {
+      const analysis = analyzeMoodRealtime(formData.experience);
+      setRealtimeAnalysis(analysis);
+    }, 300);
+    return () => clearTimeout(timer);
   }, [formData.experience]);
 
   const [todayEntry, setTodayEntry] = useState<DiaryEntry | null>(null);

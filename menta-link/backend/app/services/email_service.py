@@ -104,7 +104,7 @@ class BrevoEmailService(EmailService):
                 f"Failed to send email via Brevo to {to_email}: {e.code} - {error_body}"
             )
             return False
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Failed to send email via Brevo to {to_email}: {str(e)}")
             return False
 

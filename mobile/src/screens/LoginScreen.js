@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, StatusBar, Linking } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Mail, Lock, Sparkles } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
@@ -31,6 +31,7 @@ export function LoginScreen({ onLoginSuccess }) {
 
   return (
     <ChameleonBackground emotionLabel="Neutral">
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} translucent={false} />
       <EmotionalParticles emotionColor={theme.accent} intensity={1} />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.loginContent}>
           <View style={styles.loginLogoContainer}>
@@ -55,8 +56,27 @@ export function LoginScreen({ onLoginSuccess }) {
                 {loading ? <ActivityIndicator color={COLORS.background} /> : <Text style={[styles.loginBtnText, { color: COLORS.background }]}>Iniciar Sesión</Text>}
               </View>
             </TouchableOpacity>
+
+            {/* Registration notice */}
+            <View style={{ marginTop: 24, alignItems: 'center', paddingHorizontal: 16 }}>
+              <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, fontFamily: 'Manrope_400Regular', textAlign: 'center', lineHeight: 20 }}>
+                ¿No tienes una cuenta?
+              </Text>
+              <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, fontFamily: 'Manrope_400Regular', textAlign: 'center', lineHeight: 18, marginTop: 4 }}>
+                Regístrate primero en la plataforma web
+              </Text>
+              <TouchableOpacity 
+                onPress={() => Linking.openURL('https://menta-link-plataforma-web.up.railway.app/signup')}
+                style={{ marginTop: 8, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}
+              >
+                <Text style={{ color: theme.accent, fontSize: 11, fontFamily: 'Manrope_800ExtraBold', letterSpacing: 1 }}>
+                  MENTALINK.RAILWET.APP
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </KeyboardAvoidingView>
     </ChameleonBackground>
   );
 }
+

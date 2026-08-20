@@ -1,11 +1,18 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { View, Animated, Easing, StyleSheet, Dimensions } from 'react-native';
 
 const { width, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // ─── EMOTIONAL PARTICLES: Floating animated orbs ───
-export function EmotionalParticles({ emotionColor, intensity = 3 }) {
+export const EmotionalParticles = React.memo(function EmotionalParticles({ emotionColor, intensity = 3 }) {
   const particleCount = 6 + intensity;
+
+  // Pre-compute stable left positions so they don't change on re-render
+  const particleLeftPositions = useMemo(
+    () => Array.from({ length: particleCount }, () => Math.random() * width * 0.8),
+    [particleCount]
+  );
+
   const particles = useRef(
     Array.from({ length: particleCount }, () => ({
       x: new Animated.Value(Math.random() * width),
@@ -17,6 +24,7 @@ export function EmotionalParticles({ emotionColor, intensity = 3 }) {
   ).current;
 
   useEffect(() => {
+    const animations = [];
     particles.forEach((p, i) => {
       const duration = 4000 + Math.random() * 6000;
       const delay = i * 300;
@@ -74,7 +82,12 @@ export function EmotionalParticles({ emotionColor, intensity = 3 }) {
       floatY.start();
       pulse.start();
       fade.start();
+      animations.push(floatY, pulse, fade);
     });
+
+    return () => {
+      animations.forEach(a => a.stop());
+    };
   }, []);
 
   return (
@@ -84,7 +97,7 @@ export function EmotionalParticles({ emotionColor, intensity = 3 }) {
           key={i}
           style={{
             position: 'absolute',
-            left: Math.random() * width * 0.8,
+            left: particleLeftPositions[i],
             width: p.size,
             height: p.size,
             borderRadius: p.size / 2,
@@ -99,4 +112,4 @@ export function EmotionalParticles({ emotionColor, intensity = 3 }) {
       ))}
     </View>
   );
-}
+});

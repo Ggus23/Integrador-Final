@@ -1,9 +1,9 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
-const DEV_PC_IP = '192.168.0.20'; // IP de tu PC en la red WiFi detectada
-const BASE_URL = `http://${DEV_PC_IP}:8000`; // Cambiado para que funcione en celulares físicos (Android e iOS)
-const API_V1 = `${BASE_URL}/api/v1`;
+// Reemplaza esta URL por la URL pública real de tu backend en Railway (usando https://)
+const EXPO_PUBLIC_API_URL = 'https://integrador-final-production-ab7b.up.railway.app'; 
+const API_V1 = `${EXPO_PUBLIC_API_URL}/api/v1`;
 
 export const api = {
   async login(email, password) {

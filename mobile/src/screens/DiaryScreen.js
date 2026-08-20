@@ -33,8 +33,11 @@ export function DiaryScreen() {
   });
 
   useEffect(() => {
-    const analysis = analyzeMoodRealtime(experience);
-    setRealtimeAnalysis(analysis);
+    const timer = setTimeout(() => {
+      const analysis = analyzeMoodRealtime(experience);
+      setRealtimeAnalysis(analysis);
+    }, 300);
+    return () => clearTimeout(timer);
   }, [experience]);
 
   useEffect(() => {

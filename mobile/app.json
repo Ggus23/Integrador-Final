@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "menta-link-diario",
+    "slug": "menta-link-diario",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon_logo.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -14,15 +14,17 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.agustin.mentalink",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.agustin.mentalink",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/icon_logo.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       }
     },
@@ -33,15 +35,17 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/icon.png",
+          "icon": "./assets/icon_logo.png",
           "color": "#ffffff"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "extra": {
       "eas": {
-        "projectId": "1fe54aa2-1fd5-4979-b65b-1a77cb455e2b"
+        "projectId": "b4fd221c-3aaf-4735-bf68-5e90dbd846d8"
       }
-    }
+    },
+    "owner": "agustin25"
   }
 }

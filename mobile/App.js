@@ -136,7 +136,7 @@ function MainLayout() {
   if (!fontsLoaded || loading) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle="light-content" backgroundColor={COLORS.background} translucent={false} />
         <View style={[styles.logoCircle, { backgroundColor: COLORS.primary, width: 60, height: 60, borderRadius: 20 }]}>
           <Sparkles color={COLORS.background} size={30} />
         </View>
@@ -151,7 +151,7 @@ function MainLayout() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} translucent={false} />
       {activeTab === 'diary' && <DiaryScreen />}
       {activeTab === 'history' && <HistoryScreen />}
       {activeTab === 'stats' && <StatsScreen />}
