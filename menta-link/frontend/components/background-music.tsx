@@ -59,8 +59,8 @@ export function BackgroundMusic() {
             },
             onError: (event: any) => {
               console.error('YouTube Player Error:', event.data);
-            }
-          }
+            },
+          },
         });
       } else {
         if (typeof playerRef.current.playVideo === 'function') {
@@ -75,16 +75,16 @@ export function BackgroundMusic() {
   }, [user, apiLoaded]);
 
   return (
-    <div 
-      style={{ 
-        position: 'fixed', 
-        top: '-9999px', 
-        left: '-9999px', 
-        width: '200px', 
-        height: '200px', 
-        opacity: 0.01, 
-        pointerEvents: 'none', 
-        zIndex: -9999 
+    <div
+      style={{
+        position: 'fixed',
+        top: '-9999px',
+        left: '-9999px',
+        width: '200px',
+        height: '200px',
+        opacity: 0.01,
+        pointerEvents: 'none',
+        zIndex: -9999,
       }}
     >
       <div ref={containerRef}></div>

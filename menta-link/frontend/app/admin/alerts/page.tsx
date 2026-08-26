@@ -75,7 +75,7 @@ export default function AdminAlertsPage() {
           <select
             value={filters.risk_level}
             onChange={(e) => setFilters({ ...filters, risk_level: e.target.value })}
-            className="border-border bg-background text-foreground outline-ring/50 border px-3 py-2 text-sm rounded-md"
+            className="border-border bg-background text-foreground outline-ring/50 rounded-md border px-3 py-2 text-sm"
           >
             <option value="">Todos los Niveles</option>
             <option value="low">Bajo</option>
@@ -86,7 +86,7 @@ export default function AdminAlertsPage() {
           <select
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            className="border-border bg-background text-foreground outline-ring/50 border px-3 py-2 text-sm rounded-md"
+            className="border-border bg-background text-foreground outline-ring/50 rounded-md border px-3 py-2 text-sm"
           >
             <option value="">Todos los Estados</option>
             <option value="pending">Pendiente</option>
@@ -138,7 +138,7 @@ export default function AdminAlertsPage() {
                     </div>
                     <p className="text-foreground mt-3 font-medium">{riskAlert.message}</p>
                   </div>
-                  <div className="flex flex-col gap-2 w-full sm:w-auto">
+                  <div className="flex w-full flex-col gap-2 sm:w-auto">
                     <Link href={`/admin/students/${riskAlert.user_id}`}>
                       <Button className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 w-full">
                         Ver Estudiante

@@ -150,16 +150,6 @@ export default function LandingPage() {
         {/* El fondo Aurora gestionado globalmente en RootLayout proporcionará la iluminación de esta sección */}
 
         <div className="relative z-10 container mx-auto px-6 text-center">
-          <div className="bg-secondary/60 animate-fade-in border-border/50 mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 backdrop-blur-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="bg-accent absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"></span>
-              <span className="bg-accent relative inline-flex h-2 w-2 rounded-full"></span>
-            </span>
-            <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-              Plataforma Activa y Segura
-            </span>
-          </div>
-
           <h1 className="text-foreground mx-auto mb-6 max-w-4xl font-serif text-5xl leading-[1.15] font-bold tracking-tight md:text-7xl">
             Bienestar Estudiantil <br />
             <span className="text-primary">tu espacio seguro.</span>
@@ -282,34 +272,44 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="relative grid gap-8 md:grid-cols-4">
-            <div className="bg-border/30 absolute top-12 left-0 -z-10 hidden h-px w-full md:block" />
+          <div className="relative grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-6">
+            <div className="bg-border/30 absolute top-12 left-0 -z-10 hidden h-px w-full lg:block" />
 
             {[
               {
                 n: '1',
-                title: 'Registro',
-                desc: 'Crea tu cuenta institucional y completa tu perfil de estudiante.',
+                title: 'Acceso a la App',
+                desc: 'Regístrate con tu correo institucional y accede desde la web o tu dispositivo móvil.',
               },
               {
                 n: '2',
-                title: 'Check-in',
-                desc: 'Responde brevemente cómo te sientes cada día. Toma menos de 1 minuto.',
+                title: 'Check-in Diario',
+                desc: 'Registra tu estado de ánimo, sueño y nivel de energía en menos de un minuto.',
               },
               {
                 n: '3',
-                title: 'Análisis',
-                desc: 'Nuestra IA monitorea tendencias. Si detecta riesgo, avisa discretamente a un profesional.',
+                title: 'Diario Emocional',
+                desc: 'Escribe libremente tus pensamientos para reflexionar y desahogarte.',
               },
               {
                 n: '4',
-                title: 'Apoyo',
-                desc: 'Recibes orientación proactiva o citas con psicólogos si es necesario.',
+                title: 'Análisis con IA',
+                desc: 'La IA analiza de forma privada tus patrones emocionales y niveles de estrés.',
+              },
+              {
+                n: '5',
+                title: 'Alertas Preventivas',
+                desc: 'Si la app detecta riesgo, notifica de forma segura al equipo de psicología.',
+              },
+              {
+                n: '6',
+                title: 'Apoyo y Citas',
+                desc: 'Recibe sugerencias de bienestar o coordina citas con profesionales de forma ágil.',
               },
             ].map((step) => (
               <div
                 key={step.n}
-                className="bg-card/60 border-border/40 rounded-2xl border p-6 pt-4 text-center shadow-sm backdrop-blur-sm md:pt-0"
+                className="bg-card/60 border-border/40 rounded-2xl border p-4 pt-6 text-center shadow-sm backdrop-blur-sm sm:p-6"
               >
                 <div
                   className="border-background relative z-10 mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full border-4 text-xl font-bold text-white"

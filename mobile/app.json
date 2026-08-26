@@ -14,14 +14,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.agustin.mentalink",
-      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "com.agustin.mentalink",
-      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/icon_logo.png",

@@ -92,7 +92,7 @@ export default function AdminAppointmentsPage() {
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                <div className="flex w-full flex-wrap gap-2 sm:w-auto">
                   {apt.status === 'pending' && (
                     <>
                       <Button

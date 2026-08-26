@@ -39,10 +39,34 @@ except Exception as e:
     logger.warning("Failed to download some NLTK dictionaries: %s", e)
 
 
+from apscheduler.schedulers.background import BackgroundScheduler
+from app.db.session import SessionLocal
+from app.services.reminders import check_all_reminders
+import asyncio
+
+def run_scheduled_reminders():
+    db = SessionLocal()
+    try:
+        # Ejecutar la función asíncrona dentro del event loop de este hilo
+        asyncio.run(check_all_reminders(db))
+    except Exception as e:
+        logger.error(f"Error al ejecutar recordatorios programados: {e}")
+    finally:
+        db.close()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    
+    # Iniciar el planificador en segundo plano
+    scheduler = BackgroundScheduler()
+    # Ejecuta cada hora en punto (minute=0)
+    scheduler.add_job(run_scheduled_reminders, "cron", minute=0)
+    scheduler.start()
+    
     yield
+    scheduler.shutdown()
 
 
 if settings.SENTRY_DSN and settings.SENTRY_DSN.strip().startswith("http"):
