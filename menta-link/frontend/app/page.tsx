@@ -272,7 +272,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="relative grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-6">
+          <div className="relative grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-3">
             <div className="bg-border/30 absolute top-12 left-0 -z-10 hidden h-px w-full lg:block" />
 
             {[
