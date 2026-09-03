@@ -19,6 +19,7 @@ warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 import nltk
 import sentry_sdk
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -122,3 +123,18 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 @app.get("/")
 async def root():
     return {"message": "Welcome to MENTALINK API", "docs": "/docs"}
+
+
+@app.get("/health")
+async def health_check():
+    try:
+        from sqlalchemy import text
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+        db.close()
+        return JSONResponse(content={"status": "healthy", "database": "connected"})
+    except Exception as e:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unhealthy", "database": str(e)},
+        )
