@@ -34,22 +34,22 @@ describe('EmotionalTrendsPanel', () => {
   it('renders Wellness Index and level correctly', () => {
     render(<EmotionalTrendsPanel data={mockData} />);
 
-    expect(screen.getByText('Índice de Equilibrio Estudiantil')).toBeInTheDocument();
+    expect(screen.getByText('Índice de Equilibrio')).toBeInTheDocument();
     expect(screen.getByText('45%')).toBeInTheDocument();
-    expect(screen.getByText('Atención moderada')).toBeInTheDocument();
+    expect(screen.getAllByText('Atención moderada').length).toBeGreaterThan(0);
   });
 
   it('renders the distribution chart container', () => {
     render(<EmotionalTrendsPanel data={mockData} />);
 
-    expect(screen.getByText('Distribución Emocional Dominante')).toBeInTheDocument();
+    expect(screen.getByText('Distribución Emocional')).toBeInTheDocument();
     expect(screen.getByTestId('pie-chart')).toBeInTheDocument();
   });
 
   it('renders the evolution chart section', () => {
     render(<EmotionalTrendsPanel data={mockData} />);
 
-    expect(screen.getByText('Evolución del Bienestar Estudiantil')).toBeInTheDocument();
+    expect(screen.getByText('Evolución Semanal del Bienestar')).toBeInTheDocument();
     expect(screen.getByTestId('evolution-chart')).toBeInTheDocument();
   });
 });
