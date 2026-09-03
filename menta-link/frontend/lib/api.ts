@@ -1,12 +1,26 @@
 const getAPIUrl = () => {
+  let baseUrl: string;
   if (process.env.NEXT_PUBLIC_API_BASE_URL) {
-    return process.env.NEXT_PUBLIC_API_BASE_URL;
-  }
-  if (typeof window !== 'undefined') {
-    return `${window.location.protocol}//${window.location.hostname}:8000`;
+    baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  } else if (typeof window !== 'undefined') {
+    baseUrl = `${window.location.protocol}//${window.location.hostname}:8000`;
+  } else {
+    baseUrl = 'http://localhost:8000';
   }
 
-  return 'http://localhost:8000';
+  // When the app is served over HTTPS (e.g. Railway public domain), force the
+  // API to HTTPS as well. Browsers block "mixed content" calls to http:// APIs
+  // from HTTPS pages, which previously caused the app to be redirected to
+  // /login whenever a NEXT_PUBLIC_API_BASE_URL with an http:// prefix was used.
+  if (
+    typeof window !== 'undefined' &&
+    window.location.protocol === 'https:' &&
+    baseUrl.startsWith('http://')
+  ) {
+    baseUrl = `https://${baseUrl.slice('http://'.length)}`;
+  }
+
+  return baseUrl;
 };
 
 const API_URL = getAPIUrl();
