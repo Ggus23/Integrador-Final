@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir setuptools \
     && pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -r /code/requirements.txt
 
 FROM python:3.12-slim
