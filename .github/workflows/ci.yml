@@ -113,10 +113,9 @@ jobs:
           railway --version
 
       - name: Deploy Backend
-        run: railway up --project "$RAILWAY_PROJECT_ID" --environment production --service backend --detach
+        run: railway up --project "cb113b2e-dff0-4dd9-84d4-d9bdd01c9a31" --environment production --service "Integrador-Final-Backend" --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
 
   deploy-frontend:
     name: Deploy Frontend to Railway
@@ -136,7 +135,6 @@ jobs:
           railway --version
 
       - name: Deploy Frontend
-        run: railway up --project "$RAILWAY_PROJECT_ID" --environment production --service frontend --detach
+        run: railway up --project "cb113b2e-dff0-4dd9-84d4-d9bdd01c9a31" --environment production --service "menta-link-plataforma-web" --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
