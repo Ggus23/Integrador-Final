@@ -90,8 +90,6 @@ class User(Base):
         "PasswordResetToken", back_populates="user", cascade="all, delete-orphan"
     )
 
-
-
     # Clinical Notes relationships
     clinical_notes_received = relationship(
         "ClinicalNote",

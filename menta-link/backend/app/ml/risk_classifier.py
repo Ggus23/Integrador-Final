@@ -78,15 +78,20 @@ class RiskClassifier:
                 }
                 risk_level = mapping.get(pred_class, RiskLevel.LOW.value)
                 conf = float(confidence)
-                
+
                 from app.utils.influx_logger import log_prediction_to_influx
+
                 log_prediction_to_influx(
                     model_name="RiskClassifier",
                     student_id=student_id,
-                    fields={"confidence": conf, "pss_score": pss_score, "mood_avg": checkin_avg},
-                    tags={"risk_level": risk_level, "facultad": faculty or "Unknown"}
+                    fields={
+                        "confidence": conf,
+                        "pss_score": pss_score,
+                        "mood_avg": checkin_avg,
+                    },
+                    tags={"risk_level": risk_level, "facultad": faculty or "Unknown"},
                 )
-                
+
                 return risk_level, conf
             except Exception as e:
                 logger.error(f"Predicción ML falló: {e}. Recurriendo a heurística.")
@@ -111,13 +116,19 @@ class RiskClassifier:
         else:
             risk_level = RiskLevel.HIGH.value
             conf = score
-            
+
         from app.utils.influx_logger import log_prediction_to_influx
+
         log_prediction_to_influx(
             model_name="RiskClassifier",
             student_id=student_id,
-            fields={"confidence": conf, "heuristic_score": score, "pss_score": pss_score, "mood_avg": checkin_avg},
-            tags={"risk_level": risk_level, "facultad": faculty or "Unknown"}
+            fields={
+                "confidence": conf,
+                "heuristic_score": score,
+                "pss_score": pss_score,
+                "mood_avg": checkin_avg,
+            },
+            tags={"risk_level": risk_level, "facultad": faculty or "Unknown"},
         )
 
         return risk_level, conf

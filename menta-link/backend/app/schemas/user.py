@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 from app.models.user import UserRole
 
+
 class UserBase(BaseModel):
     email: Optional[EmailStr] = None
     is_active: Optional[bool] = True
@@ -12,6 +13,7 @@ class UserBase(BaseModel):
     consent_accepted: bool = False
     must_change_password: bool = False
     expo_push_token: Optional[str] = None
+
 
 class UserCreateBase(BaseModel):
     full_name: str
@@ -55,6 +57,7 @@ class UserCreate(UserCreateBase):
 class UserCreateAdmin(UserCreateBase):
     role: UserRole = UserRole.STUDENT
 
+
 class UserUpdate(UserBase):
     password: Optional[str] = None
 
@@ -62,6 +65,7 @@ class UserUpdate(UserBase):
 class UserInDBBase(UserBase):
     id: Optional[int] = None
     model_config = ConfigDict(from_attributes=True)
+
 
 class User(UserInDBBase):
     created_at: Optional[object] = None

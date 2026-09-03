@@ -1,57 +1,167 @@
-import re
 import json
+import re
+from collections import Counter
 from datetime import date
 from typing import Dict, List, Optional
-from collections import Counter
 
 # ============================================================================
 # 1. Definición de patrones para depresión, ansiedad y estrés
 # ============================================================================
 
 DEPRESION_PATRONES = {
-    "tristeza": (r"\b(triste|deprimid[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo|desganad[oa]|sin ganas)\b", 1.0),
-    "desesperanza": (r"\b(desesperanz[oa]|sin esperanza|sin sentido|nada vale la pena|no hay salida|nada tiene sentido|ya no quiero vivir|no quiero seguir (viviendo|así))\b", 1.2),
-    "fatiga": (r"\b(cansanci[oa]|cansad[oa]|agotamient[oa]|sin energía|fatigad[oa]|sin fuerzas)\b", 0.8),
+    "tristeza": (
+        r"\b(triste|deprimid[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo|desganad[oa]|sin ganas)\b",
+        1.0,
+    ),
+    "desesperanza": (
+        r"\b(desesperanz[oa]|sin esperanza|sin sentido|nada vale la pena|no hay salida|nada tiene sentido|ya no quiero vivir|no quiero seguir (viviendo|así))\b",
+        1.2,
+    ),
+    "fatiga": (
+        r"\b(cansanci[oa]|cansad[oa]|agotamient[oa]|sin energía|fatigad[oa]|sin fuerzas)\b",
+        0.8,
+    ),
     "inutilidad": (r"\b(inútil|fracasad[oa]|no valgo|no sirvo|incompetente)\b", 1.1),
-    "cambios_sueno": (r"\b(insomnio|duermo mucho|hipersomnia|despertar temprano|problemas de sueño|malos hábitos de sueño)\b", 0.9),
-    "pensamientos_negativos": (r"\b(culpa|autocrític[oa]|odio a mí mismo|no merezco)\b", 1.0),
+    "cambios_sueno": (
+        r"\b(insomnio|duermo mucho|hipersomnia|despertar temprano|problemas de sueño|malos hábitos de sueño)\b",
+        0.9,
+    ),
+    "pensamientos_negativos": (
+        r"\b(culpa|autocrític[oa]|odio a mí mismo|no merezco)\b",
+        1.0,
+    ),
 }
 
 ANSIEDAD_PATRONES = {
-    "nerviosismo": (r"\b(nervios[oa]|inquiet[oa]|tens[oa]|intranquil[oa]|agitad[oa]|ansios[oa]|ansiedad)\b", 1.0),
-    "preocupacion": (r"\b(preocupad[oa]|angustiad[oa]|rumiando|pensando demasiado|anticipando lo peor)\b", 1.1),
+    "nerviosismo": (
+        r"\b(nervios[oa]|inquiet[oa]|tens[oa]|intranquil[oa]|agitad[oa]|ansios[oa]|ansiedad)\b",
+        1.0,
+    ),
+    "preocupacion": (
+        r"\b(preocupad[oa]|angustiad[oa]|rumiando|pensando demasiado|anticipando lo peor)\b",
+        1.1,
+    ),
     "miedo": (r"\b(miedo|temor|pánico|aterrorizad[oa]|fobia)\b", 1.2),
-    "sintomas_fisicos": (r"\b(corazón acelerado|palpitaciones|sudor|temblor|falta de aire|opresión en el pecho|taquicardia)\b", 1.0),
+    "sintomas_fisicos": (
+        r"\b(corazón acelerado|palpitaciones|sudor|temblor|falta de aire|opresión en el pecho|taquicardia)\b",
+        1.0,
+    ),
     "evitacion": (r"\b(evito|escapo|no salgo|no quiero enfrentar)\b", 0.8),
-    "hipervigilancia": (r"\b(alerta constante|sobresalt[oa]|asustadizo|vigilando todo)\b", 0.9),
+    "hipervigilancia": (
+        r"\b(alerta constante|sobresalt[oa]|asustadizo|vigilando todo)\b",
+        0.9,
+    ),
 }
 
 ESTRES_PATRONES = {
-    "sobrecarga": (r"\b(sobrecargad[oa]|abrumad[oa]|colmad[oa]|no puedo más|demasiadas cosas|estrés|estres|estresad[oa]s?|estres[oa])\b", 1.2),
+    "sobrecarga": (
+        r"\b(sobrecargad[oa]|abrumad[oa]|colmad[oa]|no puedo más|demasiadas cosas|estrés|estres|estresad[oa]s?|estres[oa])\b",
+        1.2,
+    ),
     "presion": (r"\b(presión|exigencia|plazos|obligaciones|debo hacer todo)\b", 1.0),
-    "irritabilidad": (r"\b(irritable|enfadad[oa]|frustrad[oa]|pierdo la paciencia|me enojo fácil)\b", 1.0),
-    "agotamiento": (r"\b(agotamient[oa]|quemad[oa]|burnout|sin motivación|desgaste)\b", 1.1),
-    "problemas_concentracion": (r"\b(desconcentrad[oa]|olvidadizo|bloqueo mental|no puedo enfocarme)\b", 0.9),
-    "cambios_apetito": (r"\b(como mucho|sin apetito|atracones|pierdo el hambre|no estoy comiendo|hábitos de alimentación)\b", 0.8),
+    "irritabilidad": (
+        r"\b(irritable|enfadad[oa]|frustrad[oa]|pierdo la paciencia|me enojo fácil)\b",
+        1.0,
+    ),
+    "agotamiento": (
+        r"\b(agotamient[oa]|quemad[oa]|burnout|sin motivación|desgaste)\b",
+        1.1,
+    ),
+    "problemas_concentracion": (
+        r"\b(desconcentrad[oa]|olvidadizo|bloqueo mental|no puedo enfocarme)\b",
+        0.9,
+    ),
+    "cambios_apetito": (
+        r"\b(como mucho|sin apetito|atracones|pierdo el hambre|no estoy comiendo|hábitos de alimentación)\b",
+        0.8,
+    ),
 }
 
 # ============================================================================
 # 2. Negaciones e intensificadores
 # ============================================================================
 NEGACIONES = {"no", "ni", "nunca", "jamás", "sin", "tampoco", "ningún", "ninguna"}
-INTENSIFICADORES = {"muy", "mucho", "demasiado", "siempre", "constantemente", "extremadamente", "terriblemente"}
+INTENSIFICADORES = {
+    "muy",
+    "mucho",
+    "demasiado",
+    "siempre",
+    "constantemente",
+    "extremadamente",
+    "terriblemente",
+}
 
 # Stopwords que hacen que una frase sea incompleta si están al final o inicio
 STOPWORDS_ANALISIS = {
-    "y", "e", "ni", "o", "u", "de", "del", "la", "las", "lo", "los",
-    "el", "que", "por", "para", "con", "sin", "a", "ante", "bajo",
-    "cabe", "contra", "desde", "durante", "en", "entre", "hacia",
-    "hasta", "mediante", "para", "por", "según", "sin", "so", "sobre",
-    "tras", "ya", "también", "tambien", "más", "pero", "aunque", "si", "no", 
-    "me", "mi", "mis", "su", "sus", "te", "ti", "nos", "os",
-    "creo", "que", "porque", "ultimamente", "últimamente", "así", "asi",
-    "tan", "muy", "bastante", "un", "una", "unos", "unas"
+    "y",
+    "e",
+    "ni",
+    "o",
+    "u",
+    "de",
+    "del",
+    "la",
+    "las",
+    "lo",
+    "los",
+    "el",
+    "que",
+    "por",
+    "para",
+    "con",
+    "sin",
+    "a",
+    "ante",
+    "bajo",
+    "cabe",
+    "contra",
+    "desde",
+    "durante",
+    "en",
+    "entre",
+    "hacia",
+    "hasta",
+    "mediante",
+    "para",
+    "por",
+    "según",
+    "sin",
+    "so",
+    "sobre",
+    "tras",
+    "ya",
+    "también",
+    "tambien",
+    "más",
+    "pero",
+    "aunque",
+    "si",
+    "no",
+    "me",
+    "mi",
+    "mis",
+    "su",
+    "sus",
+    "te",
+    "ti",
+    "nos",
+    "os",
+    "creo",
+    "que",
+    "porque",
+    "ultimamente",
+    "últimamente",
+    "así",
+    "asi",
+    "tan",
+    "muy",
+    "bastante",
+    "un",
+    "una",
+    "unos",
+    "unas",
 }
+
 
 # Compilación de patrones
 def compilar_patrones(patrones_dict):
@@ -60,15 +170,19 @@ def compilar_patrones(patrones_dict):
         compilados[clave] = (re.compile(regex, re.IGNORECASE | re.UNICODE), peso)
     return compilados
 
+
 DEPRESION_COMP = compilar_patrones(DEPRESION_PATRONES)
 ANSIEDAD_COMP = compilar_patrones(ANSIEDAD_PATRONES)
 ESTRES_COMP = compilar_patrones(ESTRES_PATRONES)
+
 
 # ============================================================================
 # 3. Clase DiaryAnalyzer (mejorada con extracción de frases con sentido)
 # ============================================================================
 class DiaryAnalyzer:
-    def __init__(self, historial_path: Optional[str] = None, umbral_alerta: float = 0.6):
+    def __init__(
+        self, historial_path: Optional[str] = None, umbral_alerta: float = 0.6
+    ):
         self.historial_path = historial_path
         self.historial = []
         self.umbral_alerta = umbral_alerta
@@ -96,7 +210,7 @@ class DiaryAnalyzer:
         mapeo_emociones = {
             "depresion": "Triste",
             "ansiedad": "Ansioso",
-            "estres": "Estresado"
+            "estres": "Estresado",
         }
         emotion_label = "Neutral"
         # Umbral bajo: un solo sintoma emocional claro (peso minimo 0.8 de 6.0
@@ -108,7 +222,7 @@ class DiaryAnalyzer:
             "emotion": emotion_label,
             "scores": scores,
             "sintomas": resultado["sintomas_detectados"],
-            "alerta": resultado["alerta"]
+            "alerta": resultado["alerta"],
         }
 
     # ------------------------------------------------------------------------
@@ -158,14 +272,18 @@ class DiaryAnalyzer:
                     # parte del propio match (p.ej. "sin" en "sin esperanza",
                     # "no" en "no quiero vivir").
                     # tokens del propio match:
-                    match_tokens = tokens[tok_ini:tok_fin + 1]
-                    while (ventana_tokens and
-                           ventana_tokens[0] in STOPWORDS_ANALISIS and
-                           ventana_tokens[0] not in match_tokens[:1]):
+                    match_tokens = tokens[tok_ini : tok_fin + 1]
+                    while (
+                        ventana_tokens
+                        and ventana_tokens[0] in STOPWORDS_ANALISIS
+                        and ventana_tokens[0] not in match_tokens[:1]
+                    ):
                         ventana_tokens.pop(0)
-                    while (ventana_tokens and
-                           ventana_tokens[-1] in STOPWORDS_ANALISIS and
-                           ventana_tokens[-1] not in match_tokens[-1:]):
+                    while (
+                        ventana_tokens
+                        and ventana_tokens[-1] in STOPWORDS_ANALISIS
+                        and ventana_tokens[-1] not in match_tokens[-1:]
+                    ):
                         ventana_tokens.pop()
 
                     if ventana_tokens:
@@ -174,7 +292,9 @@ class DiaryAnalyzer:
         contador = Counter(frases_candidatas)
         return [frase for frase, _ in contador.most_common(top_n)]
 
-    def extract_meaningful_phrases(self, tokens: List[str], top_n: int = 10) -> Dict[str, int]:
+    def extract_meaningful_phrases(
+        self, tokens: List[str], top_n: int = 10
+    ) -> Dict[str, int]:
         """
         Genera bigramas y trigramas que contengan al menos una palabra emocional
         y que no terminen en una stopword vacía (como "y", "de", "que").
@@ -189,14 +309,14 @@ class DiaryAnalyzer:
         for i in range(len(tokens) - 1):
             bigrama = f"{tokens[i]} {tokens[i+1]}"
             if self._contiene_emocion(bigrama):
-                if tokens[i+1] not in STOPWORDS_ANALISIS:
+                if tokens[i + 1] not in STOPWORDS_ANALISIS:
                     frases_candidatas.append(bigrama)
 
         # Trigramas
         for i in range(len(tokens) - 2):
             trigrama = f"{tokens[i]} {tokens[i+1]} {tokens[i+2]}"
             if self._contiene_emocion(trigrama):
-                if tokens[i+2] not in STOPWORDS_ANALISIS:
+                if tokens[i + 2] not in STOPWORDS_ANALISIS:
                     frases_candidatas.append(trigrama)
 
         contador = Counter(frases_candidatas)
@@ -210,13 +330,13 @@ class DiaryAnalyzer:
         if not texto:
             return {}
         # Dividir por puntuación estándar o saltos de línea
-        oraciones = re.split(r'[.!?;]|\n', texto)
-        
+        oraciones = re.split(r"[.!?;]|\n", texto)
+
         # Si las oraciones resultantes son muy largas, subdividir por comas o " y "
         sub_oraciones = []
         for o in oraciones:
             if len(o) > 80:
-                sub_oraciones.extend(re.split(r'[,]| y ', o))
+                sub_oraciones.extend(re.split(r"[,]| y ", o))
             else:
                 sub_oraciones.append(o)
 
@@ -260,7 +380,11 @@ class DiaryAnalyzer:
             "scores": scores,
             "sintomas_detectados": sintomas,
             "alerta": alerta,
-            "texto_original": (texto_original[:200] + "...") if len(texto_original) > 200 else texto_original
+            "texto_original": (
+                (texto_original[:200] + "...")
+                if len(texto_original) > 200
+                else texto_original
+            ),
         }
 
     def _calcular_score(self, texto: str, tokens: List[str], patrones_comp) -> float:
@@ -287,15 +411,23 @@ class DiaryAnalyzer:
         # anteriores (p.ej. "No fui a clases y estoy triste" -> "estoy triste").
         inicio = max(0, pos - 60)
         contexto = texto[inicio:pos]
-        conectores = (" pero ", " aunque ", " porque ", " entonces ",
-                      " sin embargo ", " sino ", " y no ", " y ")
+        conectores = (
+            " pero ",
+            " aunque ",
+            " porque ",
+            " entonces ",
+            " sin embargo ",
+            " sino ",
+            " y no ",
+            " y ",
+        )
         ultimo_sep = -1
         for con in conectores:
             idx = contexto.rfind(con)
             if idx > ultimo_sep:
                 ultimo_sep = idx
         if ultimo_sep != -1:
-            contexto = contexto[ultimo_sep + 1:]
+            contexto = contexto[ultimo_sep + 1 :]
         return contexto
 
     def _hay_negacion(self, contexto: str) -> bool:
@@ -304,19 +436,21 @@ class DiaryAnalyzer:
         # afecta ("no estoy triste"). Esto evita que un "no" lejano en una
         # clausula anterior anule un sentimiento real ("No fui a clases... estoy
         # triste" -> el "no" ya no anula "triste").
-        palabras = re.findall(r'\b\w+\b', contexto.lower()) or [""]
+        palabras = re.findall(r"\b\w+\b", contexto.lower()) or [""]
         ultimas = palabras[-4:]
         return bool(set(ultimas) & NEGACIONES)
 
     def _hay_intensificador(self, contexto: str) -> bool:
-        palabras = set(re.findall(r'\b\w+\b', contexto.lower()))
+        palabras = set(re.findall(r"\b\w+\b", contexto.lower()))
         return bool(palabras & INTENSIFICADORES)
 
     def _extraer_sintomas(self, texto: str, tokens: List[str]) -> List[str]:
         sintomas = []
-        for categoria, patrones_comp in [("depresion", DEPRESION_COMP),
-                                         ("ansiedad", ANSIEDAD_COMP),
-                                         ("estres", ESTRES_COMP)]:
+        for categoria, patrones_comp in [
+            ("depresion", DEPRESION_COMP),
+            ("ansiedad", ANSIEDAD_COMP),
+            ("estres", ESTRES_COMP),
+        ]:
             for sintoma, (regex, _) in patrones_comp.items():
                 for match in regex.finditer(texto):
                     contexto = self._obtener_contexto(texto, match.start())
@@ -327,8 +461,8 @@ class DiaryAnalyzer:
     def _limpiar_texto(self, texto: str) -> str:
         if not texto:
             return ""
-        limpio = re.sub(r'[^\wáéíóúüñ\s]', ' ', texto.lower())
-        limpio = re.sub(r'\s+', ' ', limpio)
+        limpio = re.sub(r"[^\wáéíóúüñ\s]", " ", texto.lower())
+        limpio = re.sub(r"\s+", " ", limpio)
         return limpio.strip()
 
     # ------------------------------------------------------------------------
@@ -343,7 +477,7 @@ class DiaryAnalyzer:
             "scores": resultado["scores"],
             "alerta": resultado["alerta"],
             "sintomas": resultado["sintomas_detectados"][:10],
-            "texto_resumen": resultado["texto_original"]
+            "texto_resumen": resultado["texto_original"],
         }
         self.historial.append(registro)
         if self.historial_path:
@@ -364,8 +498,8 @@ class DiaryAnalyzer:
             if n <= 3:
                 delta = valores[-1] - valores[0]
             else:
-                primero = sum(valores[:n//3]) / (n//3)
-                ultimo = sum(valores[-n//3:]) / (n//3)
+                primero = sum(valores[: n // 3]) / (n // 3)
+                ultimo = sum(valores[-n // 3 :]) / (n // 3)
                 delta = ultimo - primero
             if delta > 0.1:
                 tendencias[categoria] = "subiendo"
@@ -377,13 +511,13 @@ class DiaryAnalyzer:
 
     def _cargar_historial(self):
         try:
-            with open(self.historial_path, 'r', encoding='utf-8') as f:
+            with open(self.historial_path, "r", encoding="utf-8") as f:
                 self.historial = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             self.historial = []
 
     def _guardar_historial(self):
-        with open(self.historial_path, 'w', encoding='utf-8') as f:
+        with open(self.historial_path, "w", encoding="utf-8") as f:
             json.dump(self.historial, f, indent=2, ensure_ascii=False)
 
 
@@ -391,6 +525,7 @@ class DiaryAnalyzer:
 # 4. Singleton para compatibilidad con la antigua API
 # ============================================================================
 _analyzer_instance = None
+
 
 def get_regex_emotion_analyzer(historial_path: Optional[str] = None):
     global _analyzer_instance
@@ -406,8 +541,8 @@ if __name__ == "__main__":
     analizador = DiaryAnalyzer(historial_path="diario_historial.json")
 
     texto_ejemplo = """
-    Hoy estoy muy nervioso porque tengo una reunión importante. 
-    No puedo dejar de pensar en lo que saldrá mal. 
+    Hoy estoy muy nervioso porque tengo una reunión importante.
+    No puedo dejar de pensar en lo que saldrá mal.
     Me siento frustrado y cansado, no duermo bien.
     Estoy nervioso y con taquicardia.
     """

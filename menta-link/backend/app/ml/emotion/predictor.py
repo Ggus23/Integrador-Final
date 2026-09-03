@@ -1,9 +1,13 @@
 import os
+
 import requests
+
 from app.core.config import settings
 from app.utils.influx_logger import log_prediction_to_influx
 
-API_URL = "https://router.huggingface.co/hf-inference/models/agustin250800/detector_emociones"
+API_URL = (
+    "https://router.huggingface.co/hf-inference/models/agustin250800/detector_emociones"
+)
 
 
 class EmotionPredictor:
@@ -35,7 +39,9 @@ class EmotionPredictor:
                 flat_results = result
 
         if not isinstance(flat_results, list) or not flat_results:
-            raise RuntimeError(f"Respuesta inesperada de la API de Hugging Face: {result}")
+            raise RuntimeError(
+                f"Respuesta inesperada de la API de Hugging Face: {result}"
+            )
 
         # Find the label with the highest score
         best_match = max(flat_results, key=lambda x: x.get("score", 0.0))

@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.api import deps
 
-
 router = APIRouter()
 
 
@@ -86,7 +85,5 @@ def resolve_alert(
 
     db.commit()
     db.refresh(alert)
-
-
 
     return alert

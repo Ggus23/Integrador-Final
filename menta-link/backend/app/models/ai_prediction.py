@@ -20,7 +20,7 @@ Fecha de Creación: 2026-05-28
 
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Index
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
@@ -29,7 +29,7 @@ from app.db.base_class import Base
 class AIPrediction(Base):
     """
     Tabla que almacena predicciones de IA para análisis y visualización.
-    
+
     Campos principales:
     - user_id: Referencia al estudiante
     - model_name: Tipo de modelo que hizo la predicción
@@ -37,13 +37,16 @@ class AIPrediction(Base):
     - Campos de salida: risk_level, dropout_probability
     - Índices: Optimizados para queries en Grafana por usuario, modelo, facultad
     """
+
     __tablename__ = "ai_predictions"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
 
     # Información del modelo
-    model_name = Column(String, nullable=False, index=True)  # RiskClassifier, DropoutPredictor, SentimentCNN
+    model_name = Column(
+        String, nullable=False, index=True
+    )  # RiskClassifier, DropoutPredictor, SentimentCNN
     model_version = Column(String, default="v1")
 
     # Features usadas para la predicción (académicos)
@@ -56,13 +59,13 @@ class AIPrediction(Base):
     hito5_nota = Column(Float, default=0.0)
 
     # Features usadas para la predicción (emocionales)
-    checkin_score = Column(Float, default=0.0)   # promedio de checkins
-    test_score = Column(Float, default=0.0)      # promedio de tests/assessments
-    pss_score = Column(Float, nullable=True)     # Escala de Estrés Percibido
-    gad_score = Column(Float, nullable=True)     # Escala GAD-7 (Ansiedad)
-    phq_score = Column(Float, nullable=True)     # Escala PHQ-9 (Depresión)
-    mood_avg = Column(Float, nullable=True)      # promedio de humor
-    confidence = Column(Float, nullable=True)    # confianza de la predicción
+    checkin_score = Column(Float, default=0.0)  # promedio de checkins
+    test_score = Column(Float, default=0.0)  # promedio de tests/assessments
+    pss_score = Column(Float, nullable=True)  # Escala de Estrés Percibido
+    gad_score = Column(Float, nullable=True)  # Escala GAD-7 (Ansiedad)
+    phq_score = Column(Float, nullable=True)  # Escala PHQ-9 (Depresión)
+    mood_avg = Column(Float, nullable=True)  # promedio de humor
+    confidence = Column(Float, nullable=True)  # confianza de la predicción
 
     # Resultado de la predicción
     risk_level = Column(String, nullable=False, index=True)  # LOW, MEDIUM, HIGH
@@ -79,7 +82,7 @@ class AIPrediction(Base):
 
     # Índices compuestos para queries eficientes en Grafana
     __table_args__ = (
-        Index('idx_user_created', 'user_id', 'created_at'),
-        Index('idx_model_created', 'model_name', 'created_at'),
-        Index('idx_facultad_created', 'facultad', 'created_at'),
+        Index("idx_user_created", "user_id", "created_at"),
+        Index("idx_model_created", "model_name", "created_at"),
+        Index("idx_facultad_created", "facultad", "created_at"),
     )

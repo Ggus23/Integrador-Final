@@ -104,15 +104,16 @@ class DropoutPredictor:
             elif score > 0.4:
                 risk = RiskLevel.MEDIUM.value
             from app.utils.influx_logger import log_prediction_to_influx
+
             student_id = data.get("student_id")
             faculty = data.get("faculty", "Unknown")
-            
+
             prob = min(round(score, 4), 1.0)
             log_prediction_to_influx(
                 model_name="DropoutPredictor",
                 student_id=student_id,
                 fields={"dropout_probability": prob, "heuristic_score": score},
-                tags={"risk_level": risk, "facultad": faculty}
+                tags={"risk_level": risk, "facultad": faculty},
             )
             return risk, prob
 
@@ -147,16 +148,17 @@ class DropoutPredictor:
                 risk = RiskLevel.MEDIUM.value
 
             prob_round = round(probability, 4)
-            
+
             from app.utils.influx_logger import log_prediction_to_influx
+
             student_id = data.get("student_id")
             faculty = data.get("faculty", "Unknown")
-            
+
             log_prediction_to_influx(
                 model_name="DropoutPredictor",
                 student_id=student_id,
                 fields={"dropout_probability": prob_round},
-                tags={"risk_level": risk, "facultad": faculty}
+                tags={"risk_level": risk, "facultad": faculty},
             )
 
             return risk, prob_round

@@ -270,7 +270,9 @@ def delete_user(
     # Elimina registros de auditoría existentes (tabla legacy sin modelo).
     # La tabla puede no existir en instalaciones nuevas; se ignora si es así.
     try:
-        db.execute(text("DELETE FROM audit_logs WHERE actor_id = :uid"), {"uid": user_id})
+        db.execute(
+            text("DELETE FROM audit_logs WHERE actor_id = :uid"), {"uid": user_id}
+        )
     except Exception:
         db.rollback()
 

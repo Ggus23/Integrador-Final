@@ -29,6 +29,7 @@ def prueba_procesar_alerta_riesgo_alto(client, db_session):
 
     # Riesgo alto crea un registro de alerta en DB (logica real de alert_service)
     import asyncio
+
     asyncio.run(
         alert_service.process_risk_alert(
             db=db_session,
@@ -59,6 +60,7 @@ def prueba_procesar_alerta_riesgo_bajo(client, db_session):
 
     # Riesgo bajo: no crea registro de alerta (solo log)
     import asyncio
+
     asyncio.run(
         alert_service.process_risk_alert(
             db=db_session,

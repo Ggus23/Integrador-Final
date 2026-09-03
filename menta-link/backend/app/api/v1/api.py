@@ -12,13 +12,13 @@ from app.api.v1.endpoints import (
     consents,
     diary,
     emotion,
+    facial_emotion,
+    insights,
     reports,
     risk,
     students,
     users,
     visualizations,
-    facial_emotion,
-    insights,
 )
 
 api_router = APIRouter()
@@ -50,6 +50,8 @@ api_router.include_router(emotion.router, prefix="/emotion", tags=["emotion"])
 api_router.include_router(
     visualizations.router, prefix="/visualizations", tags=["visualizations"]
 )
-api_router.include_router(facial_emotion.router, prefix="/facial-emotion", tags=["facial-emotion"])
+api_router.include_router(
+    facial_emotion.router, prefix="/facial-emotion", tags=["facial-emotion"]
+)
 api_router.include_router(insights.router, prefix="/insights", tags=["insights"])
 api_router.include_router(analysis.router, prefix="/analysis", tags=["analysis"])

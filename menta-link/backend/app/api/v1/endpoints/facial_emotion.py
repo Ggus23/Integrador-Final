@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 import requests
 
-HF_MODEL_URL = "https://huggingface.co/agustin250800/detector_emociones/resolve/main/best.pt"
+HF_MODEL_URL = (
+    "https://huggingface.co/agustin250800/detector_emociones/resolve/main/best.pt"
+)
 
 ALLOWED_EMOTIONS = {"triste", "neutral", "enojado", "aburrido", "sorprendido"}
 
@@ -39,9 +41,7 @@ def _get_face_cascade():
 def _get_local_model_path():
     return os.path.join(
         os.path.dirname(
-            os.path.dirname(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            )
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         ),
         "models",
         "best.pt",
@@ -51,9 +51,7 @@ def _get_local_model_path():
 def _get_hf_cache_path():
     return os.path.join(
         os.path.dirname(
-            os.path.dirname(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            )
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         ),
         "models",
         "emotion_hf.pt",
@@ -98,7 +96,11 @@ def get_emotion_model():
         from ultralytics import YOLO
 
         model_path = _get_local_model_path()
-        logger.info("Loading local YOLO model from: %s (exists: %s)", model_path, os.path.exists(model_path))
+        logger.info(
+            "Loading local YOLO model from: %s (exists: %s)",
+            model_path,
+            os.path.exists(model_path),
+        )
         _model = YOLO(model_path)
         logger.info("Loaded local best.pt successfully. Classes: %s", _model.names)
         return _model
@@ -148,10 +150,20 @@ async def analyze_frame(image: str = Body(..., embed=True)):
         if len(faces) > 0:
             x, y, w, h = faces[0]
             input_img = img[y : y + h, x : x + w]
-            logger.info("Face detected at (%d,%d,%d,%d), cropping for classification", x, y, w, h)
+            logger.info(
+                "Face detected at (%d,%d,%d,%d), cropping for classification",
+                x,
+                y,
+                w,
+                h,
+            )
         else:
             input_img = img
-            logger.info("No face detected by HaarCascade, using full image (%dx%d)", img.shape[1], img.shape[0])
+            logger.info(
+                "No face detected by HaarCascade, using full image (%dx%d)",
+                img.shape[1],
+                img.shape[0],
+            )
 
         results = model(input_img, verbose=False)
         probs = results[0].probs
@@ -159,8 +171,15 @@ async def analyze_frame(image: str = Body(..., embed=True)):
         confidence = float(probs.top1conf)
         raw_label = model.names[pred_idx]
 
-        all_scores = {model.names[i]: float(s) for i, s in enumerate(probs.data.tolist())}
-        logger.info("YOLO raw prediction: %s (%.4f) | All scores: %s", raw_label, confidence, all_scores)
+        all_scores = {
+            model.names[i]: float(s) for i, s in enumerate(probs.data.tolist())
+        }
+        logger.info(
+            "YOLO raw prediction: %s (%.4f) | All scores: %s",
+            raw_label,
+            confidence,
+            all_scores,
+        )
 
         filtered_scores = {}
         for idx, score in enumerate(probs.data.tolist()):
@@ -178,7 +197,9 @@ async def analyze_frame(image: str = Body(..., embed=True)):
 
         total = sum(filtered_scores.values())
         if total > 0:
-            filtered_scores = {k: round(v / total, 4) for k, v in filtered_scores.items()}
+            filtered_scores = {
+                k: round(v / total, 4) for k, v in filtered_scores.items()
+            }
 
         emotion = max(filtered_scores, key=filtered_scores.get)
         confidence = filtered_scores[emotion]

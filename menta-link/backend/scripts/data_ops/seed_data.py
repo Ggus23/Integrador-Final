@@ -378,9 +378,9 @@ def seed_users(db):
 
 def seed_academic_profiles(db):
     import random
+
     from app.models.academic_profile import AcademicProfile
     from app.models.risk_summary import RiskSummary
-    from app.ml.risk_classifier import risk_classifier
 
     students = db.query(User).filter(User.role == UserRole.STUDENT).all()
     total = len(students)
@@ -393,7 +393,9 @@ def seed_academic_profiles(db):
         if not profile:
             logger.info(f"Creating AcademicProfile for student: {student.email}")
 
-            risk_bucket = "High" if i < total * 0.15 else "Medium" if i < total * 0.40 else "Low"
+            risk_bucket = (
+                "High" if i < total * 0.15 else "Medium" if i < total * 0.40 else "Low"
+            )
 
             if risk_bucket == "High":
                 gpa = random.uniform(40.0, 59.9)
@@ -416,7 +418,9 @@ def seed_academic_profiles(db):
 
             profile = AcademicProfile(
                 user_id=student.id,
-                course=random.choice(["Ingeniería en Sistemas", "Psicología", "Medicina"]),
+                course=random.choice(
+                    ["Ingeniería en Sistemas", "Psicología", "Medicina"]
+                ),
                 scholarship_holder=scholarship,
                 tuition_fees_up_to_date=tuition_ok,
                 current_semester=semester,
@@ -424,24 +428,46 @@ def seed_academic_profiles(db):
                 current_gpa=round(gpa, 1),
                 age_at_enrollment=random.randint(18, 25),
                 gender=random.choice([0, 1]),
-                hito2_procesual=round(min(15.0, (gpa / 100.0) * 15.0 + random.uniform(-1, 1)), 1),
-                hito2_nota=round(min(10.0, (gpa / 100.0) * 10.0 + random.uniform(-1, 0.5)), 1),
-                hito3_procesual=round(min(15.0, (gpa / 100.0) * 15.0 + random.uniform(-1, 1)), 1),
-                hito3_nota=round(min(10.0, (gpa / 100.0) * 10.0 + random.uniform(-1, 0.5)), 1),
-                hito4_procesual=round(min(15.0, (gpa / 100.0) * 15.0 + random.uniform(-1, 1)), 1),
-                hito4_nota=round(min(10.0, (gpa / 100.0) * 10.0 + random.uniform(-1, 0.5)), 1),
-                hito5_procesual=round(min(15.0, (gpa / 100.0) * 15.0 + random.uniform(-1, 1)), 1),
-                hito5_nota=round(min(10.0, (gpa / 100.0) * 10.0 + random.uniform(-1, 0.5)), 1),
+                hito2_procesual=round(
+                    min(15.0, (gpa / 100.0) * 15.0 + random.uniform(-1, 1)), 1
+                ),
+                hito2_nota=round(
+                    min(10.0, (gpa / 100.0) * 10.0 + random.uniform(-1, 0.5)), 1
+                ),
+                hito3_procesual=round(
+                    min(15.0, (gpa / 100.0) * 15.0 + random.uniform(-1, 1)), 1
+                ),
+                hito3_nota=round(
+                    min(10.0, (gpa / 100.0) * 10.0 + random.uniform(-1, 0.5)), 1
+                ),
+                hito4_procesual=round(
+                    min(15.0, (gpa / 100.0) * 15.0 + random.uniform(-1, 1)), 1
+                ),
+                hito4_nota=round(
+                    min(10.0, (gpa / 100.0) * 10.0 + random.uniform(-1, 0.5)), 1
+                ),
+                hito5_procesual=round(
+                    min(15.0, (gpa / 100.0) * 15.0 + random.uniform(-1, 1)), 1
+                ),
+                hito5_nota=round(
+                    min(10.0, (gpa / 100.0) * 10.0 + random.uniform(-1, 0.5)), 1
+                ),
             )
             db.add(profile)
 
             risk_summary = (
-                db.query(RiskSummary)
-                .filter(RiskSummary.user_id == student.id)
-                .first()
+                db.query(RiskSummary).filter(RiskSummary.user_id == student.id).first()
             )
             if not risk_summary:
-                dropout_prob = random.uniform(0.60, 0.88) if risk_bucket == "High" else random.uniform(0.20, 0.45) if risk_bucket == "Medium" else random.uniform(0.02, 0.12)
+                dropout_prob = (
+                    random.uniform(0.60, 0.88)
+                    if risk_bucket == "High"
+                    else (
+                        random.uniform(0.20, 0.45)
+                        if risk_bucket == "Medium"
+                        else random.uniform(0.02, 0.12)
+                    )
+                )
                 risk_summary = RiskSummary(
                     user_id=student.id,
                     current_risk_level=risk_bucket,

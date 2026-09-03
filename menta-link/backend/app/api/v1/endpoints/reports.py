@@ -10,6 +10,7 @@ from app.api import deps
 
 router = APIRouter()
 
+
 @router.get("/aggregated", response_model=Dict[str, Any])
 def get_institutional_report(
     db: Session = Depends(deps.get_db),

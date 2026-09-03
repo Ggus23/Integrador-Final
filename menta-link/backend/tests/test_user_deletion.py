@@ -97,6 +97,8 @@ def prueba_cambio_estado_usuario_resuelve_alertas(client, db_session):
         assert a.is_resolved is True
         assert a.resolved_at is not None
 
-    response_activate = client.patch(f"/api/v1/users/{target_id}/status", headers=headers)
+    response_activate = client.patch(
+        f"/api/v1/users/{target_id}/status", headers=headers
+    )
     assert response_activate.status_code == 200
     assert response_activate.json()["is_active"] is True

@@ -4,8 +4,6 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.schemas.emotion import EmotionDB
-
 
 class EmotionalDiaryBase(BaseModel):
     experience: Optional[str] = None

@@ -93,9 +93,7 @@ class BrevoEmailService(EmailService):
                     )
                     return True
                 else:
-                    logger.error(
-                        f"Brevo API devolvió estado HTTP: {response.status}"
-                    )
+                    logger.error(f"Brevo API devolvió estado HTTP: {response.status}")
                     return False
 
         except urllib.error.HTTPError as e:

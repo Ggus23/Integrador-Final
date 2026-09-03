@@ -1,6 +1,7 @@
 from app.core.security import get_password_hash
 from app.models.user import User
 
+
 def prueba_inicio_sesion_token_acceso(client, db_session):
     email = "test@gmail.com"
     password = "password123"
@@ -20,6 +21,7 @@ def prueba_inicio_sesion_token_acceso(client, db_session):
     assert response.status_code == 200
     tokens = response.json()
     assert "access_token" in tokens
+
 
 def prueba_inicio_sesion_contrasena_incorrecta(client, db_session):
     email = "test2@gmail.com"

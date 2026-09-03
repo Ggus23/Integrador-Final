@@ -32,9 +32,9 @@ Fecha de Migración: 2026-05-28
 """
 
 import logging
-from typing import Any, Dict, Optional
-from threading import Thread
 from datetime import datetime
+from threading import Thread
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -43,14 +43,14 @@ def _save_to_postgres(
     model_name: str,
     user_id: Optional[int] = None,
     fields: Dict[str, Any] = None,
-    tags: Dict[str, str] = None
+    tags: Dict[str, str] = None,
 ):
     """
     Guarda predicciones de modelos IA en PostgreSQL (tabla ai_predictions).
-    
+
     Esta función se ejecuta típicamente en un thread separado (asíncrono) para
     no bloquear el flujo principal de la API.
-    
+
     Parámetros:
         model_name (str): Nombre del modelo que hizo la predicción
                           Ej: 'RiskClassifier', 'DropoutPredictor', 'SentimentCNN'
@@ -59,7 +59,7 @@ def _save_to_postgres(
                        Ej: {'dropout_probability': 0.65, 'confidence': 0.92}
         tags (dict): Metadatos para filtrado en Grafana
                      Ej: {'risk_level': 'HIGH', 'facultad': 'Ingeniería'}
-    
+
     Estructrura de Datos Guardados:
     - model_name: Identifica qué modelo generó la predicción (para Grafana)
     - user_id: Asocia la predicción con un estudiante específico
@@ -73,7 +73,7 @@ def _save_to_postgres(
       * risk_level: Clasificación (LOW, MEDIUM, HIGH)
       * facultad: Programa académico del estudiante
       * sentiment: Clasificación emocional (para SentimentCNN)
-    
+
     Nota Técnica:
     Esta función maneja excepciones silenciosamente para evitar que fallos
     en la persistencia impacten el flujo principal de la API.
@@ -84,18 +84,17 @@ def _save_to_postgres(
         tags = {}
 
     try:
-        from app.models.ai_prediction import AIPrediction
         from app.db.session import SessionLocal
+        from app.models.ai_prediction import AIPrediction
 
         db = SessionLocal()
-        
+
         # Construir registro con los datos disponibles de la predicción
         # Nota: Muchos campos pueden ser None si el modelo no los proporciona
         prediction_data = {
             "model_name": model_name,
             "user_id": user_id,
             "created_at": datetime.utcnow(),
-            
             # Resultados de la predicción (fields)
             "confidence": fields.get("confidence"),
             "pss_score": fields.get("pss_score"),
@@ -104,26 +103,27 @@ def _save_to_postgres(
             "mood_avg": fields.get("mood_avg"),
             "heuristic_score": fields.get("heuristic_score"),
             "dropout_probability": fields.get("dropout_probability"),
-            
             # Metadatos para filtrado en Grafana (tags)
             "risk_level": tags.get("risk_level", "UNKNOWN"),
             "facultad": tags.get("facultad"),
             "sentiment": tags.get("sentiment"),
         }
-        
+
         prediction = AIPrediction(**prediction_data)
         db.add(prediction)
         db.commit()
         db.close()
-        
-        logger.info(f"Prediction saved to PostgreSQL: model={model_name}, user_id={user_id}")
-        
+
+        logger.info(
+            f"Prediction saved to PostgreSQL: model={model_name}, user_id={user_id}"
+        )
+
     except Exception as e:
         logger.error(f"Failed to save prediction to PostgreSQL: {e}")
         # Falla silenciosamente para no afectar al resto de la app
         try:
             db.close()
-        except:
+        except Exception:
             pass
 
 
@@ -132,18 +132,18 @@ def log_prediction_to_influx(
     student_id: Optional[int] = None,
     fields: Dict[str, Any] = None,
     tags: Dict[str, str] = None,
-    run_in_background: bool = True
+    run_in_background: bool = True,
 ):
     """
     Función universal para persistir predicciones de modelos IA en PostgreSQL.
-    
+
     NOTA IMPORTANTE - Nombre Heredado:
     Esta función se llama 'log_prediction_to_influx' por compatibilidad histórica,
     pero ahora guarda en PostgreSQL en lugar de InfluxDB. El nombre se mantuvo
     para minimizar cambios en el código existente de los modelos ML.
-    
+
     USO - Ejemplos:
-    
+
     1. RiskClassifier (Riesgo Emocional):
         log_prediction_to_influx(
             model_name="RiskClassifier",
@@ -151,7 +151,7 @@ def log_prediction_to_influx(
             fields={"confidence": 0.92, "pss_score": 28, "mood_avg": 3.5},
             tags={"risk_level": "HIGH", "facultad": "Ingeniería"}
         )
-    
+
     2. DropoutPredictor (Predictor de Deserción):
         log_prediction_to_influx(
             model_name="DropoutPredictor",
@@ -159,7 +159,7 @@ def log_prediction_to_influx(
             fields={"dropout_probability": 0.65, "confidence": 0.88},
             tags={"risk_level": "MEDIUM", "facultad": "Medicina"}
         )
-    
+
     3. SentimentCNN (Análisis de Sentimientos):
         log_prediction_to_influx(
             model_name="SentimentCNN",
@@ -167,26 +167,26 @@ def log_prediction_to_influx(
             fields={"confidence": 0.95},
             tags={"sentiment": "ANXIETY", "facultad": "Psicología"}
         )
-    
+
     Parámetros:
         model_name (str): Tipo de modelo (RiskClassifier, DropoutPredictor, SentimentCNN)
         student_id (int): ID del estudiante afectado
         fields (dict): Resultados numéricos de la predicción
         tags (dict): Metadatos para categorización (risk_level, facultad, sentiment)
         run_in_background (bool): Si True, ejecuta en thread separado sin bloquear
-    
+
     Comportamiento:
         - Por defecto se ejecuta en segundo plano (threading)
         - Las excepciones se capturan y loguean, no se propagan
         - Los datos se guardan en tabla 'ai_predictions' de PostgreSQL
         - Son accesibles SOLO a SuperAdmin en Grafana
-    
+
     Seguridad:
         - Estudiantes NO ven sus predicciones en la API
         - Psicólogos NO ven predicciones en la API
         - SOLO SuperAdmin ve datos en Grafana (control externo)
         - Datos almacenados indefinidamente para auditoría
-    
+
     Índices Optimizados:
         - (user_id, created_at): Para queries por estudiante
         - (model_name, created_at): Para queries por tipo de modelo
@@ -197,7 +197,7 @@ def log_prediction_to_influx(
         thread = Thread(
             target=_save_to_postgres,
             args=(model_name, student_id, fields, tags),
-            daemon=True  # Se termina cuando la app principal termina
+            daemon=True,  # Se termina cuando la app principal termina
         )
         thread.start()
     else:

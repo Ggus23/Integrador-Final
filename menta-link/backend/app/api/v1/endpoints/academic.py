@@ -1,10 +1,3 @@
-from typing import Any
-
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
-from app import models, schemas
-from app.api import deps
 import os
 from functools import lru_cache
 from typing import Any
@@ -15,8 +8,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app import models
+from app import models, schemas
 from app.api import deps
+
 router = APIRouter()
 
 
@@ -148,7 +142,8 @@ def create_or_update_subject_grade(
             setattr(existing_grade, field, value)
     else:
         existing_grade = models.AcademicSubjectGrade(
-            user_id=current_user.id, subject_name=grade_in.subject_name,
+            user_id=current_user.id,
+            subject_name=grade_in.subject_name,
             hito2_procesual=grade_in.hito2_procesual,
             hito2_nota=grade_in.hito2_nota,
             hito3_procesual=grade_in.hito3_procesual,
@@ -262,7 +257,9 @@ async def upload_academic_records_csv(
         "records_updated": records_updated,
     }
 
+
 MODEL_PATH = os.getenv("RISK_MODEL_PATH", "app/ml_models/risk_model.pkl")
+
 
 @lru_cache(maxsize=1)
 def get_risk_model():
@@ -288,8 +285,8 @@ class PredictionRequest(BaseModel):
     hito3_nota: float = 0.0
     hito4_nota: float = 0.0
     hito5_nota: float = 0.0
-    checkin_score: float = 0.0   # promedio de checkins del estudiante
-    test_score: float = 0.0      # promedio de tests/assessments
+    checkin_score: float = 0.0  # promedio de checkins del estudiante
+    test_score: float = 0.0  # promedio de tests/assessments
 
 
 class PredictionResponse(BaseModel):
@@ -321,24 +318,26 @@ def predict_academic_risk(
         raise HTTPException(status_code=503, detail=str(e))
 
     # 2. Armar vector de features (el orden debe coincidir con el entrenamiento)
-    features = np.array([[
-        payload.gpa,
-        payload.enrolled_credits,
-        payload.failed_classes,
-        payload.hito2_nota,
-        payload.hito3_nota,
-        payload.hito4_nota,
-        payload.hito5_nota,
-        payload.checkin_score,
-        payload.test_score,
-    ]])
+    features = np.array(
+        [
+            [
+                payload.gpa,
+                payload.enrolled_credits,
+                payload.failed_classes,
+                payload.hito2_nota,
+                payload.hito3_nota,
+                payload.hito4_nota,
+                payload.hito5_nota,
+                payload.checkin_score,
+                payload.test_score,
+            ]
+        ]
+    )
 
     # 3. Predecir
     dropout_prob = float(model.predict_proba(features)[0][1])
     risk_level = (
-        "HIGH" if dropout_prob >= 0.7
-        else "MEDIUM" if dropout_prob >= 0.4
-        else "LOW"
+        "HIGH" if dropout_prob >= 0.7 else "MEDIUM" if dropout_prob >= 0.4 else "LOW"
     )
 
     # 4. Guardar en DB

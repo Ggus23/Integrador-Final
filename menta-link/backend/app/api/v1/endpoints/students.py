@@ -9,7 +9,6 @@ from app.core.constants import RiskLevel
 from app.ml.dropout_predictor import dropout_predictor
 from app.ml.risk_classifier import risk_classifier
 
-
 router = APIRouter()
 
 
@@ -100,8 +99,6 @@ def read_student_detail(
 
     if not student:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
-
-
 
     risk_summary = (
         db.query(models.RiskSummary)

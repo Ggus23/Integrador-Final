@@ -31,19 +31,40 @@ def prueba_puntaje_pss_10_con_inversion():
 
 
 def prueba_mapeo_riesgo_pss_10():
-    assert assessment_service.assessment_service.get_risk_level("PSS-10", 10) == RiskLevel.LOW
-    assert assessment_service.assessment_service.get_risk_level("PSS-10", 20) == RiskLevel.MEDIUM
-    assert assessment_service.assessment_service.get_risk_level("PSS-10", 30) == RiskLevel.HIGH
+    assert (
+        assessment_service.assessment_service.get_risk_level("PSS-10", 10)
+        == RiskLevel.LOW
+    )
+    assert (
+        assessment_service.assessment_service.get_risk_level("PSS-10", 20)
+        == RiskLevel.MEDIUM
+    )
+    assert (
+        assessment_service.assessment_service.get_risk_level("PSS-10", 30)
+        == RiskLevel.HIGH
+    )
 
 
 def prueba_mapeo_riesgo_gad_7():
-    assert assessment_service.assessment_service.get_risk_level("GAD-7", 5) == RiskLevel.LOW
-    assert assessment_service.assessment_service.get_risk_level("GAD-7", 30) == RiskLevel.HIGH
+    assert (
+        assessment_service.assessment_service.get_risk_level("GAD-7", 5)
+        == RiskLevel.LOW
+    )
+    assert (
+        assessment_service.assessment_service.get_risk_level("GAD-7", 30)
+        == RiskLevel.HIGH
+    )
 
 
 def prueba_mapeo_riesgo_phq_9():
-    assert assessment_service.assessment_service.get_risk_level("PHQ-9", 8) == RiskLevel.LOW
-    assert assessment_service.assessment_service.get_risk_level("PHQ-9", 25) == RiskLevel.HIGH
+    assert (
+        assessment_service.assessment_service.get_risk_level("PHQ-9", 8)
+        == RiskLevel.LOW
+    )
+    assert (
+        assessment_service.assessment_service.get_risk_level("PHQ-9", 25)
+        == RiskLevel.HIGH
+    )
 
 
 def prueba_scoring_service_suma_simple():

@@ -144,22 +144,28 @@ def get_detailed_analysis(
     full_text = full_text.replace("PASÓ HOY:", "").replace("APRENDIZAJES:", "")
 
     regex_analyzer = get_regex_emotion_analyzer()
-    
+
     key_concepts = regex_analyzer.get_key_concepts(full_text, top_n=10)
     relevant_phrases_dict = regex_analyzer.extraer_frases_relevantes(full_text, top_n=5)
-    
+
     # Patrones recurrentes del último diario
     tokens = regex_analyzer.clean_and_tokenize(full_text)
     patterns_dict = regex_analyzer.extract_bigrams(tokens, top_n=8)
-    
-    relevant_phrases = [{"phrase": p, "count": c} for p, c in relevant_phrases_dict.items()]
+
+    relevant_phrases = [
+        {"phrase": p, "count": c} for p, c in relevant_phrases_dict.items()
+    ]
     recurrent_patterns = [
-        {"phrase": p, "frequency": f, "sentiment": regex_analyzer.analyze_emotion(p)["emotion"]} 
+        {
+            "phrase": p,
+            "frequency": f,
+            "sentiment": regex_analyzer.analyze_emotion(p)["emotion"],
+        }
         for p, f in patterns_dict.items()
     ]
 
     return {
         "key_concepts": key_concepts,
         "relevant_phrases": relevant_phrases,
-        "recurrent_patterns": recurrent_patterns
+        "recurrent_patterns": recurrent_patterns,
     }

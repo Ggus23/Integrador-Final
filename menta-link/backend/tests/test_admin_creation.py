@@ -1,5 +1,6 @@
 from app.core.security import get_password_hash
-from app.models.user import UserRole, User
+from app.models.user import User, UserRole
+
 
 def prueba_creacion_psicologo_por_admin(client, db_session):
     admin_data = {
@@ -10,7 +11,7 @@ def prueba_creacion_psicologo_por_admin(client, db_session):
         "is_active": True,
         "is_email_verified": True,
     }
-    
+
     admin = User(**admin_data)
     db_session.add(admin)
     db_session.commit()
@@ -31,7 +32,7 @@ def prueba_creacion_psicologo_por_admin(client, db_session):
 
     response = client.post("/api/v1/users/internal", json=psy_payload, headers=headers)
     assert response.status_code == 201
-    
+
     data = response.json()
     assert data["role"] == "psychologist"
     assert data["email"] == "psych@gmail.com"
@@ -41,6 +42,7 @@ def prueba_creacion_psicologo_por_admin(client, db_session):
     assert user_db.role == UserRole.PSYCHOLOGIST
     assert user_db.is_active is True
     assert user_db.is_email_verified is True
+
 
 def prueba_registro_publico_bloquea_psicologo(client):
     payload = {

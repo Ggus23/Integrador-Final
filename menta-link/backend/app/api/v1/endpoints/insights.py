@@ -1,15 +1,16 @@
-from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException, Body
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-from datetime import date, timedelta
 import random
+from datetime import date, timedelta
+from typing import Any
 
-from app import models, schemas
+from fastapi import APIRouter, Body, Depends
+from sqlalchemy.orm import Session
+
+from app import models
 from app.api import deps
 from app.ml.emotion.regex_predictor import get_regex_emotion_analyzer
 
 router = APIRouter()
+
 
 @router.get("/prompts")
 def get_adaptive_prompts(
@@ -29,51 +30,64 @@ def get_adaptive_prompts(
 
     prompts = []
     if not last_entries:
-        prompts.append({
-            "text": "¿Cómo te sientes al escribir tu primer registro?",
-            "ref": "Comenzando tu viaje de bienestar.",
-            "type": "action"
-        })
+        prompts.append(
+            {
+                "text": "¿Cómo te sientes al escribir tu primer registro?",
+                "ref": "Comenzando tu viaje de bienestar.",
+                "type": "action",
+            }
+        )
         return prompts
 
     # Simple heuristic to generate prompts based on last entry
     last_entry = last_entries[0]
     analyzer = get_regex_emotion_analyzer()
     tokens = analyzer.clean_and_tokenize(last_entry.experience)
-    
+
     if "ansioso" in tokens or "examen" in tokens or "estresado" in tokens:
-        prompts.append({
-            "text": "¿Cómo te fue hoy con la inquietud que mencionaste recientemente?",
-            "ref": "Mencionaste sentirte estresado o ansioso.",
-            "type": "followup"
-        })
+        prompts.append(
+            {
+                "text": "¿Cómo te fue hoy con la inquietud que mencionaste recientemente?",
+                "ref": "Mencionaste sentirte estresado o ansioso.",
+                "type": "followup",
+            }
+        )
     elif last_entry.wellbeing_level and last_entry.wellbeing_level <= 2:
-        prompts.append({
-            "text": "¿Pudiste descansar o hacer algo que te guste hoy?",
-            "ref": f"Tu último registro de bienestar fue bajo ({last_entry.wellbeing_level}/5).",
-            "type": "action"
-        })
+        prompts.append(
+            {
+                "text": "¿Pudiste descansar o hacer algo que te guste hoy?",
+                "ref": f"Tu último registro de bienestar fue bajo ({last_entry.wellbeing_level}/5).",
+                "type": "action",
+            }
+        )
     elif last_entry.wellbeing_level and last_entry.wellbeing_level >= 4:
-        prompts.append({
-            "text": "¿Qué mantuviste de la buena energía del último registro?",
-            "ref": "Tu último registro mostró buen bienestar.",
-            "type": "followup"
-        })
+        prompts.append(
+            {
+                "text": "¿Qué mantuviste de la buena energía del último registro?",
+                "ref": "Tu último registro mostró buen bienestar.",
+                "type": "followup",
+            }
+        )
     else:
-        prompts.append({
-            "text": "¿Hubo algún cambio en tu rutina de hoy?",
-            "ref": "Explorando nuevos patrones.",
-            "type": "context"
-        })
+        prompts.append(
+            {
+                "text": "¿Hubo algún cambio en tu rutina de hoy?",
+                "ref": "Explorando nuevos patrones.",
+                "type": "context",
+            }
+        )
 
     # Add a fallback prompt
-    prompts.append({
-        "text": "¿Qué fue lo más significativo de tu día?",
-        "ref": "Reflexión general",
-        "type": "general"
-    })
+    prompts.append(
+        {
+            "text": "¿Qué fue lo más significativo de tu día?",
+            "ref": "Reflexión general",
+            "type": "general",
+        }
+    )
 
     return prompts
+
 
 @router.get("/time-capsule")
 def get_time_capsule(
@@ -101,10 +115,15 @@ def get_time_capsule(
         "daysAgo": days_ago,
         "emotion": entry.emotion_ai or "Neutral",
         "emoji": "🕰️",
-        "snippet": entry.experience[:100] + "..." if len(entry.experience) > 100 else entry.experience,
+        "snippet": (
+            entry.experience[:100] + "..."
+            if len(entry.experience) > 100
+            else entry.experience
+        ),
         "resolution": "Mira cómo estabas hace un tiempo y reflexiona sobre tu progreso.",
-        "color": entry.emotion_color or "#888888"
+        "color": entry.emotion_color or "#888888",
     }
+
 
 @router.post("/reframe")
 def generate_cognitive_reframe(
@@ -119,12 +138,22 @@ def generate_cognitive_reframe(
     # Simple rule-based reframe generator
     analyzer = get_regex_emotion_analyzer()
     tokens = set(analyzer.clean_and_tokenize(text))
-    
-    if emotionLabel == "Muy triste" or emotionLabel == "Triste" or "mal" in tokens or "triste" in tokens:
+
+    if (
+        emotionLabel == "Muy triste"
+        or emotionLabel == "Triste"
+        or "mal" in tokens
+        or "triste" in tokens
+    ):
         reframe = "Reconocer tu dolor es un acto de valentía. Cada día difícil que enfrentas demuestra una fortaleza que no siempre puedes ver."
         technique = "Validación Emocional"
         action = "Intenta escribir 3 cosas pequeñas que salieron bien hoy, sin importar cuán insignificantes parezcan."
-    elif emotionLabel == "Feliz" or emotionLabel == "Muy feliz" or "bien" in tokens or "feliz" in tokens:
+    elif (
+        emotionLabel == "Feliz"
+        or emotionLabel == "Muy feliz"
+        or "bien" in tokens
+        or "feliz" in tokens
+    ):
         reframe = "¡Excelente! Tu capacidad de reconocer la alegría es una habilidad poderosa. Anclar estos momentos fortalece tu resiliencia."
         technique = "Amplificación Positiva"
         action = "Comparte esta energía. Un mensaje a alguien que valoras puede multiplicar esta sensación."
@@ -133,11 +162,8 @@ def generate_cognitive_reframe(
         technique = "Mindfulness Cognitivo"
         action = "Toma 5 minutos para notar algo que normalmente pasas por alto: un sonido, un sabor, una textura."
 
-    return {
-        "reframe": reframe,
-        "technique": technique,
-        "action": action
-    }
+    return {"reframe": reframe, "technique": technique, "action": action}
+
 
 @router.get("/forecast")
 def get_crisis_forecast(
@@ -158,17 +184,19 @@ def get_crisis_forecast(
 
     # Fill data for the last 7 days
     days_data = []
-    days_labels = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
-    
+    days_labels = ["D", "L", "M", "X", "J", "V", "S"]
+
     for i in range(6, -1, -1):
         d = date.today() - timedelta(days=i)
         entry = next((e for e in last_entries if e.date == d), None)
-        days_data.append({
-            "day": days_labels[d.weekday() % 7],
-            "level": entry.wellbeing_level if entry else None,
-            "color": entry.emotion_color if entry else None,
-            "date": d.isoformat()
-        })
+        days_data.append(
+            {
+                "day": days_labels[d.weekday() % 7],
+                "level": entry.wellbeing_level if entry else None,
+                "color": entry.emotion_color if entry else None,
+                "date": d.isoformat(),
+            }
+        )
 
     filled_days = [d for d in days_data if d["level"] is not None]
     is_downtrend = False
@@ -179,5 +207,5 @@ def get_crisis_forecast(
     return {
         "weekData": days_data,
         "isDowntrend": is_downtrend,
-        "hasEnoughData": len(filled_days) > 0
+        "hasEnoughData": len(filled_days) > 0,
     }

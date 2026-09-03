@@ -14,13 +14,14 @@ import torch  # noqa: E402,F401
 
 # Silenciar advertencias de sklearn ANTES de importar los endpoints/modelos
 from sklearn.exceptions import InconsistentVersionWarning
+
 warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 
 import nltk
 import sentry_sdk
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -46,10 +47,13 @@ except Exception as e:
     logger.warning("Failed to download some NLTK dictionaries: %s", e)
 
 
+import asyncio
+
 from apscheduler.schedulers.background import BackgroundScheduler
+
 from app.db.session import SessionLocal
 from app.services.reminders import check_all_reminders
-import asyncio
+
 
 def run_scheduled_reminders():
     db = SessionLocal()
@@ -65,13 +69,13 @@ def run_scheduled_reminders():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
-    
+
     # Iniciar el planificador en segundo plano
     scheduler = BackgroundScheduler()
     # Ejecuta cada hora en punto (minute=0)
     scheduler.add_job(run_scheduled_reminders, "cron", minute=0)
     scheduler.start()
-    
+
     yield
     scheduler.shutdown()
 
@@ -129,6 +133,7 @@ async def root():
 async def health_check():
     try:
         from sqlalchemy import text
+
         db = SessionLocal()
         db.execute(text("SELECT 1"))
         db.close()

@@ -4,9 +4,11 @@ def prueba_error_404_no_encontrado(client):
     data = response.json()
     assert data["detail"] == "Resource not found"
 
+
 def prueba_error_500_interno(client):
-    from app.main import app
     from fastapi.testclient import TestClient
+
+    from app.main import app
 
     @app.get("/forzar_error")
     def forzar_error():

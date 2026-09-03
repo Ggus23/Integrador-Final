@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Dict, Tuple
 
 from fastapi import HTTPException
@@ -121,7 +121,7 @@ class AssessmentService:
             db.query(AssessmentResponse)
             .filter(
                 AssessmentResponse.user_id == user_id,
-                AssessmentResponse.assessment_id == assessment.id
+                AssessmentResponse.assessment_id == assessment.id,
             )
             .order_by(AssessmentResponse.created_at.desc())
             .first()
@@ -131,15 +131,15 @@ class AssessmentService:
             now = datetime.utcnow()
             last_created = last_response.created_at.replace(tzinfo=None)
             days_passed = (now - last_created).days
-            
+
             # BYPASS TEMPORAL: PSS-10 habilitado sin bloqueo para pruebas
             required_wait_days = 0 if assessment.type == "PSS-10" else 14
-            
+
             if days_passed < required_wait_days:
                 days_left = required_wait_days - days_passed
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Debes esperar {days_left} día(s) para volver a tomar el {assessment.title}."
+                    detail=f"Debes esperar {days_left} día(s) para volver a tomar el {assessment.title}.",
                 )
 
         assessment_type: str = assessment.type
@@ -191,12 +191,19 @@ class AssessmentService:
         acad_profile = (
             db.query(AcademicProfile).filter(AcademicProfile.user_id == user_id).first()
         )
-        faculty_name = str(acad_profile.course) if acad_profile and acad_profile.course else "Unknown"
+        faculty_name = (
+            str(acad_profile.course)
+            if acad_profile and acad_profile.course
+            else "Unknown"
+        )
 
         ml_risk_str, confidence = risk_classifier.predict_risk(
-            norm_emotional_score, avg_mood, bad_days, avg_pressure,
+            norm_emotional_score,
+            avg_mood,
+            bad_days,
+            avg_pressure,
             student_id=str(user_id),
-            faculty=faculty_name
+            faculty=faculty_name,
         )
         ml_risk = RiskLevel.from_str(ml_risk_str)
 

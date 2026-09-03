@@ -31,9 +31,7 @@ DELETE_TABLES = [
 
 def delete_all_students(db):
     # Uppercase enum value as stored in PostgreSQL
-    rows = db.execute(
-        text("SELECT id FROM users WHERE role = 'STUDENT'")
-    ).all()
+    rows = db.execute(text("SELECT id FROM users WHERE role = 'STUDENT'")).all()
     ids = tuple(r[0] for r in rows)
 
     if not ids:
@@ -44,11 +42,15 @@ def delete_all_students(db):
 
     # Nullify psychologist FKs that reference students
     db.execute(
-        text("UPDATE clinical_notes SET psychologist_id = NULL WHERE psychologist_id IN :ids"),
+        text(
+            "UPDATE clinical_notes SET psychologist_id = NULL WHERE psychologist_id IN :ids"
+        ),
         {"ids": ids},
     )
     db.execute(
-        text("UPDATE appointments SET psychologist_id = NULL WHERE psychologist_id IN :ids"),
+        text(
+            "UPDATE appointments SET psychologist_id = NULL WHERE psychologist_id IN :ids"
+        ),
         {"ids": ids},
     )
 

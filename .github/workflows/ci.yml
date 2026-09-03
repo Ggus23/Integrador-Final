@@ -11,6 +11,26 @@ jobs:
   backend-checks:
     name: Backend (Python)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mentalink
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mentalink
+      POSTGRES_SERVER: localhost
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mentalink
     defaults:
       run:
         working-directory: ./menta-link/backend
@@ -41,6 +61,8 @@ jobs:
 
       - name: Run Pytest
         run: pytest --tb=short -q
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mentalink
 
   frontend-checks:
     name: Frontend (Next.js)

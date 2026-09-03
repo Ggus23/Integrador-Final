@@ -14,19 +14,19 @@ class AcademicSubjectGrade(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     subject_name = Column(String, nullable=False)
-    
+
     # Hito 2
     hito2_procesual = Column(Float, default=0.0)
     hito2_nota = Column(Float, default=0.0)
-    
+
     # Hito 3
     hito3_procesual = Column(Float, default=0.0)
     hito3_nota = Column(Float, default=0.0)
-    
+
     # Hito 4
     hito4_procesual = Column(Float, default=0.0)
     hito4_nota = Column(Float, default=0.0)
-    
+
     # Hito 5
     hito5_procesual = Column(Float, default=0.0)
     hito5_nota = Column(Float, default=0.0)
