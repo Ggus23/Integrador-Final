@@ -49,6 +49,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+          pip install black isort flake8 pytest
 
       - name: Run Black (Check)
         run: black . --check
@@ -61,8 +62,6 @@ jobs:
 
       - name: Run Pytest
         run: pytest --tb=short -q
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mentalink
 
   frontend-checks:
     name: Frontend (Next.js)
