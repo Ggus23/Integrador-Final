@@ -1,0 +1,27 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "chore/platform-app-update",
+    "main",
+    "origin",
+    "railway/fix-deploy-af581d",
+    "railway/fix-deploy-dfd9b4",
+    "sandbox/6725cb4b-6999-489f-822f--gfli"
+  ],
+  "parent": {
+    "chore/platform-app-update": "main",
+    "main": null,
+    "origin": "main",
+    "railway/fix-deploy-af581d": "main",
+    "railway/fix-deploy-dfd9b4": "main",
+    "sandbox/6725cb4b-6999-489f-822f--gfli": "main"
+  },
+  "order": [
+    "main",
+    "chore/platform-app-update",
+    "origin",
+    "railway/fix-deploy-af581d",
+    "railway/fix-deploy-dfd9b4",
+    "sandbox/6725cb4b-6999-489f-822f--gfli"
+  ]
+}
