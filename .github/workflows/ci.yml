@@ -113,7 +113,7 @@ jobs:
           railway --version
 
       - name: Deploy Backend
-        run: railway up --service backend --non-interactive --detach
+        run: railway up --service backend --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
@@ -136,7 +136,7 @@ jobs:
           railway --version
 
       - name: Deploy Frontend
-        run: railway up --service frontend --non-interactive --detach
+        run: railway up --service frontend --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
