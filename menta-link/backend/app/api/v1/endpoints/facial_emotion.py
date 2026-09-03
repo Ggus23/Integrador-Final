@@ -98,7 +98,7 @@ def get_emotion_model():
         from ultralytics import YOLO
 
         model_path = _get_local_model_path()
-        logger.info("Loading local YOLO model from: %s", model_path)
+        logger.info("Loading local YOLO model from: %s (exists: %s)", model_path, os.path.exists(model_path))
         _model = YOLO(model_path)
         logger.info("Loaded local best.pt successfully. Classes: %s", _model.names)
         return _model
@@ -132,11 +132,14 @@ async def analyze_frame(image: str = Body(..., embed=True)):
 
         model = get_emotion_model()
         if model is None:
+            logger.error("Emotion model is None - cannot classify")
             return {
                 "emotion": "neutral",
                 "confidence": 1.0,
                 "warning": "Model not loaded. Will retry on next request.",
             }
+
+        logger.info("Emotion model loaded, classes: %s", model.names)
 
         face_cascade = _get_face_cascade()
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
