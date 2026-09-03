@@ -17,6 +17,7 @@ WORKDIR /code
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
+    libglib2.0-0 \
     libgl1 \
     libsm6 \
     libxext6 \
@@ -33,3 +34,4 @@ RUN chmod +x /code/docker/start.sh
 EXPOSE ${PORT:-8000}
 
 CMD ["/code/docker/start.sh"]
+
