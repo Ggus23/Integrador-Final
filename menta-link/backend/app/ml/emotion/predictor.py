@@ -1,74 +1,68 @@
 import os
-import sys
+import requests
+from app.core.config import settings
+from app.utils.influx_logger import log_prediction_to_influx
 
-try:
-    import torch
-    TORCH_AVAILABLE = True
-except (ImportError, OSError) as e:
-    print(f"Warning: Failed to load PyTorch: {e}. Emotion prediction will be disabled.")
-    TORCH_AVAILABLE = False
-
-# Ensure we can import from app
-sys.path.append(
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    )
-)
-
-from app.ml.emotion.model import EmotionCNN
-from app.ml.emotion.preprocessor import TextPreprocessor
+API_URL = "https://router.huggingface.co/hf-inference/models/agustin250800/detector_emociones"
 
 
 class EmotionPredictor:
-    def __init__(self, model_path, vocab_path, device="cpu"):
-        if not TORCH_AVAILABLE:
-            raise RuntimeError("Torch is not available.")
-        self.device = torch.device(device)
-        self.preprocessor = TextPreprocessor(max_len=100, vocab_path=vocab_path)
+    def __init__(self):
+        self.api_url = API_URL
+        # Use token from Settings configuration or env var
+        self.token = settings.HF_TOKEN or os.getenv("HF_TOKEN", "")
+        self.headers = {"Authorization": f"Bearer {self.token}"} if self.token else {}
 
-        # We need vocab size to initialize model
-        vocab_size = len(self.preprocessor.word_index)
-        self.emotions = [
-            "feliz",
-            "neutral",
-            "triste",
-            "ansioso",
-            "frustrado",
-            "motivado",
-        ]
+    def predict(self, text: str, student_id: str = None, faculty: str = None):
+        payload = {"inputs": text}
+        try:
+            response = requests.post(
+                self.api_url, headers=self.headers, json=payload, timeout=10
+            )
+            response.raise_for_status()
+            result = response.json()
+        except Exception as e:
+            raise RuntimeError(f"Error al consultar la API de Hugging Face: {str(e)}")
 
-        self.model = EmotionCNN(vocab_size, num_classes=len(self.emotions))
-        self.model.load_state_dict(
-            torch.load(model_path, map_location=self.device, weights_only=True)
-        )
-        self.model.to(self.device)
-        self.model.eval()
+        # Parse Hugging Face API response. It usually returns a list of classification labels
+        # e.g., [[{"label": "feliz", "score": 0.8}, {"label": "neutral", "score": 0.2}]]
+        # or [{"label": "feliz", "score": 0.8}, ...]
+        flat_results = []
+        if isinstance(result, list):
+            if len(result) > 0 and isinstance(result[0], list):
+                flat_results = result[0]
+            else:
+                flat_results = result
 
-    def predict(self, text, student_id: str = None, faculty: str = None):
-        input_tensor = self.preprocessor.preprocess(text).unsqueeze(0).to(self.device)
-        with torch.no_grad():
-            outputs = self.model(input_tensor)
-            probabilities = torch.softmax(outputs, dim=1)[0]
-            confidence, predicted_idx = torch.max(probabilities, dim=0)
+        if not isinstance(flat_results, list) or not flat_results:
+            raise RuntimeError(f"Respuesta inesperada de la API de Hugging Face: {result}")
 
-        from app.utils.influx_logger import log_prediction_to_influx
-        emotion_str = self.emotions[predicted_idx.item()]
-        conf_float = float(confidence.item())
-        
-        log_prediction_to_influx(
-            model_name="SentimentCNN",
-            student_id=student_id,
-            fields={"confidence": conf_float},
-            tags={"emotion": emotion_str, "facultad": faculty or "Unknown"}
-        )
+        # Find the label with the highest score
+        best_match = max(flat_results, key=lambda x: x.get("score", 0.0))
+        emotion_str = best_match.get("label", "neutral").lower()
+        conf_float = float(best_match.get("score", 0.0))
+
+        # Build scores dictionary for all predicted labels
+        scores = {
+            item.get("label", "Unknown").lower(): float(item.get("score", 0.0))
+            for item in flat_results
+        }
+
+        # Log prediction to influx if possible
+        try:
+            log_prediction_to_influx(
+                model_name="HuggingFace_DetectorEmociones",
+                student_id=student_id,
+                fields={"confidence": conf_float},
+                tags={"emotion": emotion_str, "facultad": faculty or "Unknown"},
+            )
+        except Exception as logger_err:
+            print(f"Influx logging failed: {logger_err}")
 
         return {
             "emotion": emotion_str,
             "confidence": conf_float,
-            "scores": {
-                self.emotions[i]: float(probabilities[i].item())
-                for i in range(len(self.emotions))
-            },
+            "scores": scores,
         }
 
 
@@ -79,11 +73,5 @@ _predictor = None
 def get_emotion_predictor():
     global _predictor
     if _predictor is None:
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        model_path = os.path.join(base_path, "model_emotion_cnn.pt")
-        vocab_path = os.path.join(base_path, "vocab.pkl")
-
-        if not TORCH_AVAILABLE or not os.path.exists(model_path) or not os.path.exists(vocab_path):
-            return None
-        _predictor = EmotionPredictor(model_path, vocab_path)
+        _predictor = EmotionPredictor()
     return _predictor

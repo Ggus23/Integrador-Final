@@ -48,3 +48,6 @@ backend/.env.backend
 
 # ML Data & Models (Do not commit large or generated files)
 backend/data/*.csv
+
+# Downloaded HuggingFace model cache
+backend/app/models/emotion_hf.pt

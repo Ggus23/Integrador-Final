@@ -6,6 +6,12 @@ from contextlib import asynccontextmanager
 # Fix para errores de PyTorch en Windows
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
+# IMPORTANTE: Torch DEBE cargarse antes que sklearn/scipy/nltk en Windows, de lo
+# contrario c10.dll falla con WinError 1114 (conflicto de DLLs de OpenMP). El
+# endpoint de reconocimiento facial usa YOLO/ultralytics que depende de torch,
+# por eso lo precargamos aquí para reservar sus DLLs al arranque del proceso.
+import torch  # noqa: E402,F401
+
 # Silenciar advertencias de sklearn ANTES de importar los endpoints/modelos
 from sklearn.exceptions import InconsistentVersionWarning
 warnings.filterwarnings("ignore", category=InconsistentVersionWarning)

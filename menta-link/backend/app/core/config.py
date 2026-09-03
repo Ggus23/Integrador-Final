@@ -87,6 +87,7 @@ class Settings(BaseSettings):
 
     ML_MODEL_PATH: str = "app/models/risk_model.pkl"
     GEMINI_API_KEY: str = ""
+    HF_TOKEN: str = ""
 
 
 settings = Settings()

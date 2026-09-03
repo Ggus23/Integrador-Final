@@ -18,23 +18,23 @@ def prueba_logica_prediccion_emocion(client: TestClient):
     response = client.post("/api/v1/emotion/predict", json=payload)
     assert response.status_code in [401, 404, 422, 200]
 
-def prueba_cargar_y_procesar_texto_frases():
-    from app.ml.emotion.regex_predictor import cargar_y_procesar_texto_frases
-    textos = ["Hoy me siento muy triste. No he podido dormir bien; estoy angustiado."]
-    frases = cargar_y_procesar_texto_frases(textos)
-    assert len(frases) >= 2
-    # El método limpia los signos . ; , ! ? ¿ ¡ " y convierte a minúsculas
-    assert "hoy me siento muy triste" in frases
-    assert "no he podido dormir bien" in frases
+def prueba_clean_y_tokenize_sc():
+    from app.ml.emotion.regex_predictor import DiaryAnalyzer
+    a = DiaryAnalyzer()
+    tokens = a.clean_and_tokenize("Hoy me siento muy triste. No he podido dormir bien; estoy angustiado.")
+    # Limpia signos de puntuación y convierte a minúsculas
+    assert "triste" in tokens
+    assert "angustiado" in tokens
+    assert "Hoy" not in tokens
 
 def prueba_dividir_en_oraciones():
-    from app.ml.emotion.regex_predictor import dividir_en_oraciones
-    texto = "Hoy me siento muy triste. No he podido dormir bien. Estoy angustiado."
-    oraciones = dividir_en_oraciones(texto)
-    assert len(oraciones) == 3
-    assert oraciones[0] == "Hoy me siento muy triste."
-    assert oraciones[1] == "No he podido dormir bien."
-    assert oraciones[2] == "Estoy angustiado."
+    from app.ml.emotion.regex_predictor import DiaryAnalyzer
+    a = DiaryAnalyzer()
+    frases = a.extraer_frases_relevantes("Hoy me siento muy triste. No he podido dormir bien. Estoy angustiado.")
+    assert isinstance(frases, dict)
+    assert len(frases) >= 1
+    # La frase con palabra emocional debe ser detectada
+    assert any("triste" in f for f in frases)
 
 def prueba_visualizations_analysis_endpoint_auth(client: TestClient):
     response = client.get("/api/v1/visualizations/analysis")

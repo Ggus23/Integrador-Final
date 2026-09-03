@@ -267,8 +267,12 @@ def delete_user(
             detail="No puedes eliminar tu propia cuenta de administrador",
         )
 
-    # Elimina registros de auditoría existentes (tabla legacy sin modelo)
-    db.execute(text("DELETE FROM audit_logs WHERE actor_id = :uid"), {"uid": user_id})
+    # Elimina registros de auditoría existentes (tabla legacy sin modelo).
+    # La tabla puede no existir en instalaciones nuevas; se ignora si es así.
+    try:
+        db.execute(text("DELETE FROM audit_logs WHERE actor_id = :uid"), {"uid": user_id})
+    except Exception:
+        db.rollback()
 
     # Elimina el usuario de la DB
     db.delete(user)

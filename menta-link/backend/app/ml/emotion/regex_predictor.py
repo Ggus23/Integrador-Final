@@ -10,7 +10,7 @@ from collections import Counter
 
 DEPRESION_PATRONES = {
     "tristeza": (r"\b(triste|deprimid[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo|desganad[oa]|sin ganas)\b", 1.0),
-    "desesperanza": (r"\b(desesperanz[oa]|sin esperanza|sin sentido|nada vale la pena|no hay salida)\b", 1.2),
+    "desesperanza": (r"\b(desesperanz[oa]|sin esperanza|sin sentido|nada vale la pena|no hay salida|nada tiene sentido|ya no quiero vivir|no quiero seguir (viviendo|así))\b", 1.2),
     "fatiga": (r"\b(cansanci[oa]|cansad[oa]|agotamient[oa]|sin energía|fatigad[oa]|sin fuerzas)\b", 0.8),
     "inutilidad": (r"\b(inútil|fracasad[oa]|no valgo|no sirvo|incompetente)\b", 1.1),
     "cambios_sueno": (r"\b(insomnio|duermo mucho|hipersomnia|despertar temprano|problemas de sueño|malos hábitos de sueño)\b", 0.9),
@@ -27,7 +27,7 @@ ANSIEDAD_PATRONES = {
 }
 
 ESTRES_PATRONES = {
-    "sobrecarga": (r"\b(sobrecargad[oa]|abrumad[oa]|colmad[oa]|no puedo más|demasiadas cosas|estrés|estres[oa])\b", 1.2),
+    "sobrecarga": (r"\b(sobrecargad[oa]|abrumad[oa]|colmad[oa]|no puedo más|demasiadas cosas|estrés|estres|estresad[oa]s?|estres[oa])\b", 1.2),
     "presion": (r"\b(presión|exigencia|plazos|obligaciones|debo hacer todo)\b", 1.0),
     "irritabilidad": (r"\b(irritable|enfadad[oa]|frustrad[oa]|pierdo la paciencia|me enojo fácil)\b", 1.0),
     "agotamiento": (r"\b(agotamient[oa]|quemad[oa]|burnout|sin motivación|desgaste)\b", 1.1),
@@ -99,7 +99,10 @@ class DiaryAnalyzer:
             "estres": "Estresado"
         }
         emotion_label = "Neutral"
-        if max_val >= 0.3:
+        # Umbral bajo: un solo sintoma emocional claro (peso minimo 0.8 de 6.0
+        # -> ~0.13) ya cuenta como la emocion, para que las entradas cortas del
+        # diario ("estoy triste", "estoy ansioso") no se pierdan como Neutral.
+        if max_val >= 0.12:
             emotion_label = mapeo_emociones.get(max_score_cat, "Neutral")
         return {
             "emotion": emotion_label,
@@ -113,40 +116,60 @@ class DiaryAnalyzer:
     # ------------------------------------------------------------------------
     def get_key_concepts(self, text: str, top_n: int = 10) -> List[str]:
         """
-        Extrae conceptos clave (frases cortas de 2-4 palabras) que contengan
-        palabras emocionales, eliminando conectores innecesarios al inicio y final.
+        Extrae conceptos clave (frases cortas que contengan palabras emocionales),
+        conservando el modificador cuando aporta significado (p.ej. "muy triste",
+        "sin esperanza") y eliminando conectores vacíos de los extremos.
         """
         texto_limpio = self._limpiar_texto(text)
         tokens = texto_limpio.split()
         if len(tokens) < 2:
             return []
 
-        posiciones_emocionales = set()
+        # Mapa de posicion de caracter -> indice de token, para localizar el
+        # span completo del match (incluso frases multi-palabra como "sin esperanza").
+        offset_acumulado = []
+        acum = 0
+        for tok in tokens:
+            offset_acumulado.append(acum)
+            acum += len(tok) + 1
+
+        def indice_token(pos_caracter):
+            idx = 0
+            for off in offset_acumulado:
+                if off <= pos_caracter:
+                    idx = offset_acumulado.index(off)
+                else:
+                    break
+            return idx
+
+        frases_candidatas = []
         for categoria in [DEPRESION_COMP, ANSIEDAD_COMP, ESTRES_COMP]:
             for _, (regex, _) in categoria.items():
                 for match in regex.finditer(texto_limpio):
-                    palabra_match = match.group(0)
-                    for i, tok in enumerate(tokens):
-                        if tok == palabra_match:
-                            posiciones_emocionales.add(i)
+                    tok_ini = indice_token(match.start())
+                    tok_fin = indice_token(match.end() - 1)
 
-        frases_candidatas = []
-        for pos in posiciones_emocionales:
-            # Ventana reducida para conceptos clave (máximo 4 palabras)
-            inicio = max(0, pos - 1)
-            fin = min(len(tokens), pos + 2) 
-            
-            ventana_tokens = tokens[inicio:fin]
-            
-            # Limpiar stopwords de los extremos para que la frase tenga sentido
-            while ventana_tokens and ventana_tokens[0] in STOPWORDS_ANALISIS:
-                ventana_tokens.pop(0)
-            while ventana_tokens and ventana_tokens[-1] in STOPWORDS_ANALISIS:
-                ventana_tokens.pop()
+                    # Ventana = la frase del match + 1 palabra antes y 1 después
+                    inicio = max(0, tok_ini - 1)
+                    fin = min(len(tokens), tok_fin + 2)
+                    ventana_tokens = tokens[inicio:fin]
 
-            if len(ventana_tokens) >= 2:
-                frase = " ".join(ventana_tokens)
-                frases_candidatas.append(frase)
+                    # Limpiar stopwords de los extremos, preservando las que son
+                    # parte del propio match (p.ej. "sin" en "sin esperanza",
+                    # "no" en "no quiero vivir").
+                    # tokens del propio match:
+                    match_tokens = tokens[tok_ini:tok_fin + 1]
+                    while (ventana_tokens and
+                           ventana_tokens[0] in STOPWORDS_ANALISIS and
+                           ventana_tokens[0] not in match_tokens[:1]):
+                        ventana_tokens.pop(0)
+                    while (ventana_tokens and
+                           ventana_tokens[-1] in STOPWORDS_ANALISIS and
+                           ventana_tokens[-1] not in match_tokens[-1:]):
+                        ventana_tokens.pop()
+
+                    if ventana_tokens:
+                        frases_candidatas.append(" ".join(ventana_tokens))
 
         contador = Counter(frases_candidatas)
         return [frase for frase, _ in contador.most_common(top_n)]
@@ -157,7 +180,7 @@ class DiaryAnalyzer:
         y que no terminen en una stopword vacía (como "y", "de", "que").
         Ideal para "PATRONES RECURRENTES".
         """
-        if len(tokens) < 2:
+        if not tokens or len(tokens) < 2:
             return {}
 
         frases_candidatas = []
@@ -184,6 +207,8 @@ class DiaryAnalyzer:
         Divide el texto en oraciones reales y devuelve aquellas que contienen
         palabras emocionales. Si no hay puntuación, divide por comas o conjunciones.
         """
+        if not texto:
+            return {}
         # Dividir por puntuación estándar o saltos de línea
         oraciones = re.split(r'[.!?;]|\n', texto)
         
@@ -230,11 +255,12 @@ class DiaryAnalyzer:
         }
         sintomas = self._extraer_sintomas(texto_limpio, tokens)
         alerta = any(score >= self.umbral_alerta for score in scores.values())
+        texto_original = str(texto) if texto else ""
         return {
             "scores": scores,
             "sintomas_detectados": sintomas,
             "alerta": alerta,
-            "texto_original": texto[:200] + "..." if len(texto) > 200 else texto
+            "texto_original": (texto_original[:200] + "...") if len(texto_original) > 200 else texto_original
         }
 
     def _calcular_score(self, texto: str, tokens: List[str], patrones_comp) -> float:
@@ -255,12 +281,32 @@ class DiaryAnalyzer:
         return round(score, 3)
 
     def _obtener_contexto(self, texto: str, pos: int) -> str:
-        inicio = max(0, pos - 100)
-        return texto[inicio:pos]
+        # Tomamos hasta 60 caracteres previos, recortando en el ultimo conector
+        # (y, pero, aunque, porque, entonces, sin embargo) para evaluar la
+        # negacion dentro de la MISMA clausula y no anular palabras de clausulas
+        # anteriores (p.ej. "No fui a clases y estoy triste" -> "estoy triste").
+        inicio = max(0, pos - 60)
+        contexto = texto[inicio:pos]
+        conectores = (" pero ", " aunque ", " porque ", " entonces ",
+                      " sin embargo ", " sino ", " y no ", " y ")
+        ultimo_sep = -1
+        for con in conectores:
+            idx = contexto.rfind(con)
+            if idx > ultimo_sep:
+                ultimo_sep = idx
+        if ultimo_sep != -1:
+            contexto = contexto[ultimo_sep + 1:]
+        return contexto
 
     def _hay_negacion(self, contexto: str) -> bool:
-        palabras = set(re.findall(r'\b\w+\b', contexto.lower()))
-        return bool(palabras & NEGACIONES)
+        # Evaluamos la negacion solo sobre las ultimas pocas palabras previas a
+        # la palabra emocional, ya que es donde suele residir el "no" que la
+        # afecta ("no estoy triste"). Esto evita que un "no" lejano en una
+        # clausula anterior anule un sentimiento real ("No fui a clases... estoy
+        # triste" -> el "no" ya no anula "triste").
+        palabras = re.findall(r'\b\w+\b', contexto.lower()) or [""]
+        ultimas = palabras[-4:]
+        return bool(set(ultimas) & NEGACIONES)
 
     def _hay_intensificador(self, contexto: str) -> bool:
         palabras = set(re.findall(r'\b\w+\b', contexto.lower()))
@@ -279,6 +325,8 @@ class DiaryAnalyzer:
         return list(set(sintomas))
 
     def _limpiar_texto(self, texto: str) -> str:
+        if not texto:
+            return ""
         limpio = re.sub(r'[^\wáéíóúüñ\s]', ' ', texto.lower())
         limpio = re.sub(r'\s+', ' ', limpio)
         return limpio.strip()

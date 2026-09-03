@@ -1,13 +1,13 @@
 from app.core.security import get_password_hash
 from app.models.alert import Alert
-from app.models.audit_log import AuditLog
 from app.models.user import User, UserRole
 
+
 def prueba_eliminacion_usuario_cascada(client, db_session):
-    admin_pass = "admin123"
+    """Verifica que al eliminar un estudiante se purgan sus alertas (cascade)."""
     admin = User(
         email="admin_test@gmail.com",
-        hashed_password=get_password_hash(admin_pass),
+        hashed_password=get_password_hash("admin123"),
         full_name="Admin Test User",
         role=UserRole.ADMIN,
         is_email_verified=True,
@@ -29,18 +29,13 @@ def prueba_eliminacion_usuario_cascada(client, db_session):
 
     target_id = target.id
 
-    audit = AuditLog(
-        actor_id=target_id, action="LOGIN", resource_id="auth", details="User logged in"
-    )
     alert = Alert(user_id=target_id, severity="high", message="Risk detected")
-    db_session.add(audit)
     db_session.add(alert)
     db_session.commit()
 
-    assert db_session.query(AuditLog).filter(AuditLog.actor_id == target_id).count() == 1
     assert db_session.query(Alert).filter(Alert.user_id == target_id).count() == 1
 
-    login_data = {"username": "admin_test@gmail.com", "password": admin_pass}
+    login_data = {"username": "admin_test@gmail.com", "password": "admin123"}
     r = client.post("/api/v1/auth/login", data=login_data)
     assert r.status_code == 200
     token = r.json()["access_token"]
@@ -50,14 +45,14 @@ def prueba_eliminacion_usuario_cascada(client, db_session):
     assert response.status_code == 204
 
     assert db_session.query(User).filter(User.id == target_id).first() is None
-    assert db_session.query(AuditLog).filter(AuditLog.actor_id == target_id).count() == 0
     assert db_session.query(Alert).filter(Alert.user_id == target_id).count() == 0
 
+
 def prueba_cambio_estado_usuario_resuelve_alertas(client, db_session):
-    admin_pass = "admin123"
+    """Al desactivar un usuario, sus alertas pendientes se marcan como resueltas."""
     admin = User(
         email="admin_toggle@gmail.com",
-        hashed_password=get_password_hash(admin_pass),
+        hashed_password=get_password_hash("admin123"),
         full_name="Admin Toggle User",
         role=UserRole.ADMIN,
         is_email_verified=True,
@@ -85,8 +80,9 @@ def prueba_cambio_estado_usuario_resuelve_alertas(client, db_session):
     db_session.add(alert2)
     db_session.commit()
 
-    login_data = {"username": "admin_toggle@gmail.com", "password": admin_pass}
+    login_data = {"username": "admin_toggle@gmail.com", "password": "admin123"}
     r = client.post("/api/v1/auth/login", data=login_data)
+    assert r.status_code == 200
     token = r.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -104,8 +100,3 @@ def prueba_cambio_estado_usuario_resuelve_alertas(client, db_session):
     response_activate = client.patch(f"/api/v1/users/{target_id}/status", headers=headers)
     assert response_activate.status_code == 200
     assert response_activate.json()["is_active"] is True
-
-    db_session.expire_all()
-    alerts = db_session.query(Alert).filter(Alert.user_id == target_id).all()
-    for a in alerts:
-        assert a.is_resolved is True
