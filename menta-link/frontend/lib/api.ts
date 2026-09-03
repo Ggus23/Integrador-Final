@@ -105,11 +105,34 @@ class APIClient {
     }
 
     try {
-      const response = await fetch(url, {
+      // Use manual redirect handling so we can force HTTPS on redirects. The
+      // backend behind Railway issues trailing-slash 307 redirects whose
+      // Location uses http://; browsers block that as mixed content on HTTPS
+      // pages, so we rewrite it to https:// and follow it ourselves.
+      let response = await fetch(url, {
         method,
         headers: this.headers(isFormData),
         body: requestBody,
+        redirect: 'manual',
       });
+
+      if (
+        response.status >= 300 &&
+        response.status < 400 &&
+        typeof window !== 'undefined' &&
+        window.location.protocol === 'https:'
+      ) {
+        const location = response.headers.get('location');
+        if (location && location.startsWith('http://')) {
+          const secureLocation = `https://${location.slice('http://'.length)}`;
+          response = await fetch(secureLocation, {
+            method,
+            headers: this.headers(isFormData),
+            body: requestBody,
+            redirect: 'manual',
+          });
+        }
+      }
 
       if (response.status === 401) {
         this.clearToken();
@@ -206,7 +229,7 @@ class APIClient {
 
   // Check-in endpoints
   async createCheckin(data: { mood_score: number; note?: string }) {
-    return this.request('POST', '/checkins', data);
+    return this.request('POST', '/checkins/', data);
   }
 
   async getMyCheckins() {
