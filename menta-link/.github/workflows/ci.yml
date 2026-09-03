@@ -5,6 +5,7 @@ on:
     branches: ["main", "master"]
   pull_request:
     branches: ["main", "master"]
+  workflow_dispatch:
 
 jobs:
   backend-checks:
@@ -77,30 +78,44 @@ jobs:
     name: Deploy Backend to Railway
     needs: [backend-checks, frontend-checks]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
+    defaults:
+      run:
+        working-directory: ./menta-link/backend
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Railway CLI
-        run: npm install -g @railway/cli
+        run: |
+          npm install -g @railway/cli
+          railway --version
 
       - name: Deploy Backend
-        run: railway up --service backend --non-interactive
+        run: railway up --service backend --non-interactive --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
 
   deploy-frontend:
     name: Deploy Frontend to Railway
     needs: [backend-checks, frontend-checks]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
+    defaults:
+      run:
+        working-directory: ./menta-link/frontend
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Railway CLI
-        run: npm install -g @railway/cli
+        run: |
+          npm install -g @railway/cli
+          railway --version
 
       - name: Deploy Frontend
-        run: railway up --service frontend --non-interactive
+        run: railway up --service frontend --non-interactive --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
