@@ -57,3 +57,38 @@ def prueba_visualizations_analysis_endpoint_auth(client: TestClient):
 def prueba_visualizations_phrasecloud_endpoint_auth(client: TestClient):
     response = client.get("/api/v1/visualizations/phrasecloud")
     assert response.status_code == 401
+
+
+def prueba_deteccion_emociones_positivas():
+    from app.ml.emotion.regex_predictor import DiaryAnalyzer
+
+    a = DiaryAnalyzer()
+    # El análisis debe detectar entradas felices/motivadas y no solo negativas.
+    assert a.analyze_emotion("hoy me siento muy feliz y contento")["emotion"] == "feliz"
+    assert a.analyze_emotion("estoy motivado con mis proyectos")["emotion"] == "motivado"
+    # Un día tranquilo también cuenta como positivo.
+    assert a.analyze_emotion("me siento tranquilo y relajado, todo bien")["emotion"] == "feliz"
+
+
+def prueba_deteccion_palabras_clave_negativas():
+    from app.ml.emotion.regex_predictor import DiaryAnalyzer
+
+    a = DiaryAnalyzer()
+    # Palabras comunes que antes no se detectaban en el frontend.
+    assert a.analyze_emotion("estoy ansioso por el examen")["emotion"] == "ansioso"
+    assert a.analyze_emotion("me siento estresado con las entregas")["emotion"] == "frustrado"
+    assert a.analyze_emotion("tengo taquicardia y falta de aire")["emotion"] == "ansioso"
+    # La negación debe seguir anulando la emoción.
+    assert a.analyze_emotion("no estoy triste, hoy me fue bien")["emotion"] == "neutral"
+
+
+def prueba_calidad_vocabulario_positivo():
+    from app.ml.emotion.regex_predictor import DiaryAnalyzer
+
+    a = DiaryAnalyzer()
+    full = "PASÓ HOY: Me desperté tranquilo, estudié y me fue bien en el parcial, estoy feliz."
+    tokens = a.clean_and_tokenize(full)
+    # Las frases y conceptos clave deben poblarse también con vocabulario positivo.
+    assert a.get_key_concepts(full, top_n=5)
+    assert a.extract_bigrams(tokens, top_n=8)
+    assert a.extraer_frases_relevantes(full, top_n=3)

@@ -57,9 +57,14 @@ const EMOTIONS = [
 
 const getSentimentColor = (sentiment: string) => {
   const s = sentiment?.toLowerCase() || '';
-  if (s.includes('muy feliz') || s.includes('feliz')) return '#22C55E'; // Verde (Pos)
+  if (s.includes('muy feliz') || s.includes('feliz') || s.includes('motivado')) return '#22C55E'; // Verde (Pos)
   if (s.includes('neutral') || s.includes('indiferente')) return '#FACC15'; // Amarillo (Neu)
-  if (s.includes('ansioso') || s.includes('estresado') || s.includes('preocupado'))
+  if (
+    s.includes('ansioso') ||
+    s.includes('estresado') ||
+    s.includes('preocupado') ||
+    s.includes('frustrado')
+  )
     return '#F97316'; // Naranja (Ans)
   if (s.includes('triste') || s.includes('tristeza')) return '#EF4444'; // Rojo (Tris)
   return 'currentColor';
@@ -95,7 +100,7 @@ export default function DiaryPage() {
   });
 
   const [realtimeAnalysis, setRealtimeAnalysis] = useState({
-    scores: { depresion: 0, ansiedad: 0, estres: 0 },
+    scores: { depresion: 0, ansiedad: 0, estres: 0, felicidad: 0 },
     symptoms: [] as string[],
     keyConcepts: [] as string[],
     meaningfulPhrases: {} as Record<string, number>,
@@ -327,6 +332,12 @@ export default function DiaryPage() {
                           className="bg-primary/5 flex flex-col gap-2 rounded-xl px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                         >
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                            <div className="flex items-center gap-2">
+                              <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                              <span className="text-[9px] font-black uppercase opacity-60">
+                                Felicidad: {(realtimeAnalysis.scores.felicidad * 100).toFixed(0)}%
+                              </span>
+                            </div>
                             <div className="flex items-center gap-2">
                               <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
                               <span className="text-[9px] font-black uppercase opacity-60">

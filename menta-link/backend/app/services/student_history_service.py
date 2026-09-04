@@ -22,6 +22,26 @@ class StudentHistoryService:
         )
 
         for d in diaries:
+            # Mapear la emoción canónica al score correspondiente del dict
+            # de scores devuelto por el motor de regex.
+            score_key = {
+                "triste": "depresion",
+                "ansioso": "ansiedad",
+                "frustrado": "estres",
+                "feliz": "felicidad",
+                "motivado": "felicidad",
+                "depresion": "depresion",
+                "ansiedad": "ansiedad",
+                "estres": "estres",
+            }.get((d.emotion_ai or "").lower(), "")
+            raw_confidence = (
+                (d.emotion_scores or {}).get(score_key, 0.0) if score_key else None
+            )
+            confidence = (
+                float(raw_confidence)
+                if raw_confidence is not None
+                else d.wellbeing_level / 5.0
+            )
             history.append(
                 {
                     "type": "diary",
@@ -29,11 +49,7 @@ class StudentHistoryService:
                     "timestamp": d.created_at,
                     "text": d.experience,
                     "emotion": d.emotion_ai or d.emotion,
-                    "confidence": (
-                        (d.emotion_scores or {}).get(d.emotion_ai, 0)
-                        if d.emotion_ai
-                        else 1.0
-                    ),
+                    "confidence": confidence,
                     "wellbeing_level": d.wellbeing_level,
                 }
             )

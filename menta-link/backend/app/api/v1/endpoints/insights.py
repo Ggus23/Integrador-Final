@@ -138,10 +138,10 @@ def generate_cognitive_reframe(
     # Simple rule-based reframe generator
     analyzer = get_regex_emotion_analyzer()
     tokens = set(analyzer.clean_and_tokenize(text))
+    label = emotionLabel.lower()
 
     if (
-        emotionLabel == "Muy triste"
-        or emotionLabel == "Triste"
+        label in ["muy triste", "triste"]
         or "mal" in tokens
         or "triste" in tokens
     ):
@@ -149,14 +149,17 @@ def generate_cognitive_reframe(
         technique = "Validación Emocional"
         action = "Intenta escribir 3 cosas pequeñas que salieron bien hoy, sin importar cuán insignificantes parezcan."
     elif (
-        emotionLabel == "Feliz"
-        or emotionLabel == "Muy feliz"
+        label in ["feliz", "muy feliz", "motivado"]
         or "bien" in tokens
         or "feliz" in tokens
     ):
         reframe = "¡Excelente! Tu capacidad de reconocer la alegría es una habilidad poderosa. Anclar estos momentos fortalece tu resiliencia."
         technique = "Amplificación Positiva"
         action = "Comparte esta energía. Un mensaje a alguien que valoras puede multiplicar esta sensación."
+    elif label in ["ansioso", "frustrado"]:
+        reframe = "Lo que sientes es una señal de que te importa. Respirar profundo y partir la tarea en pasos pequeños ayuda a recuperar el control."
+        technique = "Regulación Emocional"
+        action = "Haz una pausa de 2 minutos: inhala 4 segundos, mantén 4, exhala 6. Repite tres veces."
     else:
         reframe = "Los días tranquilos son el fundamento sobre el que se construye el bienestar. No todo tiene que ser extraordinario para ser valioso."
         technique = "Mindfulness Cognitivo"

@@ -10,7 +10,7 @@ from typing import Dict, List, Optional
 
 DEPRESION_PATRONES = {
     "tristeza": (
-        r"\b(triste|deprimid[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo|desganad[oa]|sin ganas)\b",
+        r"\b(triste|deprimid[oa]|melancólic[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo|desganad[oa]|sin ganas)\b",
         1.0,
     ),
     "desesperanza": (
@@ -73,6 +73,33 @@ ESTRES_PATRONES = {
     ),
     "cambios_apetito": (
         r"\b(como mucho|sin apetito|atracones|pierdo el hambre|no estoy comiendo|hábitos de alimentación)\b",
+        0.8,
+    ),
+}
+
+# Patrones de emociones positivas para que el análisis no solo detecte lo negativo.
+# Permite que el "Análisis Emocional AI" clasifique entradas felices/motivadas
+# (antes todo texto sin palabras negativas caía en Neutral y las visualizaciones
+# quedaban vacías).
+POSITIVO_PATRONES = {
+    "felicidad": (
+        r"\b(feliz|felices|content[oa]|alegre|alegrí[oa]|alegria|sonri[óo])\b",
+        1.2,
+    ),
+    "motivacion": (
+        r"\b(motivad[oa]|entusiasmad[oa]|con ganas|optimista|ilusionad[oa]|con energía)\b",
+        1.1,
+    ),
+    "tranquilidad": (
+        r"\b(tranquil[oa]|calmad[oa]|relajad[oa]|en paz|sin preocupaciones)\b",
+        0.9,
+    ),
+    "satisfaccion": (
+        r"\b(genial|excelente|increíble|increible|maravillos[oa]|satisfech[oa]|me fue bien|todo bien|muy bien|logré|logre|aprobé|aprobe|éxito|exito)\b",
+        1.0,
+    ),
+    "agradecimiento": (
+        r"\b(agradecid[oa]|agradecid[oa]s|orgullos[oa]|gracias a dios)\b",
         0.8,
     ),
 }
@@ -174,6 +201,7 @@ def compilar_patrones(patrones_dict):
 DEPRESION_COMP = compilar_patrones(DEPRESION_PATRONES)
 ANSIEDAD_COMP = compilar_patrones(ANSIEDAD_PATRONES)
 ESTRES_COMP = compilar_patrones(ESTRES_PATRONES)
+POSITIVO_COMP = compilar_patrones(POSITIVO_PATRONES)
 
 
 # ============================================================================
@@ -205,19 +233,30 @@ class DiaryAnalyzer:
     def analyze_emotion(self, text: str) -> Dict:
         resultado = self.analizar_entrada(text)
         scores = resultado["scores"]
+        sintomas = resultado["sintomas_detectados"]
         max_score_cat = max(scores, key=scores.get)
         max_val = scores[max_score_cat]
         mapeo_emociones = {
-            "depresion": "Triste",
-            "ansiedad": "Ansioso",
-            "estres": "Estresado",
+            "depresion": "triste",
+            "ansiedad": "ansioso",
+            "estres": "frustrado",
+            "felicidad": "feliz",
         }
-        emotion_label = "Neutral"
-        # Umbral bajo: un solo sintoma emocional claro (peso minimo 0.8 de 6.0
-        # -> ~0.13) ya cuenta como la emocion, para que las entradas cortas del
-        # diario ("estoy triste", "estoy ansioso") no se pierdan como Neutral.
+        emotion_label = "neutral"
+        # Umbral bajo: un solo sintoma emocional claro (peso minimo 0.8 de X
+        # categorias) ya cuenta como la emocion, para que las entradas cortas
+        # del diario ("estoy triste", "estoy ansioso", "estoy feliz") no se
+        # pierdan como neutral.
         if max_val >= 0.12:
-            emotion_label = mapeo_emociones.get(max_score_cat, "Neutral")
+            emotion_label = mapeo_emociones.get(max_score_cat, "neutral")
+            # Distinguir motivación de felicidad para la clasificación canónica:
+            # si la entrada es positiva y hay un síntoma de motivación, reportar
+            # "motivado" (usado por ARI y los paneles de tendencias).
+            if (
+                emotion_label == "feliz"
+                and "positivo:motivacion" in sintomas
+            ):
+                emotion_label = "motivado"
         return {
             "emotion": emotion_label,
             "scores": scores,
@@ -257,7 +296,7 @@ class DiaryAnalyzer:
             return idx
 
         frases_candidatas = []
-        for categoria in [DEPRESION_COMP, ANSIEDAD_COMP, ESTRES_COMP]:
+        for categoria in [DEPRESION_COMP, ANSIEDAD_COMP, ESTRES_COMP, POSITIVO_COMP]:
             for _, (regex, _) in categoria.items():
                 for match in regex.finditer(texto_limpio):
                     tok_ini = indice_token(match.start())
@@ -356,7 +395,7 @@ class DiaryAnalyzer:
 
     def _contiene_emocion(self, frase: str) -> bool:
         """Verifica si la frase contiene alguna palabra de los patrones emocionales."""
-        for categoria in [DEPRESION_COMP, ANSIEDAD_COMP, ESTRES_COMP]:
+        for categoria in [DEPRESION_COMP, ANSIEDAD_COMP, ESTRES_COMP, POSITIVO_COMP]:
             for _, (regex, _) in categoria.items():
                 if regex.search(frase):
                     return True
@@ -372,6 +411,7 @@ class DiaryAnalyzer:
             "depresion": self._calcular_score(texto_limpio, tokens, DEPRESION_COMP),
             "ansiedad": self._calcular_score(texto_limpio, tokens, ANSIEDAD_COMP),
             "estres": self._calcular_score(texto_limpio, tokens, ESTRES_COMP),
+            "felicidad": self._calcular_score(texto_limpio, tokens, POSITIVO_COMP),
         }
         sintomas = self._extraer_sintomas(texto_limpio, tokens)
         alerta = any(score >= self.umbral_alerta for score in scores.values())
@@ -450,6 +490,7 @@ class DiaryAnalyzer:
             ("depresion", DEPRESION_COMP),
             ("ansiedad", ANSIEDAD_COMP),
             ("estres", ESTRES_COMP),
+            ("positivo", POSITIVO_COMP),
         ]:
             for sintoma, (regex, _) in patrones_comp.items():
                 for match in regex.finditer(texto):
@@ -486,13 +527,19 @@ class DiaryAnalyzer:
 
     def obtener_tendencia(self, ultimos_dias: int = 7) -> Dict:
         if len(self.historial) < 2:
-            return {k: "insuficiente" for k in ["depresion", "ansiedad", "estres"]}
+            return {
+                k: "insuficiente"
+                for k in ["depresion", "ansiedad", "estres", "felicidad"]
+            }
         ordenados = sorted(self.historial, key=lambda x: x["fecha"])
         recientes = ordenados[-ultimos_dias:]
         if len(recientes) < 2:
-            return {k: "estable" for k in ["depresion", "ansiedad", "estres"]}
+            return {
+                k: "estable"
+                for k in ["depresion", "ansiedad", "estres", "felicidad"]
+            }
         tendencias = {}
-        for categoria in ["depresion", "ansiedad", "estres"]:
+        for categoria in ["depresion", "ansiedad", "estres", "felicidad"]:
             valores = [r["scores"][categoria] for r in recientes]
             n = len(valores)
             if n <= 3:

@@ -29,7 +29,9 @@ class EmotionalTrendsService:
             return {}
 
         emotions = [
-            e.emotion_ai or e.emotion for e in entries if e.emotion_ai or e.emotion
+            (e.emotion_ai or e.emotion).lower()
+            for e in entries
+            if e.emotion_ai or e.emotion
         ]
         counts = Counter(emotions)
         total = len(emotions)
@@ -66,7 +68,7 @@ class EmotionalTrendsService:
                 )
                 continue
 
-            emotions = [e.emotion_ai or e.emotion for e in entries]
+            emotions = [(e.emotion_ai or e.emotion).lower() for e in entries]
             dominant = Counter(emotions).most_common(1)[0][0]
             avg_wellbeing = sum(e.wellbeing_level for e in entries) / len(entries)
 
@@ -106,7 +108,7 @@ class EmotionalTrendsService:
             }
 
         total = len(entries)
-        emotions = [e.emotion_ai for e in entries if e.emotion_ai]
+        emotions = [e.emotion_ai.lower() for e in entries if e.emotion_ai]
         counts = Counter(emotions)
 
         # Frequencies (0.0 to 1.0)
@@ -114,10 +116,11 @@ class EmotionalTrendsService:
         f_ansiedad = counts.get("ansioso", 0) / total
         f_frustracion = counts.get("frustrado", 0) / total
 
-        # Caída de motivación (simplificado: si la emoción predominante cambió de algo positivo a neutral/negativo)
-        # Aquí lo simplificamos a frecuencia de NO estar motivado o feliz si antes lo estaba (complejo de trackear sin más datos)
-        # Usaremos frecuencia de baja motivación si existe el label
-        f_baja_motivacion = 1.0 - (counts.get("motivado", 0) / total)
+        # Caída de motivación (simplificado: frecuencia de NO estar motivado o
+        # feliz, que es lo que el motor de regex puede detectar positivamente)
+        f_baja_motivacion = 1.0 - (
+            (counts.get("motivado", 0) + counts.get("feliz", 0)) / total
+        )
 
         ari_score = (
             0.4 * f_tristeza

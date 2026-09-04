@@ -1,80 +1,140 @@
-// Regex patterns for depression, anxiety, and stress (Ported from backend/app/ml/emotion/regex_predictor.py)
+// Regex patterns for depression, anxiety, stress AND positive emotions.
+// Ported from backend/app/ml/emotion/regex_predictor.py. The patterns are
+// compiled with Unicode-aware word boundaries (JS \b does NOT treat accented
+// chars like á/é/í/ó/ú/ñ as word characters, which silently broke most Spanish
+// matches).
 
-export const MOOD_PATTERNS = {
+const MOOD_PATTERN_SOURCES: Record<string, Record<string, { pattern: string; weight: number }>> = {
   depresion: {
     tristeza: {
-      regex: /\b(triste|deprimid[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo)\b/gi,
+      pattern:
+        'triste|deprimid[oa]|melancólic[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo|desganad[oa]|sin ganas',
       weight: 1.0,
     },
     desesperanza: {
-      regex: /\b(desesperanz[oa]|sin esperanza|sin sentido|nada vale la pena|no hay salida)\b/gi,
+      pattern:
+        'desesperanz[oa]|sin esperanza|sin sentido|nada vale la pena|no hay salida|nada tiene sentido|ya no quiero vivir|no quiero seguir (viviendo|así)',
       weight: 1.2,
     },
     fatiga: {
-      regex: /\b(cansanci[oa]|cansad[oa]|agotamient[oa]|sin energía|fatigad[oa]|sin fuerzas)\b/gi,
+      pattern: 'cansanci[oa]|cansad[oa]|agotamient[oa]|sin energía|fatigad[oa]|sin fuerzas',
       weight: 0.8,
     },
     inutilidad: {
-      regex: /\b(inútil|fracasad[oa]|no valgo|no sirvo|incompetente)\b/gi,
+      pattern: 'inútil|fracasad[oa]|no valgo|no sirvo|incompetente',
       weight: 1.1,
     },
     cambios_sueno: {
-      regex: /\b(insomnio|duermo mucho|hipersomnia|despertar temprano)\b/gi,
+      pattern:
+        'insomnio|duermo mucho|hipersomnia|despertar temprano|problemas de sueño|malos hábitos de sueño',
       weight: 0.9,
     },
     pensamientos_negativos: {
-      regex: /\b(culpa|autocrític[oa]|odio a mí mismo|no merezco)\b/gi,
+      pattern: 'culpa|autocrític[oa]|odio a mí mismo|no merezco',
       weight: 1.0,
     },
   },
   ansiedad: {
     nerviosismo: {
-      regex: /\b(nervios[oa]|inquiet[oa]|tens[oa]|intranquil[oa]|agitad[oa])\b/gi,
+      pattern: 'nervios[oa]|inquiet[oa]|tens[oa]|intranquil[oa]|agitad[oa]|ansios[oa]|ansiedad',
       weight: 1.0,
     },
     preocupacion: {
-      regex: /\b(preocupad[oa]|angustiad[oa]|rumiando|pensando demasiado|anticipando lo peor)\b/gi,
+      pattern: 'preocupad[oa]|angustiad[oa]|rumiando|pensando demasiado|anticipando lo peor',
       weight: 1.1,
     },
-    miedo: { regex: /\b(miedo|temor|pánico|aterrorizad[oa]|fobia)\b/gi, weight: 1.2 },
+    miedo: {
+      pattern: 'miedo|temor|pánico|aterrorizad[oa]|fobia',
+      weight: 1.2,
+    },
     sintomas_fisicos: {
-      regex:
-        /\b(corazón acelerado|palpitaciones|sudor|temblor|falta de aire|opresión en el pecho)\b/gi,
+      pattern:
+        'corazón acelerado|palpitaciones|sudor|temblor|falta de aire|opresión en el pecho|taquicardia',
       weight: 1.0,
     },
-    evitacion: { regex: /\b(evito|escapo|no salgo|no quiero enfrentar)\b/gi, weight: 0.8 },
+    evitacion: {
+      pattern: 'evito|escapo|no salgo|no quiero enfrentar',
+      weight: 0.8,
+    },
     hipervigilancia: {
-      regex: /\b(alerta constante|sobresalt[oa]|asustadizo|vigilando todo)\b/gi,
+      pattern: 'alerta constante|sobresalt[oa]|asustadizo|vigilando todo',
       weight: 0.9,
     },
   },
   estres: {
     sobrecarga: {
-      regex: /\b(sobrecargad[oa]|abrumad[oa]|colmad[oa]|no puedo más|demasiadas cosas)\b/gi,
+      pattern:
+        'sobrecargad[oa]|abrumad[oa]|colmad[oa]|no puedo más|demasiadas cosas|estrés|estres|estresad[oa]s?|estres[oa]',
       weight: 1.2,
     },
     presion: {
-      regex: /\b(presión|exigencia|plazos|obligaciones|debo hacer todo)\b/gi,
+      pattern: 'presión|exigencia|plazos|obligaciones|debo hacer todo',
       weight: 1.0,
     },
     irritabilidad: {
-      regex: /\b(irritable|enfadad[oa]|frustrad[oa]|pierdo la paciencia|me enojo fácil)\b/gi,
+      pattern: 'irritable|enfadad[oa]|frustrad[oa]|pierdo la paciencia|me enojo fácil',
       weight: 1.0,
     },
     agotamiento: {
-      regex: /\b(agotamient[oa]|quemad[oa]|burnout|sin motivación|desgaste)\b/gi,
+      pattern: 'agotamient[oa]|quemad[oa]|burnout|sin motivación|desgaste',
       weight: 1.1,
     },
     problemas_concentracion: {
-      regex: /\b(desconcentrad[oa]|olvidadizo|bloqueo mental|no puedo enfocarme)\b/gi,
+      pattern: 'desconcentrad[oa]|olvidadizo|bloqueo mental|no puedo enfocarme',
       weight: 0.9,
     },
     cambios_apetito: {
-      regex: /\b(como mucho|sin apetito|atracones|pierdo el hambre)\b/gi,
+      pattern:
+        'como mucho|sin apetito|atracones|pierdo el hambre|no estoy comiendo|hábitos de alimentación',
+      weight: 0.8,
+    },
+  },
+  felicidad: {
+    felicidad: {
+      pattern: 'feliz|felices|content[oa]|alegre|alegrí[oa]|alegria|sonri[óo]',
+      weight: 1.2,
+    },
+    motivacion: {
+      pattern: 'motivad[oa]|entusiasmad[oa]|con ganas|optimista|ilusionad[oa]|con energía',
+      weight: 1.1,
+    },
+    tranquilidad: {
+      pattern: 'tranquil[oa]|calmad[oa]|relajad[oa]|en paz|sin preocupaciones',
+      weight: 0.9,
+    },
+    satisfaccion: {
+      pattern:
+        'genial|excelente|increíble|increible|maravillos[oa]|satisfech[oa]|me fue bien|todo bien|muy bien|logré|logre|aprobé|aprobe|éxito|exito',
+      weight: 1.0,
+    },
+    agradecimiento: {
+      pattern: 'agradecid[oa]s?|orgullos[oa]|gracias a dios',
       weight: 0.8,
     },
   },
 };
+
+// Unicode-aware word boundaries: JS \b/\B only know the ASCII \w character
+// class, so accented Spanish letters break matches. These lookarounds emulate
+// Python `re`'s unicode \b behavior.
+function makeWordRegex(pattern: string) {
+  return new RegExp(`(?<![\\p{L}\\p{N}_])(?:${pattern})(?![\\p{L}\\p{N}_])`, 'giu');
+}
+
+function compilePatterns(
+  sources: Record<string, Record<string, { pattern: string; weight: number }>>
+): Record<string, Record<string, { regex: RegExp; weight: number }>> {
+  const compiled: Record<string, Record<string, { regex: RegExp; weight: number }>> = {};
+  for (const [category, patterns] of Object.entries(sources)) {
+    compiled[category] = {};
+    for (const [symptom, { pattern, weight }] of Object.entries(patterns)) {
+      compiled[category][symptom] = { regex: makeWordRegex(pattern), weight };
+    }
+  }
+  return compiled;
+}
+
+export const MOOD_PATTERNS = compilePatterns(MOOD_PATTERN_SOURCES);
 
 const NEGATIONS = new Set(['no', 'ni', 'nunca', 'jamás', 'sin', 'tampoco', 'ningún', 'ninguna']);
 const INTENSIFIERS = new Set([
@@ -229,10 +289,17 @@ export function extractMeaningfulPhrases(text: string, topN: number = 10): Recor
   return Object.fromEntries(sorted);
 }
 
+export type MoodScores = {
+  depresion: number;
+  ansiedad: number;
+  estres: number;
+  felicidad: number;
+};
+
 export function analyzeMoodRealtime(text: string) {
   if (!text)
     return {
-      scores: { depresion: 0, ansiedad: 0, estres: 0 },
+      scores: { depresion: 0, ansiedad: 0, estres: 0, felicidad: 0 } as MoodScores,
       symptoms: [],
       keyConcepts: [],
       meaningfulPhrases: {},
@@ -241,10 +308,11 @@ export function analyzeMoodRealtime(text: string) {
   const textoLimpio = cleanText(text);
   const tokens = textoLimpio.split(' ');
 
-  const scores = {
+  const scores: MoodScores = {
     depresion: 0,
     ansiedad: 0,
     estres: 0,
+    felicidad: 0,
   };
 
   const detectedSymptoms: string[] = [];
@@ -273,8 +341,7 @@ export function analyzeMoodRealtime(text: string) {
       }
     }
 
-    // @ts-ignore
-    scores[category] = Math.min(totalWeight / maxPossible, 1.0);
+    scores[category as keyof MoodScores] = Math.min(totalWeight / maxPossible, 1.0);
   }
 
   return {
