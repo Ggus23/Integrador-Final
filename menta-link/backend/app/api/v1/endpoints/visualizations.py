@@ -6,7 +6,10 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.api import deps
-from app.ml.emotion.regex_predictor import get_regex_emotion_analyzer
+from app.ml.emotion.regex_predictor import (
+    STOPWORDS_ANALISIS,
+    get_regex_emotion_analyzer,
+)
 
 router = APIRouter()
 
@@ -65,7 +68,9 @@ def get_word_cloud(
         "estive",
         "estaba",
     }
-    tokens_filtrados = [t for t in tokens if t not in conectores]
+    tokens_filtrados = [
+        t for t in tokens if t not in conectores and t not in STOPWORDS_ANALISIS
+    ]
 
     counts = Counter(tokens_filtrados).most_common(50)
 
@@ -152,9 +157,34 @@ def get_detailed_analysis(
     tokens = regex_analyzer.clean_and_tokenize(full_text)
     patterns_dict = regex_analyzer.extract_bigrams(tokens, top_n=8)
 
-    relevant_phrases = [
-        {"phrase": p, "count": c} for p, c in relevant_phrases_dict.items()
-    ]
+    # Fallback: si el texto no contiene suficientes palabras emocionales
+    # explícitas (entradas poéticas o figurativas), completar cada cuadro con
+    # conceptos/frases/patrones reales del propio texto para que nunca queden
+    # vacíos ni se vean con un solo elemento suelto.
+    if len(key_concepts) < 5:
+        for extra in regex_analyzer.get_fallback_concepts(full_text, top_n=10):
+            if extra not in key_concepts:
+                key_concepts.append(extra)
+    key_concepts = key_concepts[:10]
+
+    frases_items = list(relevant_phrases_dict.items())
+    if len(frases_items) < 2:
+        for frase, count in regex_analyzer.get_fallback_phrases(
+            full_text, top_n=5
+        ).items():
+            if frase not in relevant_phrases_dict:
+                frases_items.append((frase, count))
+    relevant_phrases = [{"phrase": p, "count": c} for p, c in frases_items[:5]]
+
+    patrones = patterns_dict
+    if len(patrones) < 3:
+        for extra, count in regex_analyzer.get_fallback_patterns(
+            tokens, top_n=8
+        ).items():
+            if extra not in patrones:
+                patrones[extra] = count
+    patterns_dict = dict(list(patrones.items())[:8])
+
     recurrent_patterns = [
         {
             "phrase": p,

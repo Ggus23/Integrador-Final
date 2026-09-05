@@ -10,7 +10,7 @@ from typing import Dict, List, Optional
 
 DEPRESION_PATRONES = {
     "tristeza": (
-        r"\b(triste|deprimid[oa]|melancólic[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo|desganad[oa]|sin ganas)\b",
+        r"\b(triste|deprimid[oa]|melancólic[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo|desganad[oa]|sin ganas|extrañ[oa]s?|te extraño|me extrañas|soledad|me siento sol[oa]|vac[íi]o|vac[íi]a|duele|dolió|llor[éo]?|lloraba|llorando|llorar|nudo en la garganta|dolor|silencio|callad[oa])\b",
         1.0,
     ),
     "desesperanza": (
@@ -388,6 +388,67 @@ class DiaryAnalyzer:
                     frases_con_emocion.append(o_clean[:147] + "...")
 
         contador = Counter(frases_con_emocion)
+        return dict(contador.most_common(top_n))
+
+    # ------------------------------------------------------------------------
+    # Métodos de respaldo ("fallback") para que las visualizaciones nunca
+    # queden vacías cuando el texto no contiene palabras emocionales explícitas
+    # (p. ej. entradas poéticas o figurativas). Se usan en el endpoint
+    # /analysis solo cuando la extracción basada en patrones no devuelve nada.
+    # ------------------------------------------------------------------------
+    def get_fallback_concepts(self, text: str, top_n: int = 10) -> List[str]:
+        """Conceptos: palabras de contenido más frecuentes (sin stopwords)."""
+        tokens = self.clean_and_tokenize(text)
+        content_tokens = [
+            t
+            for t in tokens
+            if len(t) > 2 and t not in STOPWORDS_ANALISIS and not t.isdigit()
+        ]
+        contador = Counter(content_tokens)
+        return [frase for frase, _ in contador.most_common(top_n)]
+
+    def get_fallback_phrases(self, text: str, top_n: int = 5) -> Dict[str, int]:
+        """Frases: oraciones reales del texto cuando no hay frases emocionales."""
+        if not text:
+            return {}
+        oraciones = re.split(r"[.!?;]|\n", text)
+        segmentos = []
+        for o in oraciones:
+            o_clean = o.strip().strip(",")
+            if not o_clean:
+                continue
+            if len(o_clean) < 150:
+                segmentos.append(o_clean)
+            else:
+                segmentos.append(o_clean[:147] + "...")
+        if not segmentos:
+            limpio = self._limpiar_texto(text)
+            if limpio:
+                segmentos = [limpio[:147] + "..." if len(limpio) > 147 else limpio]
+        contador = Counter(segmentos)
+        return dict(contador.most_common(top_n))
+
+    def get_fallback_patterns(
+        self, tokens: List[str], top_n: int = 8
+    ) -> Dict[str, int]:
+        """Patrones: bigramas/trigramas de palabras de contenido (sin stopwords)."""
+        if len(tokens) < 2:
+            return {}
+        candidatas = []
+        n = len(tokens)
+        for i in range(n - 1):
+            if (tokens[i] not in STOPWORDS_ANALISIS) and (
+                tokens[i + 1] not in STOPWORDS_ANALISIS
+            ):
+                candidatas.append(f"{tokens[i]} {tokens[i+1]}")
+        for i in range(n - 2):
+            if (
+                tokens[i] not in STOPWORDS_ANALISIS
+                and tokens[i + 1] not in STOPWORDS_ANALISIS
+                and tokens[i + 2] not in STOPWORDS_ANALISIS
+            ):
+                candidatas.append(f"{tokens[i]} {tokens[i+1]} {tokens[i+2]}")
+        contador = Counter(candidatas)
         return dict(contador.most_common(top_n))
 
     def _contiene_emocion(self, frase: str) -> bool:

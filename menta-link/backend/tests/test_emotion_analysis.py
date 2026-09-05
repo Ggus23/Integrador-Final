@@ -102,3 +102,55 @@ def prueba_calidad_vocabulario_positivo():
     assert a.get_key_concepts(full, top_n=5)
     assert a.extract_bigrams(tokens, top_n=8)
     assert a.extraer_frases_relevantes(full, top_n=3)
+
+
+def prueba_deteccion_vocabulario_figurativo_tristeza():
+    from app.ml.emotion.regex_predictor import DiaryAnalyzer
+
+    a = DiaryAnalyzer()
+    # Entradas poéticas/figurativas sin las palabras clave básicas también
+    # deben clasificarse como tristeza (p. ej. "te extraño", "soledad",
+    # "vacío", "me siento sola", "llorando", "nudo en la garganta").
+    assert (
+        a.analyze_emotion("te extraño y me siento sola en esta casa")["emotion"]
+        == "triste"
+    )
+    assert (
+        a.analyze_emotion("sentí un nudo en la garganta al recordar")["emotion"]
+        == "triste"
+    )
+    assert a.analyze_emotion("el silencio me duele")["emotion"] == "triste"
+    assert (
+        a.analyze_emotion("esta casa está demasiado vacía sin él")["scores"][
+            "depresion"
+        ]
+        > 0
+    )
+    # La negación sigue anulando incluso el vocabulario figurativo.
+    assert a.analyze_emotion("no la extraño, me fue mejor así")["emotion"] == "neutral"
+
+
+def prueba_fallbacks_pueblan_visualizaciones():
+    from app.ml.emotion.regex_predictor import DiaryAnalyzer
+
+    a = DiaryAnalyzer()
+    # Texto sin palabras emocionales explícitas: los cuadros aún deben poblarse.
+    full = (
+        "El día transcurrió en silencio y la tarde se hizo larga. "
+        "Caminé por el parque mirando el cielo gris y volví a casa antes "
+        "de lo planeado, con la sensación de haber perdido algo."
+    )
+    tokens = a.clean_and_tokenize(full)
+    conceptos = a.get_fallback_concepts(full, top_n=10)
+    frases = a.get_fallback_phrases(full, top_n=5)
+    patrones = a.get_fallback_patterns(tokens, top_n=8)
+    assert conceptos, "fallback de conceptos no debe ser vacío"
+    assert frases, "fallback de frases no debe ser vacío"
+    assert patrones, "fallback de patrones no debe ser vacío"
+    # No debe devolver stopwords como concepto principal.
+    assert "el" not in conceptos[:3]
+    # El flujo completo del endpoint /analysis (jerarquía real) queda cubierto.
+    key_concepts = a.get_key_concepts(full, top_n=10) or conceptos
+    relevant = a.extraer_frases_relevantes(full, top_n=5) or frases
+    patterns = a.extract_bigrams(tokens, top_n=8) or patrones
+    assert key_concepts and relevant and patterns

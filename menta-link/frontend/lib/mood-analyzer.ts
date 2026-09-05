@@ -8,7 +8,7 @@ const MOOD_PATTERN_SOURCES: Record<string, Record<string, { pattern: string; wei
   depresion: {
     tristeza: {
       pattern:
-        'triste|deprimid[oa]|melancólic[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo|desganad[oa]|sin ganas',
+        'triste|deprimid[oa]|melancólic[oa]|melancolí[oa]|desanimad[oa]|baj[oa] de ánimo|desganad[oa]|sin ganas|extrañ[oa]s?|te extraño|me extrañas|soledad|me siento sol[oa]|vac[íi]o|vac[íi]a|duele|dolió|llor[éo]?|lloraba|llorando|llorar|nudo en la garganta|dolor|silencio|callad[oa]',
       weight: 1.0,
     },
     desesperanza: {
