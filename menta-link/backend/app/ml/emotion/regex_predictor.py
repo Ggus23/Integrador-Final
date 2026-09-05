@@ -252,10 +252,7 @@ class DiaryAnalyzer:
             # Distinguir motivación de felicidad para la clasificación canónica:
             # si la entrada es positiva y hay un síntoma de motivación, reportar
             # "motivado" (usado por ARI y los paneles de tendencias).
-            if (
-                emotion_label == "feliz"
-                and "positivo:motivacion" in sintomas
-            ):
+            if emotion_label == "feliz" and "positivo:motivacion" in sintomas:
                 emotion_label = "motivado"
         return {
             "emotion": emotion_label,
@@ -535,8 +532,7 @@ class DiaryAnalyzer:
         recientes = ordenados[-ultimos_dias:]
         if len(recientes) < 2:
             return {
-                k: "estable"
-                for k in ["depresion", "ansiedad", "estres", "felicidad"]
+                k: "estable" for k in ["depresion", "ansiedad", "estres", "felicidad"]
             }
         tendencias = {}
         for categoria in ["depresion", "ansiedad", "estres", "felicidad"]:

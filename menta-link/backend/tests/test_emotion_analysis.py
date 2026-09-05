@@ -65,9 +65,14 @@ def prueba_deteccion_emociones_positivas():
     a = DiaryAnalyzer()
     # El análisis debe detectar entradas felices/motivadas y no solo negativas.
     assert a.analyze_emotion("hoy me siento muy feliz y contento")["emotion"] == "feliz"
-    assert a.analyze_emotion("estoy motivado con mis proyectos")["emotion"] == "motivado"
+    assert (
+        a.analyze_emotion("estoy motivado con mis proyectos")["emotion"] == "motivado"
+    )
     # Un día tranquilo también cuenta como positivo.
-    assert a.analyze_emotion("me siento tranquilo y relajado, todo bien")["emotion"] == "feliz"
+    assert (
+        a.analyze_emotion("me siento tranquilo y relajado, todo bien")["emotion"]
+        == "feliz"
+    )
 
 
 def prueba_deteccion_palabras_clave_negativas():
@@ -76,8 +81,13 @@ def prueba_deteccion_palabras_clave_negativas():
     a = DiaryAnalyzer()
     # Palabras comunes que antes no se detectaban en el frontend.
     assert a.analyze_emotion("estoy ansioso por el examen")["emotion"] == "ansioso"
-    assert a.analyze_emotion("me siento estresado con las entregas")["emotion"] == "frustrado"
-    assert a.analyze_emotion("tengo taquicardia y falta de aire")["emotion"] == "ansioso"
+    assert (
+        a.analyze_emotion("me siento estresado con las entregas")["emotion"]
+        == "frustrado"
+    )
+    assert (
+        a.analyze_emotion("tengo taquicardia y falta de aire")["emotion"] == "ansioso"
+    )
     # La negación debe seguir anulando la emoción.
     assert a.analyze_emotion("no estoy triste, hoy me fue bien")["emotion"] == "neutral"
 

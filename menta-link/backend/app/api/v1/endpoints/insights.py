@@ -140,11 +140,7 @@ def generate_cognitive_reframe(
     tokens = set(analyzer.clean_and_tokenize(text))
     label = emotionLabel.lower()
 
-    if (
-        label in ["muy triste", "triste"]
-        or "mal" in tokens
-        or "triste" in tokens
-    ):
+    if label in ["muy triste", "triste"] or "mal" in tokens or "triste" in tokens:
         reframe = "Reconocer tu dolor es un acto de valentía. Cada día difícil que enfrentas demuestra una fortaleza que no siempre puedes ver."
         technique = "Validación Emocional"
         action = "Intenta escribir 3 cosas pequeñas que salieron bien hoy, sin importar cuán insignificantes parezcan."
