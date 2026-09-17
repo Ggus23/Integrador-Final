@@ -249,10 +249,7 @@ def verify_otp(
     Valida el código OTP recibido por SMS. Devuelve un token de corta duración
     que acredita la verificación del celular y puede usarse al crear la cuenta.
     """
-    from app.services.auth_service import (
-        PHONE_VERIFY_TOKEN_MINUTES,
-        auth_service,
-    )
+    from app.services.auth_service import PHONE_VERIFY_TOKEN_MINUTES, auth_service
 
     phone_verified_token = auth_service.verify_otp(db, otp_in.phone_number, otp_in.code)
     if not phone_verified_token:

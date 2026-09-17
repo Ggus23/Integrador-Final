@@ -32,7 +32,9 @@ class AuthService:
     # ------------------------------------------------------------------
     # Verificación por celular (SMS / OTP)
     # ------------------------------------------------------------------
-    def request_otp(self, db: Session, phone_number: str, purpose: str = "signup") -> bool:
+    def request_otp(
+        self, db: Session, phone_number: str, purpose: str = "signup"
+    ) -> bool:
         """
         Genera un código OTP de 6 dígitos, lo persiste (hasheado) y lo envía
         por SMS al número indicado. Devuelve True si el envío fue exitoso.

@@ -1,4 +1,3 @@
-import re
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
@@ -91,9 +90,6 @@ class UserCreateAdmin(UserCreateBase):
 
 class UserUpdate(UserBase):
     password: Optional[str] = None
-
-
-
 
 
 class UserInDBBase(UserBase):
