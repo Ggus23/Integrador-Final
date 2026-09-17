@@ -109,6 +109,11 @@ export default function AdminStudentsPage() {
                     <div>
                       <h3 className="text-lg font-semibold">{student.full_name}</h3>
                       <p className="text-muted-foreground text-sm">{student.email}</p>
+                      {student.phone_number && (
+                        <p className="text-muted-foreground mt-1 text-xs">
+                          📞 {student.phone_number}
+                        </p>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2">

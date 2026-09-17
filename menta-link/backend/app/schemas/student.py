@@ -14,6 +14,7 @@ class StudentSummary(BaseModel):
     risk_level: str = RiskLevel.LOW.value
     active_alerts: int = 0
     last_assessment_date: Optional[datetime] = None
+    phone_number: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

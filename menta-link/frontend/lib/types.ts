@@ -93,6 +93,7 @@ export interface StudentSummary {
   risk_level: 'low' | 'medium' | 'high';
   active_alerts: number;
   last_assessment_date?: string;
+  phone_number?: string;
 }
 
 export interface AcademicRecord {
