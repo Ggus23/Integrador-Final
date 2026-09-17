@@ -3,12 +3,22 @@ from app.models.user import User
 from app.services.auth_service import auth_service
 
 
-def prueba_registro_crea_token_verificacion(client, db_session):
+def prueba_registro_crea_token_verificacion(client, db_session, sms_codes):
+    phone = "73510011"
+    client.post("/api/v1/auth/request-otp", json={"phone_number": phone})
+    code = sms_codes[phone]
+    token = client.post(
+        "/api/v1/auth/verify-otp",
+        json={"phone_number": phone, "code": code},
+    ).json()["phone_verified_token"]
+
     payload = {
         "full_name": "Test Student",
         "email": "student@unifranz.edu.bo",
         "password": "Password123",
         "role": "student",
+        "phone_number": phone,
+        "phone_verified_token": token,
     }
     response = client.post("/api/v1/users/", json=payload)
     assert response.status_code == 201
@@ -18,6 +28,7 @@ def prueba_registro_crea_token_verificacion(client, db_session):
     )
     assert user is not None
     assert user.is_email_verified is False
+    assert user.is_phone_verified is True
 
     token_entry = (
         db_session.query(EmailVerificationToken)

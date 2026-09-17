@@ -26,6 +26,7 @@ import {
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
+import { UserProfileCard } from '@/components/UserProfileCard';
 import type { RiskSummary, AssessmentResponse, Checkin } from '@/lib/types';
 
 export default function DashboardPage() {
@@ -137,6 +138,13 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* SECTION: User Profile Card */}
+        {user && (
+          <div className="animate-fade-in">
+            <UserProfileCard user={user} />
+          </div>
+        )}
 
         {error && (
           <div className="border-destructive bg-destructive/10 text-destructive animate-shake rounded-xl border p-4 text-sm">

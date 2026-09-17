@@ -9,17 +9,28 @@ import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { Phone, ShieldCheck, Loader2 } from 'lucide-react';
+
+const isValidPhone = (phone: string) => /^\+?\d{7,15}$/.test(phone.trim());
 
 export default function SignupPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otpCode, setOtpCode] = useState('');
   // Role is fixed to student for public registration
   const role = 'student';
   const [loading, setLoading] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
   const [error, setError] = useState('');
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [phoneVerifiedToken, setPhoneVerifiedToken] = useState('');
   const { user } = useAuth();
   const router = useRouter();
 
@@ -33,7 +44,15 @@ export default function SignupPage() {
     }
   }, [user, router]);
 
-  const validateForm = () => {
+  const invalidatePhoneVerification = () => {
+    setOtpSent(false);
+    setPhoneVerified(false);
+    setPhoneVerifiedToken('');
+  };
+
+  const anyDigit = (str: string) => /\d/.test(str);
+
+  const validateEmailAndPassword = () => {
     if (!email.toLowerCase().endsWith('@unifranz.edu.bo')) {
       setError('Debes usar tu correo institucional (@unifranz.edu.bo)');
       return false;
@@ -53,13 +72,62 @@ export default function SignupPage() {
     return true;
   };
 
-  const anyDigit = (str: string) => /\d/.test(str);
+  const handleRequestOtp = async () => {
+    setError('');
+    if (!isValidPhone(phoneNumber)) {
+      setError('Ingresa un número de teléfono celular válido (7 a 15 dígitos).');
+      return;
+    }
+
+    setOtpSending(true);
+    try {
+      await apiClient.requestOTP(phoneNumber.trim());
+      setOtpSent(true);
+      setPhoneVerified(false);
+      setPhoneVerifiedToken('');
+      setOtpCode('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo enviar el código de verificación');
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    setError('');
+    if (!/^\d{6}$/.test(otpCode)) {
+      setError('Ingresa el código de 6 dígitos que recibiste por SMS.');
+      return;
+    }
+
+    setOtpVerifying(true);
+    try {
+      const result = await apiClient.verifyOTP(phoneNumber.trim(), otpCode.trim());
+      setPhoneVerifiedToken(result.phone_verified_token);
+      setPhoneVerified(true);
+      setOtpSent(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Código inválido. Intenta nuevamente.');
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!validateForm()) return;
+    if (!validateEmailAndPassword()) return;
+
+    if (!isValidPhone(phoneNumber)) {
+      setError('Debes registrar un número de teléfono celular válido.');
+      return;
+    }
+
+    if (!phoneVerified || !phoneVerifiedToken) {
+      setError('Debes verificar tu número de teléfono con el código SMS antes de crear tu cuenta.');
+      return;
+    }
 
     setLoading(true);
 
@@ -69,6 +137,8 @@ export default function SignupPage() {
         email: email,
         password: password,
         role: role,
+        phone_number: phoneNumber.trim(),
+        phone_verified_token: phoneVerifiedToken,
       });
       setVerificationSent(true);
     } catch (err) {
@@ -153,6 +223,96 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-2">
+              <label className="text-foreground text-sm font-semibold">
+                Número de Teléfono Celular
+              </label>
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => {
+                  setPhoneNumber(e.target.value);
+                  if (otpSent || phoneVerified) invalidatePhoneVerification();
+                }}
+                placeholder="71234567"
+                className="border-border bg-background focus:ring-primary/20 text-foreground focus:border-primary w-full rounded-xl border px-4 py-3 shadow-sm transition-all outline-none focus:ring-4"
+                required
+              />
+              <p className="text-muted-foreground text-xs italic opacity-60">
+                Se enviará un código de verificación por SMS.
+              </p>
+            </div>
+
+            {/* Verificación por celular (OTP) */}
+            {!phoneVerified && (
+              <div className="border-border/50 space-y-3 rounded-xl border p-4">
+                {!otpSent ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={otpSending || !isValidPhone(phoneNumber)}
+                    onClick={handleRequestOtp}
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-xl font-black tracking-wide uppercase"
+                  >
+                    {otpSending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Phone className="h-4 w-4" />
+                    )}
+                    {otpSending ? 'Enviando...' : 'Solicitar código de verificación'}
+                  </Button>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-center gap-2 text-center">
+                      <p className="text-muted-foreground text-xs italic">
+                        Te enviamos un código de 6 dígitos a{' '}
+                        <strong className="text-foreground">{phoneNumber}</strong>. Revísalo en tu
+                        celular.
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                        placeholder="••••••"
+                        className="border-border bg-background focus:ring-primary/20 text-foreground focus:border-primary w-full rounded-xl border px-4 py-3 text-center text-2xl font-black tracking-[0.5em] shadow-sm transition-all outline-none focus:ring-4"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          disabled={otpVerifying || !/^\d{6}$/.test(otpCode)}
+                          onClick={handleVerifyOtp}
+                          className="bg-primary flex h-11 flex-1 items-center justify-center gap-2 rounded-xl font-black tracking-wide uppercase"
+                        >
+                          {otpVerifying && <Loader2 className="h-4 w-4 animate-spin" />}
+                          {otpVerifying ? 'Verificando...' : 'Verificar código'}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          disabled={otpSending}
+                          onClick={handleRequestOtp}
+                          className="text-primary h-11 rounded-xl font-black uppercase"
+                        >
+                          Reenviar
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {phoneVerified && (
+              <div className="flex items-center justify-center gap-2 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm font-bold text-green-600">
+                <ShieldCheck className="h-5 w-5" />
+                Número verificado correctamente
+              </div>
+            )}
+
+            <div className="space-y-2">
               <label className="text-foreground text-sm font-semibold">Contraseña</label>
               <input
                 type="password"
@@ -177,7 +337,14 @@ export default function SignupPage() {
             </div>
 
             {error && (
-              <div className="border-destructive/20 bg-destructive/10 text-destructive flex items-center justify-center rounded-xl border p-4 text-sm font-bold">
+              <div
+                className={cn(
+                  'flex items-center justify-center rounded-xl border p-4 text-sm font-bold',
+                  error.includes('verificar') || error.includes('Código')
+                    ? 'border-amber-500/30 bg-amber-500/10 text-amber-600'
+                    : 'border-destructive/20 bg-destructive/10 text-destructive'
+                )}
+              >
                 {error}
               </div>
             )}

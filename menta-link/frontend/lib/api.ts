@@ -202,6 +202,19 @@ class APIClient {
     return this.request('GET', '/users/me');
   }
 
+  async updateMyProfile(data: Record<string, any>) {
+    return this.request('PUT', '/users/me', data);
+  }
+
+  // Phone verification (SMS / OTP)
+  async requestOTP(phoneNumber: string) {
+    return this.request('POST', '/auth/request-otp', { phone_number: phoneNumber });
+  }
+
+  async verifyOTP(phoneNumber: string, code: string) {
+    return this.request('POST', '/auth/verify-otp', { phone_number: phoneNumber, code });
+  }
+
   // Assessment endpoints
   async getAssessments() {
     return this.request('GET', '/assessments/');

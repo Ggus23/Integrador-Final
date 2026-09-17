@@ -1,8 +1,10 @@
+import re
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 from app.models.user import UserRole
+from app.utils.phones import normalize_phone_number
 
 
 class UserBase(BaseModel):
@@ -13,12 +15,16 @@ class UserBase(BaseModel):
     consent_accepted: bool = False
     must_change_password: bool = False
     expo_push_token: Optional[str] = None
+    phone_number: Optional[str] = None
+    is_phone_verified: Optional[bool] = False
+    avatar_url: Optional[str] = None
 
 
 class UserCreateBase(BaseModel):
     full_name: str
     email: EmailStr
     password: str
+    phone_number: Optional[str] = None
 
     @field_validator("email")
     @classmethod
@@ -40,9 +46,24 @@ class UserCreateBase(BaseModel):
             raise ValueError("Password must contain at least one digit")
         return v
 
+    @field_validator("phone_number")
+    @classmethod
+    def phone_number_valid(cls, v: Optional[str]) -> Optional[str]:
+        if not v:
+            return v
+        normalized = normalize_phone_number(v)
+        if normalized is None:
+            raise ValueError(
+                "El número de teléfono debe tener entre 7 y 15 dígitos "
+                "(ej. 71234567 o +59171234567)."
+            )
+        return normalized
+
 
 class UserCreate(UserCreateBase):
+    phone_number: str
     role: UserRole = UserRole.STUDENT
+    phone_verified_token: Optional[str] = None
 
     @field_validator("role")
     @classmethod
@@ -53,6 +74,16 @@ class UserCreate(UserCreateBase):
             )
         return v
 
+    @field_validator("phone_number")
+    @classmethod
+    def phone_number_required_public(cls, v: Optional[str]) -> Optional[str]:
+        if not v:
+            raise ValueError(
+                "Es obligatorio registrar un número de teléfono celular para "
+                "verificar tu cuenta."
+            )
+        return v
+
 
 class UserCreateAdmin(UserCreateBase):
     role: UserRole = UserRole.STUDENT
@@ -60,6 +91,9 @@ class UserCreateAdmin(UserCreateBase):
 
 class UserUpdate(UserBase):
     password: Optional[str] = None
+
+
+
 
 
 class UserInDBBase(UserBase):

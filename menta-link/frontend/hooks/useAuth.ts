@@ -55,5 +55,16 @@ export function useAuth() {
     router.push('/login');
   };
 
-  return { user, loading, error, login, logout };
+  const refresh = async () => {
+    try {
+      const userData = await apiClient.getMe();
+      setUser(userData);
+      return userData;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al obtener el usuario');
+      return null;
+    }
+  };
+
+  return { user, loading, error, login, logout, refresh };
 }

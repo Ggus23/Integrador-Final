@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.api import deps
 from app.core.security import get_password_hash
+from app.utils.phones import normalize_phone_number
 
 router = APIRouter()
 
@@ -17,6 +18,7 @@ def create_user(
 ) -> Any:
     """
     Este endpoint permite que un usuario se registre en el sistema.
+    El registro exige un número de celular verificado vía SMS/OTP.
     """
     # Busca si el correo ya existe en la base de datos
     # Si existe, lanza un error 409 Conflict
@@ -39,12 +41,50 @@ def create_user(
                 detail="Debes usar tu correo institucional (@unifranz.edu.bo) para registrarte.",
             )
 
+    # El número de celular es obligatorio y debe estar previamente verificado
+    phone_number = normalize_phone_number(user_in.phone_number or "")
+    if not phone_number:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Debes registrar un número de teléfono celular válido.",
+        )
+
+    existing_phone = (
+        db.query(models.user.User)
+        .filter(models.user.User.phone_number == phone_number)
+        .first()
+    )
+    if existing_phone:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ya existe un usuario registrado con este número de teléfono.",
+        )
+
+    if not user_in.phone_verified_token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Debes verificar tu número de teléfono antes de crear la cuenta.",
+        )
+
+    from app.services.auth_service import auth_service
+
+    phone_claims = auth_service.verify_phone_verification_token(
+        user_in.phone_verified_token
+    )
+    if not phone_claims or phone_claims.get("sub") != phone_number:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La verificación del número de teléfono es inválida o expiró.",
+        )
+
     # Crea el usuario, hashea la contraseña y la guarda en la DB
     db_obj = models.user.User(
         email=user_in.email,
         hashed_password=get_password_hash(user_in.password),
         full_name=user_in.full_name,
         role=user_in.role,
+        phone_number=phone_number,
+        is_phone_verified=True,
     )
 
     # Aquí el usuario se guarda físicamente en la tabla users
@@ -145,6 +185,35 @@ def update_user_me(
 
     if user_in.expo_push_token is not None:
         current_user.expo_push_token = user_in.expo_push_token
+
+    if user_in.phone_number is not None:
+        phone_number = normalize_phone_number(user_in.phone_number)
+        if not phone_number:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El número de teléfono es inválido.",
+            )
+        duplicate = (
+            db.query(models.user.User)
+            .filter(
+                models.user.User.phone_number == phone_number,
+                models.user.User.id != current_user.id,
+            )
+            .first()
+        )
+        if duplicate:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Ya existe un usuario registrado con este número de teléfono.",
+            )
+        phone_changed = phone_number != (current_user.phone_number or "")
+        current_user.phone_number = phone_number
+        # Un número nuevo deja de estar verificado hasta validarlo vía SMS
+        if phone_changed:
+            current_user.is_phone_verified = False
+
+    if user_in.avatar_url is not None:
+        current_user.avatar_url = user_in.avatar_url
 
     # Se guarda el usuario en la DB
     db.add(current_user)

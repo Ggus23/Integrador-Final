@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev:all": "concurrently \"cd menta-link && npm run dev\" \"cd mobile && npx expo start\""
+    "dev:all": "concurrently \"cd menta-link/frontend && npm run dev\" \"cd menta-link/backend && uvicorn app.main:app --reload --port 8000\" \"cd mobile && npx expo start\""
   },
   "keywords": [],
   "author": "",

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import warnings
@@ -19,6 +20,7 @@ warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 
 import nltk
 import sentry_sdk
+from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -35,7 +37,8 @@ from app.core.errors import (
 )
 from app.core.limiter import limiter
 from app.db.base import Base
-from app.db.session import engine
+from app.db.session import SessionLocal, engine
+from app.services.reminders import check_all_reminders
 
 logger = logging.getLogger(__name__)
 
@@ -45,14 +48,6 @@ try:
     nltk.download("punkt_tab", quiet=True)
 except Exception as e:
     logger.warning("Failed to download some NLTK dictionaries: %s", e)
-
-
-import asyncio
-
-from apscheduler.schedulers.background import BackgroundScheduler
-
-from app.db.session import SessionLocal
-from app.services.reminders import check_all_reminders
 
 
 def run_scheduled_reminders():
@@ -109,16 +104,24 @@ async def add_security_headers(request: Request, call_next):
     return response
 
 
-if settings.BACKEND_CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[
-            str(origin).rstrip("/") for origin in settings.BACKEND_CORS_ORIGINS
-        ],
-        allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Content-Type", "Authorization"],
-    )
+# --- CONFIGURACIÓN DE CORS CORREGIDA ---
+origins = (
+    [str(origin).rstrip("/") for origin in settings.BACKEND_CORS_ORIGINS]
+    if settings.BACKEND_CORS_ORIGINS
+    else [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# ---------------------------------------
 
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

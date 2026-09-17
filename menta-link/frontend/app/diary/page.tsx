@@ -4,13 +4,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import type { DiaryEntry } from '@/lib/types';
+import type { DiaryEntry, WordCloudItem } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Brain, MessageSquare, Sparkles, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/lib/api';
 import { analyzeMoodRealtime } from '@/lib/mood-analyzer';
+import { WordCloud } from '@/components/WordCloud';
 
 const EMOTIONS = [
   {
@@ -115,15 +116,11 @@ export default function DiaryPage() {
   }, [formData.experience]);
 
   const [todayEntry, setTodayEntry] = useState<DiaryEntry | null>(null);
-  const [wordCloud, setWordCloud] = useState<
-    { word: string; frequency: number; sentiment?: string }[]
-  >([]);
+  const [wordCloud, setWordCloud] = useState<WordCloudItem[]>([]);
   const [analysisData, setAnalysisData] = useState<{
-    key_concepts: string[];
     relevant_phrases: { phrase: string; count: number }[];
     recurrent_patterns: { phrase: string; frequency: number; sentiment: string }[];
   }>({
-    key_concepts: [],
     relevant_phrases: [],
     recurrent_patterns: [],
   });
@@ -168,7 +165,14 @@ export default function DiaryPage() {
       ]);
       setWordCloud(words || []);
       setPhraseCloud(phrases || []);
-      setAnalysisData(analysis || { key_concepts: [], relevant_phrases: [] });
+      setAnalysisData(
+        analysis && analysis.relevant_phrases
+          ? {
+              relevant_phrases: analysis.relevant_phrases || [],
+              recurrent_patterns: analysis.recurrent_patterns || [],
+            }
+          : { relevant_phrases: [], recurrent_patterns: [] }
+      );
     } catch (e) {
       console.error('Error fetching clouds:', e);
     }
@@ -560,22 +564,9 @@ export default function DiaryPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-6">
-                    {analysisData.key_concepts.length > 0 ? (
-                      analysisData.key_concepts.map((concept, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          className="flex items-center gap-3"
-                        >
-                          <div className="bg-primary h-1.5 w-1.5 rounded-full" />
-                          <span className="text-primary/80 block text-2xl font-black tracking-tighter italic">
-                            {concept}
-                          </span>
-                        </motion.div>
-                      ))
+                  <div className="flex min-h-[180px] flex-col justify-center">
+                    {wordCloud.length > 0 ? (
+                      <WordCloud items={wordCloud} />
                     ) : (
                       <p className="text-muted-foreground text-center text-[10px] italic opacity-50">
                         Esperando registros...

@@ -211,6 +211,69 @@ def reset_password(
     return {"msg": "Contraseña actualizada exitosamente"}
 
 
+# Verificación de número de celular vía SMS / OTP (flujo de registro)
+@router.post("/request-otp")
+@limiter.limit("3/minute")
+def request_otp(
+    request: Request,
+    otp_in: schemas.auth.OTPRequest,
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    """
+    Envía un código OTP de 6 dígitos al número de teléfono indicado.
+    El código expira a los pocos minutos y es de un solo uso.
+    """
+    from app.services.auth_service import auth_service
+
+    sent = auth_service.request_otp(db, otp_in.phone_number)
+    if not sent:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="No se pudo enviar el código de verificación. Intenta más tarde.",
+        )
+    log_security_event(
+        "OTP_REQUESTED",
+        f"OTP requested for phone {otp_in.phone_number} from IP: {request.client.host}",
+    )
+    return {"msg": "Código de verificación enviado por SMS."}
+
+
+@router.post("/verify-otp", response_model=schemas.auth.OTPVerifyResponse)
+@limiter.limit("10/minute")
+def verify_otp(
+    request: Request,
+    otp_in: schemas.auth.OTPVerify,
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    """
+    Valida el código OTP recibido por SMS. Devuelve un token de corta duración
+    que acredita la verificación del celular y puede usarse al crear la cuenta.
+    """
+    from app.services.auth_service import (
+        PHONE_VERIFY_TOKEN_MINUTES,
+        auth_service,
+    )
+
+    phone_verified_token = auth_service.verify_otp(db, otp_in.phone_number, otp_in.code)
+    if not phone_verified_token:
+        log_security_event(
+            "OTP_FAILED",
+            f"Invalid/expired OTP for phone {otp_in.phone_number} from IP: {request.client.host}",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Código inválido o expirado. Solicita un nuevo código.",
+        )
+    log_security_event(
+        "OTP_VERIFIED", f"OTP verified for phone {otp_in.phone_number}", level=10
+    )
+    return {
+        "phone_number": otp_in.phone_number,
+        "phone_verified_token": phone_verified_token,
+        "expires_in": PHONE_VERIFY_TOKEN_MINUTES * 60,
+    }
+
+
 # Este def es util para la interfaz grafica
 @router.post("/test-token", response_model=schemas.user.User)
 # Se confia en el current_user que viene del token

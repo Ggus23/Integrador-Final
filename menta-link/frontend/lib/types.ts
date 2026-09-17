@@ -7,6 +7,21 @@ export interface User {
   semester?: number;
   consent_accepted: boolean;
   must_change_password?: boolean;
+  phone_number?: string;
+  is_phone_verified?: boolean;
+  avatar_url?: string;
+}
+
+export interface WordCloudItem {
+  word: string;
+  frequency: number;
+  sentiment?: string;
+}
+
+export interface AnalysisData {
+  key_concepts: { concept: string; count: number }[];
+  relevant_phrases: { phrase: string; count: number }[];
+  recurrent_patterns: { phrase: string; frequency: number; sentiment: string }[];
 }
 
 export interface Assessment {
