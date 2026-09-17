@@ -3,7 +3,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Importa tu modelo y enum directamente desde tu proyecto FastAPI
-from app.models.user import User, UserRole  # Ajusta la ruta de importación según la carpeta de user.py
+from app.models.user import (
+    User,
+    UserRole,
+)  # Ajusta la ruta de importación según la carpeta de user.py
 
 # Credenciales exactas obtenidas de tu docker-compose
 DATABASE_URL = "postgresql://postgres:postgresql@localhost:5432/mentalink"
@@ -12,15 +15,16 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 def create_test_user():
     db = SessionLocal()
     try:
         email = "cbbe.agustin.pacar.tr@unifranz.edu.bo"
         hashed = pwd_context.hash("12345678")
-        
+
         # Buscar si el usuario ya existe
         existing_user = db.query(User).filter(User.email == email).first()
-        
+
         if existing_user:
             existing_user.is_email_verified = True
             existing_user.is_phone_verified = True
@@ -38,7 +42,7 @@ def create_test_user():
             is_active=True,
             is_email_verified=True,
             phone_number="79717725",
-            is_phone_verified=True
+            is_phone_verified=True,
         )
 
         db.add(new_user)
@@ -51,6 +55,7 @@ def create_test_user():
         print(f"Error al insertar el usuario: {e}")
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     create_test_user()

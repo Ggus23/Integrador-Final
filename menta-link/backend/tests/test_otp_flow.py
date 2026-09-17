@@ -103,9 +103,10 @@ def prueba_token_verificacion_tel_incorrecto(client, sms_codes):
     }
     response_reg = client.post("/api/v1/users/", json=payload)
     assert response_reg.status_code == 400
-    assert "verificación" in response_reg.json()["detail"] or "verificaci" in response_reg.json()[
-        "detail"
-    ].lower()
+    assert (
+        "verificación" in response_reg.json()["detail"]
+        or "verificaci" in response_reg.json()["detail"].lower()
+    )
 
 
 def prueba_telefono_duplicado_rechazado(client, db_session, sms_codes):
