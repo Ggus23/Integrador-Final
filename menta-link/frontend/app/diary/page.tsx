@@ -142,24 +142,36 @@ export default function DiaryPage() {
   }, [filteredEntries]);
 
   const fetchVisualizations = async () => {
-    try {
-      const [words, phrases, analysis] = await Promise.all([
-        apiClient.getWordCloud(),
-        apiClient.getPhraseCloud(),
-        apiClient.getAnalysis(),
-      ]);
-      setWordCloud(words || []);
-      setPhraseCloud(phrases || []);
+    const [words, phrases, analysis] = await Promise.allSettled([
+      apiClient.getWordCloud(),
+      apiClient.getPhraseCloud(),
+      apiClient.getAnalysis(),
+    ]);
+
+    if (words.status === 'fulfilled') {
+      setWordCloud(Array.isArray(words.value) ? words.value : []);
+    } else {
+      console.error('Error fetching word cloud:', words.reason);
+    }
+
+    if (phrases.status === 'fulfilled') {
+      setPhraseCloud(Array.isArray(phrases.value) ? phrases.value : []);
+    } else {
+      console.error('Error fetching phrase cloud:', phrases.reason);
+    }
+
+    if (analysis.status === 'fulfilled') {
+      const a = analysis.value;
       setAnalysisData(
-        analysis && analysis.relevant_phrases
+        a && a.relevant_phrases
           ? {
-              relevant_phrases: analysis.relevant_phrases || [],
-              recurrent_patterns: analysis.recurrent_patterns || [],
+              relevant_phrases: a.relevant_phrases || [],
+              recurrent_patterns: a.recurrent_patterns || [],
             }
           : { relevant_phrases: [], recurrent_patterns: [] }
       );
-    } catch (e) {
-      console.error('Error fetching clouds:', e);
+    } else {
+      console.error('Error fetching analysis:', analysis.reason);
     }
   };
 
