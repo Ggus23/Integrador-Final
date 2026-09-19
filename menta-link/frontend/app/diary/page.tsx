@@ -56,21 +56,6 @@ const EMOTIONS = [
   },
 ];
 
-const getSentimentColor = (sentiment: string) => {
-  const s = sentiment?.toLowerCase() || '';
-  if (s.includes('muy feliz') || s.includes('feliz') || s.includes('motivado')) return '#22C55E'; // Verde (Pos)
-  if (s.includes('neutral') || s.includes('indiferente')) return '#FACC15'; // Amarillo (Neu)
-  if (
-    s.includes('ansioso') ||
-    s.includes('estresado') ||
-    s.includes('preocupado') ||
-    s.includes('frustrado')
-  )
-    return '#F97316'; // Naranja (Ans)
-  if (s.includes('triste') || s.includes('tristeza')) return '#EF4444'; // Rojo (Tris)
-  return 'currentColor';
-};
-
 const PREDEFINED_ACTIVITIES = [
   { id: 'estudio', label: 'Estudio', emoji: '📚' },
   { id: 'gaming', label: 'Gaming', emoji: '🎮' },
@@ -518,7 +503,7 @@ export default function DiaryPage() {
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+              <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2">
                 {/* Frases Relevantes */}
                 <Card className="bg-card/30 border-0 p-8 shadow-xl backdrop-blur-md">
                   <div className="mb-8 flex items-center justify-between">
@@ -564,7 +549,7 @@ export default function DiaryPage() {
                     </div>
                   </div>
 
-                  <div className="flex min-h-[180px] flex-col justify-center">
+                  <div className="flex min-h-[200px] flex-col justify-center">
                     {wordCloud.length > 0 ? (
                       <WordCloud items={wordCloud} />
                     ) : (
@@ -572,61 +557,6 @@ export default function DiaryPage() {
                         Esperando registros...
                       </p>
                     )}
-                  </div>
-                </Card>
-
-                {/* Patrones Recurrentes */}
-                <Card className="bg-card/30 border-0 p-8 shadow-xl backdrop-blur-md">
-                  <div className="mb-8 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Sparkles className="text-primary h-5 w-5" />
-                      <h3 className="text-xs font-black tracking-widest uppercase opacity-60">
-                        Patrones Recurrentes
-                      </h3>
-                    </div>
-                    <div className="bg-primary/10 text-primary rounded-full px-3 py-1 text-[8px] font-black">
-                      PATTERNS
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    {analysisData.recurrent_patterns.map((p, i) => (
-                      <div key={i} className="space-y-2">
-                        <div className="flex justify-between text-[10px] font-black tracking-widest uppercase opacity-80">
-                          <span>"{p.phrase}"</span>
-                          <div
-                            className="h-1.5 w-1.5 rounded-full"
-                            style={{ backgroundColor: getSentimentColor(p.sentiment || '') }}
-                          />
-                        </div>
-                        <div className="bg-muted/30 h-1 w-full overflow-hidden rounded-full">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.min(p.frequency * 20, 100)}%` }}
-                            className="bg-primary h-full rounded-full opacity-60"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 flex justify-center gap-4 opacity-50">
-                    {[
-                      { l: 'Pos', c: '#22C55E' },
-                      { l: 'Neu', c: '#FACC15' },
-                      { l: 'Ans', c: '#F97316' },
-                      { l: 'Tris', c: '#EF4444' },
-                    ].map((leg) => (
-                      <div key={leg.l} className="flex items-center gap-1.5">
-                        <div
-                          className="h-1.5 w-1.5 rounded-full"
-                          style={{ backgroundColor: leg.c }}
-                        />
-                        <span className="text-[8px] font-black tracking-wider uppercase">
-                          {leg.l}
-                        </span>
-                      </div>
-                    ))}
                   </div>
                 </Card>
               </div>
