@@ -136,7 +136,7 @@ def get_detailed_analysis(
     entries = (
         db.query(models.EmotionalDiary)
         .filter(models.EmotionalDiary.user_id == current_user.id)
-        .order_by(models.EmotionalDiary.created_at.desc())
+        .order_by(models.EmotionalDiary.id.desc())
         .limit(1)
         .all()
     )

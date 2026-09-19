@@ -78,7 +78,7 @@ def read_my_diary_history(
     return (
         db.query(models.EmotionalDiary)
         .filter(models.EmotionalDiary.user_id == current_user.id)
-        .order_by(models.EmotionalDiary.date.desc())
+        .order_by(models.EmotionalDiary.date.desc(), models.EmotionalDiary.id.desc())
         .offset(skip)
         .limit(limit)
         .all()
@@ -100,7 +100,9 @@ def read_diary_today(
             models.EmotionalDiary.user_id == current_user.id,
             models.EmotionalDiary.date == date.today(),
         )
-        .order_by(models.EmotionalDiary.created_at.asc())
+        .order_by(
+            models.EmotionalDiary.created_at.asc(), models.EmotionalDiary.id.asc()
+        )
         .all()
     )
 
