@@ -3,10 +3,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Importa tu modelo y enum directamente desde tu proyecto FastAPI
-from app.models.user import (
+from app.models.user import (  # Ajusta la ruta de importación según la carpeta de user.py
     User,
     UserRole,
-)  # Ajusta la ruta de importación según la carpeta de user.py
+)
 
 # Credenciales exactas obtenidas de tu docker-compose
 DATABASE_URL = "postgresql://postgres:postgresql@localhost:5432/mentalink"
