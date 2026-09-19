@@ -114,6 +114,7 @@ class APIClient {
         headers: this.headers(isFormData),
         body: requestBody,
         redirect: 'manual',
+        cache: 'no-store',
       });
 
       if (
