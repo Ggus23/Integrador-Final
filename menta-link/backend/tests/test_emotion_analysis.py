@@ -1,5 +1,8 @@
 from fastapi.testclient import TestClient
 
+from app.core.security import get_password_hash
+from app.models.user import User, UserRole
+
 
 def prueba_consolidacion_historial(client: TestClient):
     response = client.get("/api/v1/students/me/history")
@@ -57,6 +60,79 @@ def prueba_visualizations_analysis_endpoint_auth(client: TestClient):
 def prueba_visualizations_phrasecloud_endpoint_auth(client: TestClient):
     response = client.get("/api/v1/visualizations/phrasecloud")
     assert response.status_code == 401
+
+
+def _login(client, email, password):
+    r = client.post(
+        "/api/v1/auth/login", data={"username": email, "password": password}
+    )
+    assert r.status_code == 200
+    return {"Authorization": f"Bearer {r.json()['access_token']}"}
+
+
+def _crear_entrada(client, headers, experience):
+    payload = {
+        "experience": experience,
+        "activities": "estudio",
+        "emotion": "Neutral",
+        "emotion_color": "Amarillo",
+        "wellbeing_level": 3,
+    }
+    r = client.post("/api/v1/diary/", json=payload, headers=headers)
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def prueba_visualizaciones_se_actualizan_por_insercion(client, db_session):
+    """
+    El analisis y la nube deben reflejar cada nueva entrada al diario, incluso
+    cuando varias entradas comparten el mismo timestamp de creacion.
+    """
+    email = "refresh@unifranz.edu.bo"
+    user = User(
+        email=email,
+        hashed_password=get_password_hash("password123"),
+        full_name="Refresh Test",
+        is_active=True,
+        role=UserRole.STUDENT,
+    )
+    db_session.add(user)
+    db_session.commit()
+    headers = _login(client, email, "password123")
+
+    _crear_entrada(
+        client,
+        headers,
+        "PASÓ HOY:\nEstaba triste por el partido de cálculo, perdimos.\n\nAPRENDIZAJES:\nDebo ser más constante",
+    )
+
+    cloud1 = client.get("/api/v1/visualizations/wordcloud", headers=headers).json()
+    words1 = {w["word"] for w in cloud1}
+    assert "partido" in words1, f"primera insercion no visible en nube: {words1}"
+
+    _crear_entrada(
+        client,
+        headers,
+        "PASÓ HOY:\nFui a la montaña en bicicleta y me sentí feliz con el paisaje.\n\nAPRENDIZAJES:\nMoverme me da energía",
+    )
+
+    # La nube acumula el historial completo y cambia con la nueva entrada.
+    cloud2 = client.get("/api/v1/visualizations/wordcloud", headers=headers).json()
+    words2 = {w["word"] for w in cloud2}
+    assert "bicicleta" in words2, f"segunda insercion no visible en nube: {words2}"
+    assert "partido" in words2, f"primera insercion se perdio en nube: {words2}"
+    assert words2 != words1, f"la nube no cambio tras insertar: {words1}"
+
+    # /analysis analiza SIEMPRE la entrada mas reciente (por id, no por timestamp).
+    analysis2 = client.get("/api/v1/visualizations/analysis", headers=headers).json()
+    profile2 = (
+        " ".join(analysis2["key_concepts"])
+        + " "
+        + " ".join(p["phrase"] for p in analysis2["relevant_phrases"])
+    )
+    assert (
+        "bicicleta" in profile2
+    ), f"la ultima entrada no llego a /analysis: {analysis2}"
 
 
 def prueba_deteccion_emociones_positivas():
