@@ -69,10 +69,12 @@ def create_admin():
 
                 # Crear usuario
                 conn.execute(
-                    text("""
+                    text(
+                        """
                         INSERT INTO users (full_name, email, hashed_password, role, is_active, is_email_verified, must_change_password)
                         VALUES (:full_name, :email, :hashed_password, :role, :is_active, :is_email_verified, :must_change_password)
-                    """),
+                    """
+                    ),
                     {
                         "full_name": full_name,
                         "email": email,
