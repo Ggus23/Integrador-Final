@@ -11,6 +11,7 @@ from .consent import Consent  # noqa: F401
 from .emotion import Emotion  # noqa: F401
 from .emotional_checkin import EmotionalCheckin  # noqa: F401
 from .emotional_diary import EmotionalDiary  # noqa: F401
+from .phone_otp import PhoneOTPCode  # noqa: F401
 from .risk_summary import RiskSummary  # noqa: F401
 from .subject import Subject  # noqa: F401
 from .tokens import EmailVerificationToken, PasswordResetToken  # noqa: F401

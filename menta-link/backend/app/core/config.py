@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres"
+    POSTGRES_PASSWORD: str = "postgresql"
     POSTGRES_DB: str = "mentalink"
 
     # Campo para capturar la variable inyectada por Railway
@@ -88,6 +88,15 @@ class Settings(BaseSettings):
     ML_MODEL_PATH: str = "app/models/risk_model.pkl"
     GEMINI_API_KEY: str = ""
     HF_TOKEN: str = ""
+
+    # ----------------------------------------------------------------
+    # SMS / OTP (verificación por celular)
+    # ----------------------------------------------------------------
+    SMS_ENABLED: bool = False
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_FROM_NUMBER: str = ""
+    OTP_EXPIRE_MINUTES: int = 10
 
 
 settings = Settings()

@@ -71,6 +71,12 @@ def read_students(
                 "last_assessment_date": (
                     last_assessment.created_at if last_assessment else None
                 ),
+                "phone_number": (
+                    student.phone_number
+                    if current_user.role
+                    in [models.user.UserRole.PSYCHOLOGIST, models.user.UserRole.ADMIN]
+                    else None
+                ),
             }
         )
 
@@ -141,6 +147,12 @@ def read_student_detail(
         "email": student.email,
         "full_name": student.full_name,
         "role": student.role,
+        "phone_number": (
+            student.phone_number
+            if current_user.role
+            in [models.user.UserRole.PSYCHOLOGIST, models.user.UserRole.ADMIN]
+            else None
+        ),
         "risk_level": (
             risk_summary.current_risk_level if risk_summary else RiskLevel.LOW.value
         ),

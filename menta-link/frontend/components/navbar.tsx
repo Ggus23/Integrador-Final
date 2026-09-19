@@ -6,12 +6,20 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Menu, X, LogOut } from 'lucide-react';
 import { useSidebar } from '@/context/sidebar-context';
+import { cn } from '@/lib/utils';
 
 export function Navbar() {
   const { user, logout } = useAuth();
   const { isOpen, toggle } = useSidebar();
 
   if (!user) return null;
+
+  const initials = (user.full_name || '?')
+    .split(' ')
+    .map((part) => part.charAt(0))
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
 
   return (
     <nav className="border-border/50 bg-background/80 sticky top-0 z-50 border-b backdrop-blur-md transition-all">
@@ -41,11 +49,38 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Lado Derecho: Usuario + Botón de Salida */}
+        {/* Lado Derecho: Usuario + Avatar + Botón de Salida */}
         <div className="flex items-center gap-2 sm:gap-4">
-          <span className="text-muted-foreground hidden max-w-[120px] truncate text-sm sm:inline-block sm:max-w-[200px] md:max-w-none">
-            {user.full_name}
-          </span>
+          <Link
+            href="/profile"
+            className="hover:bg-secondary/70 flex items-center gap-2 rounded-xl px-1.5 py-1.5 transition-all sm:gap-3 sm:px-2"
+            title="Ver Mi Perfil"
+          >
+            <span className="text-muted-foreground hidden max-w-[120px] truncate text-sm sm:inline-block sm:max-w-[160px] md:max-w-none">
+              {user.full_name}
+            </span>
+            <span className="relative inline-flex">
+              <span className="bg-primary/10 text-primary relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl font-black uppercase shadow-sm">
+                {user.avatar_url ? (
+                  <Image
+                    src={user.avatar_url}
+                    alt={`Avatar de ${user.full_name}`}
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
+                ) : (
+                  initials
+                )}
+              </span>
+              <span
+                className={cn(
+                  'ring-background absolute -right-1 -bottom-1 h-3 w-3 rounded-full ring-2',
+                  user.is_phone_verified ? 'bg-green-500' : 'bg-amber-400'
+                )}
+              />
+            </span>
+          </Link>
 
           <Button
             onClick={logout}

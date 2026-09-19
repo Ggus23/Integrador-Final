@@ -13,11 +13,8 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  {
-    label: 'Inicio',
-    href: '/dashboard',
-    roles: ['student', 'psychologist', 'tutor', 'admin'],
-  },
+  { label: 'Inicio', href: '/dashboard', roles: ['student', 'psychologist', 'tutor', 'admin'] },
+  { label: 'Mi Perfil', href: '/profile', roles: ['student', 'psychologist', 'tutor', 'admin'] },
   { label: 'Evaluaciones', href: '/assessments', roles: ['student'] },
   { label: 'Mi Bienestar', href: '/checkins', roles: ['student'] },
   { label: 'Diario Emocional', href: '/diary', roles: ['student'] },

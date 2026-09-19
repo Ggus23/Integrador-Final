@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from app.models.user import User
 
 
-def prueba_registro_estudiante_valida_datos(client: TestClient):
+def prueba_registro_estudiante_valida_datos(client: TestClient, sms_codes):
     # El registro de estudiante requiere correo institucional @unifranz.edu.bo
     payload_invalido = {
         "full_name": "Estudiante Inválido",
@@ -14,11 +14,21 @@ def prueba_registro_estudiante_valida_datos(client: TestClient):
     response = client.post("/api/v1/users/", json=payload_invalido)
     assert response.status_code in [401, 400, 409, 422]
 
+    phone = "73334455"
+    client.post("/api/v1/auth/request-otp", json={"phone_number": phone})
+    code = sms_codes[phone]
+    token = client.post(
+        "/api/v1/auth/verify-otp",
+        json={"phone_number": phone, "code": code},
+    ).json()["phone_verified_token"]
+
     payload_valido = {
         "full_name": "Estudiante Válido",
         "email": "estudiante@unifranz.edu.bo",
         "password": "Password123",
         "role": "student",
+        "phone_number": phone,
+        "phone_verified_token": token,
     }
     response_ok = client.post("/api/v1/users/", json=payload_valido)
     assert response_ok.status_code == 201

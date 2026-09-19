@@ -43,10 +43,14 @@ def client(db_session):
         finally:
             pass
 
+    from app.core.limiter import limiter
+
+    limiter.enabled = False
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as c:
         yield c
     app.dependency_overrides = {}
+    limiter.enabled = True
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -61,6 +65,27 @@ def mock_email():
     auth_service.mail = MockEmailService()
     yield
     auth_service.mail = original_service
+
+
+@pytest.fixture(scope="session")
+def sms_codes():
+    """
+    Recording SMS service: captura los códigos OTP generados por teléfono
+    para poder testear el flujo completo sin enviar SMS reales.
+    """
+    from app.services.auth_service import auth_service
+
+    store: dict[str, str] = {}
+
+    class RecordingSmsService:
+        def send_otp(self, phone_number: str, code: str) -> bool:
+            store[phone_number] = code
+            return True
+
+    original_service = auth_service.sms
+    auth_service.sms = RecordingSmsService()
+    yield store
+    auth_service.sms = original_service
 
 
 @pytest.fixture(scope="session", autouse=True)

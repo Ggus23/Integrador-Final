@@ -36,6 +36,11 @@ class User(Base):
     must_change_password = Column(Boolean(), default=False)
     expo_push_token = Column(String, nullable=True)
 
+    # Phone verification (SMS / OTP)
+    phone_number = Column(String, index=True, nullable=True)
+    is_phone_verified = Column(Boolean(), default=False)
+    avatar_url = Column(String, nullable=True)
+
     # Relationships with Full Cascade Delete
     # Academic Note: 'cascade="all, delete-orphan"' ensures that when a User is deleted,
     # all related data is purged as well. This is crucial for privacy and DB integrity.

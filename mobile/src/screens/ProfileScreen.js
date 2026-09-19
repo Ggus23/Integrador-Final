@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
-import { ShieldCheck, Flame, BookText, LogOut } from 'lucide-react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet, Image } from 'react-native';
+import { ShieldCheck, Flame, BookText, LogOut, Phone } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { styles } from '../theme/styles';
 import { api } from '../services/api';
@@ -54,11 +54,25 @@ export function ProfileScreen({ onLogout }) {
 
       {/* Avatar Card */}
       <View style={[styles.profileCard, { backgroundColor: theme.surface }]}>
-        <View style={[styles.profileAvatarPlaceholder, { backgroundColor: theme.accent }]}>
-          <Text style={[styles.avatarInitials, { color: COLORS.background }]}>{user?.full_name?.charAt(0) || 'U'}</Text>
+        <View style={[styles.profileAvatarPlaceholder, { backgroundColor: theme.accent, overflow: 'hidden' }]}>
+          {user?.avatar_url ? (
+            <Image source={{ uri: user.avatar_url }} style={{ width: '100%', height: '100%' }} />
+          ) : (
+            <Text style={[styles.avatarInitials, { color: COLORS.background }]}>{user?.full_name?.charAt(0) || 'U'}</Text>
+          )}
         </View>
         <Text style={styles.profileName}>{user?.full_name || 'Estudiante'}</Text>
         <Text style={styles.profileEmail}>{user?.email || 'email@uab.edu.bo'}</Text>
+        
+        {user?.phone_number ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+            <Phone color="rgba(255,255,255,0.4)" size={12} />
+            <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, fontFamily: 'Manrope_600SemiBold' }}>
+              {user.phone_number}
+            </Text>
+          </View>
+        ) : null}
+
         <View style={[styles.roleBadge, { backgroundColor: theme.accent + '15' }]}>
           <ShieldCheck color={theme.accent} size={14} />
           <Text style={[styles.roleText, { color: theme.accent }]}>{user?.role?.toUpperCase() || 'ESTUDIANTE'}</Text>

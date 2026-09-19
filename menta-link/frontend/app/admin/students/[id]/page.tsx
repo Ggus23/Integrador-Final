@@ -47,6 +47,7 @@ interface StudentDetails {
   full_name: string;
   email: string;
   role: string;
+  phone_number?: string;
   risk_summary: {
     current_risk_level: string;
     prediction_confidence?: number;
@@ -254,6 +255,11 @@ export default function StudentDetailPage() {
             </Button>
             <h1 className="text-foreground font-serif text-4xl font-bold">{student.full_name}</h1>
             <p className="text-muted-foreground text-lg">{student.email}</p>
+            {student.phone_number && (
+              <p className="text-muted-foreground text-md mt-1 flex items-center gap-1">
+                📞 {student.phone_number}
+              </p>
+            )}
           </div>
 
           <div
