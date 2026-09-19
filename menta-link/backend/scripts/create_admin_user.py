@@ -69,10 +69,12 @@ def create_admin():
 
                 # Crear usuario
                 conn.execute(
-                    text("""
+                    text(
+                        """
                         INSERT INTO users (full_name, email, hashed_password, role, is_active, is_email_verified, must_change_password)
                         VALUES (:full_name, :email, :hashed_password, :role, :is_active, :is_email_verified, :must_change_password)
-                    """),
+                    """
+                    ),
                     {
                         "full_name": full_name,
                         "email": email,
@@ -92,8 +94,8 @@ def create_admin():
                 print(f"👑 Rol:         ADMIN")
                 print("=" * 50)
                 print("\n✨ Datos de Login:")
-                print(f"   Email: admin@unifranz.edu.bo")
-                print(f"   Password: Admin123!")
+                print("   Email: admin@unifranz.edu.bo")
+                print("   Password: Admin123!")
                 print("\n🎯 El admin puede:")
                 print("   ✓ Ver dashboard con gráfico de regresión lineal")
                 print("   ✓ Gestionar usuarios")
