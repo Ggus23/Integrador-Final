@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     APP_ENV: str = "development"
     FRONTEND_BASE_URL: str | None = None
+    ALEMBIC_RUNNING: bool = False
 
     SECRET_KEY: str = Field(
         default="development-only-secret-key-change-in-production",
@@ -130,7 +131,7 @@ class Settings(BaseSettings):
         if self.APP_ENV.lower() == "production":
             if self.SECRET_KEY == "development-only-secret-key-change-in-production":
                 raise ValueError("SECRET_KEY must be configured in production")
-            if not self.FRONTEND_BASE_URL:
+            if not self.FRONTEND_BASE_URL and not self.ALEMBIC_RUNNING:
                 raise ValueError("FRONTEND_BASE_URL must be configured in production")
         return self
 
