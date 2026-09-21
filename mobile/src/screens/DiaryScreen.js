@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { PenTool, Lightbulb, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react-native';
+import { PenTool, Lightbulb, CheckCircle2, ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { styles } from '../theme/styles';
 import { api } from '../services/api';
@@ -21,6 +21,7 @@ export function DiaryScreen() {
   const [selectedActivities, setSelectedActivities] = useState([]);
   const [selectedEmotionIdx, setSelectedEmotionIdx] = useState(2);
   const [submitting, setSubmitting] = useState(false);
+  const [experienceError, setExperienceError] = useState(null);
   const [showReframe, setShowReframe] = useState(false);
   const [savedEmotion, setSavedEmotion] = useState(null);
   const [showTimeCapsule, setShowTimeCapsule] = useState(true);
@@ -59,9 +60,11 @@ export function DiaryScreen() {
   };
 
   const handleSave = async () => {
-    if (!experience) {
-      setStep(2); // Devolver al paso 2 si no ha escrito nada
-      return Alert.alert("¡Espera!", "Escribe qué sucedió hoy antes de guardar.");
+    if (!experience.trim()) {
+      setStep(2);
+      setExperienceError('La experiencia es obligatoria para guardar tu diario');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      return;
     }
     setSubmitting(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -87,6 +90,11 @@ export function DiaryScreen() {
 
   // Funciones de navegación de pasos
   const nextStep = () => {
+    if (step === 2 && !experience.trim()) {
+      setExperienceError('Escribe qué sucedió hoy antes de continuar');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      return;
+    }
     if (step < 4) {
       setStep(prev => prev + 1);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -220,11 +228,17 @@ export function DiaryScreen() {
                 placeholder={activePrompt} 
                 placeholderTextColor="#556" 
                 value={experience} 
-                onChangeText={setExperience} 
+                onChangeText={(text) => { setExperience(text); if (experienceError) setExperienceError(null); }} 
                 onSubmitEditing={handleExperienceSubmit}
                 returnKeyType="next"
-                style={styles.textInput} 
+                style={[styles.textInput, experienceError && diaryStyles.inputError]} 
               />
+              {experienceError && (
+                <View style={diaryStyles.errorRow}>
+                  <AlertCircle size={12} color="#f87171" />
+                  <Text style={diaryStyles.errorText}>{experienceError}</Text>
+                </View>
+              )}
             </View>
           </View>
         )}
@@ -392,6 +406,21 @@ const diaryStyles = StyleSheet.create({
   },
   inputSection: {
     marginVertical: 4,
+  },
+  inputError: {
+    borderWidth: 1,
+    borderColor: 'rgba(248, 113, 113, 0.6)',
+  },
+  errorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 8,
+  },
+  errorText: {
+    color: '#f87171',
+    fontSize: 11,
+    fontFamily: 'Manrope_600SemiBold',
   },
   emotionFeedback: {
     flexDirection: 'row',

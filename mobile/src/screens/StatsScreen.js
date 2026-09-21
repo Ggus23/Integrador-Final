@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
-import { Brain, Sparkles, Info, HelpCircle } from 'lucide-react-native';
+import { Brain, Sparkles, Info, HelpCircle, CalendarDays } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { styles } from '../theme/styles';
 import { api } from '../services/api';
@@ -10,25 +10,55 @@ import { EmotionalParticles } from '../components/EmotionalParticles';
 
 const theme = EMOTION_THEMES['Neutral'];
 
+const formatDayLabel = (dateStr) => {
+  const d = new Date(`${dateStr}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }).replace('.', '');
+};
+
+const cloudFontSize = (w) => {
+  if (w.is_dominant === true) return 36;
+  const weight = typeof w.weight === 'number' ? Math.max(0, Math.min(100, w.weight)) : 50;
+  return 13 + (weight / 100) * 17;
+};
+
 export function StatsScreen() {
   const [wordCloud, setWordCloud] = useState([]);
   const [phraseCloud, setPhraseCloud] = useState([]);
   const [loading, setLoading] = useState(true);
   const [phraseLimit, setPhraseLimit] = useState(5);
   const [showHelp, setShowHelp] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [dayOptions, setDayOptions] = useState([]);
 
-  useEffect(() => { load(); }, []);
-  const load = async () => {
+  useEffect(() => {
+    load();
+    api.getDiaryHistory(100)
+      .then((history) => {
+        const dates = Array.isArray(history)
+          ? [...new Set(history.map((h) => h.date).filter(Boolean))].sort().reverse()
+          : [];
+        setDayOptions(dates);
+      })
+      .catch((e) => console.error(e));
+  }, []);
+
+  const load = async (date) => {
     setLoading(true);
     try {
       const [words, phrases] = await Promise.all([
-        api.getWordCloud(),
-        api.getPhraseCloud()
+        api.getWordCloud(date),
+        api.getPhraseCloud(date)
       ]);
       setWordCloud(words);
       setPhraseCloud(phrases);
     } catch (e) { console.error(e); }
     setLoading(false);
+  };
+
+  const handleSelectDate = (date) => {
+    setSelectedDate(date);
+    load(date);
   };
 
   const getSentimentColor = (sentiment) => {
@@ -104,6 +134,38 @@ export function StatsScreen() {
           </TouchableOpacity>
         )}
 
+        {/* ── SELECTOR POR DÍA ── */}
+        <View style={mStyles.daySelector}>
+          <View style={mStyles.daySelectorHeader}>
+            <CalendarDays size={12} color={theme.accent} />
+            <Text style={[mStyles.daySelectorLabel, { color: theme.accent }]}>NUBE POR DÍA</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={mStyles.dayChips}>
+            <TouchableOpacity
+              onPress={() => handleSelectDate(null)}
+              style={[mStyles.dayChip, selectedDate === null && { backgroundColor: theme.accent }]}
+            >
+              <Text style={[mStyles.dayChipText, selectedDate === null && { color: COLORS.background }]}>
+                Todo el historial
+              </Text>
+            </TouchableOpacity>
+            {dayOptions.map((d) => {
+              const isActive = selectedDate === d;
+              return (
+                <TouchableOpacity
+                  key={d}
+                  onPress={() => handleSelectDate(d)}
+                  style={[mStyles.dayChip, isActive && { backgroundColor: theme.accent }]}
+                >
+                  <Text style={[mStyles.dayChipText, isActive && { color: COLORS.background }]}>
+                    {formatDayLabel(d)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+
         {loading ? (
           <View style={styles.loadingStats}>
             <ActivityIndicator color={theme.accent} size="large" />
@@ -122,23 +184,32 @@ export function StatsScreen() {
               </View>
               
               <Text style={mStyles.sectionDesc}>
-                Las palabras que más usas en tu diario. El tamaño indica frecuencia y el color refleja la emoción asociada.
+                Las palabras que más usas. La más grande y destacada resume el tema principal de tu selección; el color refleja la emoción asociada.
               </Text>
 
               <View style={styles.cloudGrid}>
-                {wordCloud.length > 0 ? wordCloud.slice(0, 30).map((w, i) => (
-                  <Text key={i} style={[
-                    styles.cloudWord, 
-                    { 
-                      fontSize: Math.min(12 + w.frequency * 5, 26), 
-                      fontFamily: w.frequency > 2 ? 'NotoSerif_700Bold' : 'NotoSerif_400Regular_Italic',
-                      opacity: Math.min(0.4 + w.frequency * 0.2, 1),
-                      color: getSentimentColor(w.sentiment)
-                    }
-                  ]}>
-                    {w.word}
-                  </Text>
-                )) : (
+                {wordCloud.length > 0 ? wordCloud.slice(0, 30).map((w, i) => {
+                  const isDominant = w.is_dominant === true;
+                  const weight = typeof w.weight === 'number' ? Math.max(0, Math.min(100, w.weight)) : 50;
+                  return (
+                    <Text key={i} style={[
+                      styles.cloudWord,
+                      {
+                        fontSize: cloudFontSize(w),
+                        fontFamily: isDominant || weight >= 60 ? 'NotoSerif_700Bold' : 'NotoSerif_400Regular_Italic',
+                        opacity: isDominant ? 1 : Math.min(0.4 + weight * 0.005, 0.85),
+                        color: isDominant ? COLORS.primary : getSentimentColor(w.sentiment),
+                      },
+                      isDominant && {
+                        textShadowColor: 'rgba(224, 123, 95, 0.45)',
+                        textShadowOffset: { width: 0, height: 0 },
+                        textShadowRadius: 16,
+                      },
+                    ]}>
+                      {w.word}
+                    </Text>
+                  );
+                }) : (
                   <View style={mStyles.emptyState}>
                     <Text style={mStyles.emptyEmoji}>🧠</Text>
                     <Text style={mStyles.emptyTitle}>Aún no hay conceptos</Text>
@@ -393,5 +464,40 @@ const mStyles = StyleSheet.create({
     fontFamily: 'Manrope_400Regular',
     lineHeight: 17,
     fontStyle: 'italic',
+  },
+
+  // Day selector
+  daySelector: {
+    marginBottom: 20,
+  },
+  daySelectorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginBottom: 10,
+  },
+  daySelectorLabel: {
+    fontSize: 9,
+    fontFamily: 'Manrope_800ExtraBold',
+    letterSpacing: 2,
+  },
+  dayChips: {
+    gap: 8,
+    paddingHorizontal: 2,
+  },
+  dayChip: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  dayChipText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 11,
+    fontFamily: 'Manrope_800ExtraBold',
+    letterSpacing: 0.5,
   },
 });

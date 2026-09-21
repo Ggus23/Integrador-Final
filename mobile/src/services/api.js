@@ -63,11 +63,11 @@ export const api = {
     } catch (error) { throw error; }
   },
 
-  async getDiaryHistory() {
+  async getDiaryHistory(limit = 10) {
     const token = await this.getToken();
     if (!token) return [];
     try {
-      const response = await fetch(`${API_V1}/diary/me?limit=10`, {
+      const response = await fetch(`${API_V1}/diary/me?limit=${limit}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -75,11 +75,12 @@ export const api = {
     } catch (error) { return []; }
   },
 
-  async getWordCloud() {
+  async getWordCloud(date) {
     const token = await this.getToken();
     if (!token) return [];
     try {
-      const response = await fetch(`${API_V1}/visualizations/wordcloud`, {
+      const query = date ? `?date=${encodeURIComponent(date)}` : '';
+      const response = await fetch(`${API_V1}/visualizations/wordcloud${query}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -87,11 +88,12 @@ export const api = {
     } catch (error) { return []; }
   },
 
-  async getPhraseCloud() {
+  async getPhraseCloud(date) {
     const token = await this.getToken();
     if (!token) return [];
     try {
-      const response = await fetch(`${API_V1}/visualizations/phrasecloud`, {
+      const query = date ? `?date=${encodeURIComponent(date)}` : '';
+      const response = await fetch(`${API_V1}/visualizations/phrasecloud${query}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();

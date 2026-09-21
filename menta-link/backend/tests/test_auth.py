@@ -11,6 +11,7 @@ def prueba_inicio_sesion_token_acceso(client, db_session):
         hashed_password=get_password_hash(password),
         full_name="Usuario Prueba",
         is_active=True,
+        is_email_verified=True,
     )
     db_session.add(user)
     db_session.commit()
@@ -21,6 +22,25 @@ def prueba_inicio_sesion_token_acceso(client, db_session):
     assert response.status_code == 200
     tokens = response.json()
     assert "access_token" in tokens
+
+
+def prueba_login_bloqueado_email_no_verificado(client, db_session):
+    email = "sinverificar@gmail.com"
+    user = User(
+        email=email,
+        hashed_password=get_password_hash("password123"),
+        full_name="Sin Verificar",
+        is_active=True,
+        is_email_verified=False,
+    )
+    db_session.add(user)
+    db_session.commit()
+
+    response = client.post(
+        "/api/v1/auth/login", data={"username": email, "password": "password123"}
+    )
+    assert response.status_code == 400
+    assert "verificar" in response.json()["detail"].lower()
 
 
 def prueba_inicio_sesion_contrasena_incorrecta(client, db_session):

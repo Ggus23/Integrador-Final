@@ -1,7 +1,8 @@
 from collections import Counter
-from typing import Any
+from datetime import date
+from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app import models
@@ -13,73 +14,352 @@ from app.ml.emotion.regex_predictor import (
 
 router = APIRouter()
 
+# Stopwords estrictas para la NUBE DE PALABRAS: artículos, preposiciones,
+# conjunciones, pronombres, verbos auxiliares, adverbios vacíos y encabezados
+# estructurales del diario. Mantener aquí (y no solo en STOPWORDS_ANALISIS)
+# evita que conectores como "es", "se", "sino", "vi", "todo", "cuando" o
+# "veces" contaminen la nube.
+WORDCLOUD_STOPWORDS = {
+    # Artículos
+    "el",
+    "la",
+    "los",
+    "las",
+    "lo",
+    "un",
+    "una",
+    "unos",
+    "unas",
+    "al",
+    "del",
+    # Preposiciones
+    "a",
+    "ante",
+    "bajo",
+    "cabe",
+    "con",
+    "contra",
+    "de",
+    "desde",
+    "durante",
+    "en",
+    "entre",
+    "hacia",
+    "hasta",
+    "mediante",
+    "para",
+    "por",
+    "según",
+    "sin",
+    "so",
+    "sobre",
+    "tras",
+    # Conjunciones
+    "e",
+    "o",
+    "u",
+    "y",
+    "ni",
+    "que",
+    "aunque",
+    "como",
+    "mas",
+    "pero",
+    "porque",
+    "pues",
+    "sino",
+    "mientras",
+    "cuando",
+    "además",
+    "incluso",
+    "también",
+    "tambien",
+    "tampoco",
+    "entonces",
+    "luego",
+    # Pronombres y determinantes
+    "yo",
+    "tú",
+    "usted",
+    "ustedes",
+    "él",
+    "ella",
+    "ello",
+    "ellos",
+    "ellas",
+    "nosotros",
+    "nosotras",
+    "vosotros",
+    "vosotras",
+    "me",
+    "te",
+    "se",
+    "nos",
+    "os",
+    "le",
+    "les",
+    "mi",
+    "mis",
+    "ti",
+    "tu",
+    "tus",
+    "su",
+    "sus",
+    "nuestro",
+    "nuestra",
+    "nuestros",
+    "nuestras",
+    "vuestro",
+    "vuestra",
+    "algo",
+    "nada",
+    "alguien",
+    "nadie",
+    "este",
+    "esta",
+    "estos",
+    "estas",
+    "ese",
+    "esa",
+    "esos",
+    "esas",
+    "aquel",
+    "aquella",
+    "aquellos",
+    "aquellas",
+    "esto",
+    "eso",
+    "aquello",
+    "cada",
+    "otro",
+    "otra",
+    "otros",
+    "otras",
+    "mismo",
+    "misma",
+    "mismos",
+    "mismas",
+    "cual",
+    "cuales",
+    "cualquier",
+    "quien",
+    "quienes",
+    "cuyo",
+    "cuya",
+    # Verbos auxiliares / cópula
+    "ser",
+    "sido",
+    "siendo",
+    "es",
+    "soy",
+    "eres",
+    "somos",
+    "sois",
+    "son",
+    "era",
+    "eras",
+    "éramos",
+    "eran",
+    "fue",
+    "fui",
+    "fueron",
+    "fuera",
+    "será",
+    "estar",
+    "estando",
+    "está",
+    "estás",
+    "estoy",
+    "estamos",
+    "están",
+    "estaba",
+    "estabas",
+    "estábamos",
+    "estaban",
+    "estuve",
+    "estuviste",
+    "estuvo",
+    "estuvimos",
+    "estiveron",
+    "estive",
+    "ha",
+    "has",
+    "hemos",
+    "han",
+    "había",
+    "hubo",
+    "hay",
+    "he",
+    "haber",
+    "habido",
+    # Verbos impersonales/frecuentes sin valor como palabra clave
+    "tengo",
+    "tiene",
+    "tienen",
+    "tenía",
+    "tenia",
+    "tuve",
+    "tuvo",
+    "paso",
+    "pasa",
+    "pasó",
+    "pasado",
+    "vi",
+    "vio",
+    "veo",
+    "ver",
+    "saber",
+    "sabía",
+    "quiero",
+    "quiere",
+    "puedo",
+    "puede",
+    "hace",
+    "hacer",
+    "hice",
+    "debo",
+    "debemos",
+    "hoy",
+    "ayer",
+    "mañana",
+    "día",
+    "dia",
+    "días",
+    "dias",
+    "ahora",
+    "después",
+    "despues",
+    "antes",
+    "siempre",
+    "nunca",
+    "jamás",
+    "casi",
+    # Adverbios / intensificadores
+    "muy",
+    "mucho",
+    "mucha",
+    "muchos",
+    "muchas",
+    "poco",
+    "poca",
+    "pocos",
+    "pocas",
+    "más",
+    "mas",
+    "menos",
+    "tan",
+    "tanto",
+    "tanta",
+    "tantos",
+    "tantas",
+    "bastante",
+    "demasiado",
+    "también",
+    "tambien",
+    "si",
+    "sí",
+    "así",
+    "asi",
+    "ya",
+    "solo",
+    "sola",
+    "sólo",
+    "últimamente",
+    "ultimamente",
+    # Cuantificadores vacíos
+    "todo",
+    "toda",
+    "todos",
+    "todas",
+    "cada",
+    "veces",
+    "vez",
+    "cosas",
+    "cosa",
+    # Encabezados estructurales del diario
+    "aprendizajes",
+    "aprendizaje",
+    "aprendí",
+    "aprendi",
+    # Palabras solicitadas explícitamente (seguridad ante variantes)
+    "es",
+    "se",
+    "sino",
+    "vi",
+    "todo",
+    "cuando",
+    "veces",
+}
+
+
+def _collect_entries_text(entries: List[models.EmotionalDiary]) -> str:
+    """
+    Concatenar los textos (experience) de un grupo de entradas y limpiar los
+    encabezados estructurales que el frontend inyecta.
+    """
+    text = " ".join([e.experience for e in entries if e.experience])
+    text = text.replace("PASÓ HOY:", "").replace("APRENDIZAJES:", "")
+    return text
+
+
+def _filter_keyword_tokens(tokens: List[str]) -> List[str]:
+    """Aplicar filtrado estricto de stopwords y tokens sin valor para la nube."""
+    stopwords = WORDCLOUD_STOPWORDS | STOPWORDS_ANALISIS
+    return [t for t in tokens if t not in stopwords and len(t) > 2 and t.isalpha()]
+
 
 @router.get("/wordcloud")
 def get_word_cloud(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_current_user),
+    date: Optional[date] = Query(
+        None, description="Filtrar y agrupar por día (formato YYYY-MM-DD)."
+    ),
 ) -> Any:
     """
-    Generar nube de palabras a partir del historial de diarios con sentimiento.
-    """
-    entries = (
-        db.query(models.EmotionalDiary)
-        .filter(models.EmotionalDiary.user_id == current_user.id)
-        .all()
-    )
+    Generar nube de palabras con agrupación diaria.
 
-    text = " ".join([e.experience for e in entries if e.experience])
+    Si se especifica ``date`` (YYYY-MM-DD), se concatenan TODAS las entradas de
+    ese día antes de contar frecuencias. Sin ``date``, se usa el historial
+    completo (comportamiento acumulativo de compatibilidad).
+
+    Retorna un arreglo estructurado ``[{word, frequency, weight, is_dominant,
+    sentiment}]`` donde ``weight`` es el peso normalizado (0-100) de cada
+    palabra clave y ``is_dominant`` marca la palabra clave dominante del día.
+    """
+    query = db.query(models.EmotionalDiary).filter(
+        models.EmotionalDiary.user_id == current_user.id
+    )
+    if date:
+        query = query.filter(models.EmotionalDiary.date == date)
+    entries = query.all()
+
+    text = _collect_entries_text(entries)
     if not text:
         return []
-
-    # Limpiar encabezados estructurales del diario antes del análisis
-    text = text.replace("PASÓ HOY:", "").replace("APRENDIZAJES:", "")
 
     regex_analyzer = get_regex_emotion_analyzer()
     tokens = regex_analyzer.clean_and_tokenize(text)
 
-    # Filtrar palabras que son solo conectores en la NUBE DE PALABRAS (pero que se mantienen en frases)
-    conectores = {
-        "pero",
-        "muy",
-        "tan",
-        "más",
-        "mas",
-        "poco",
-        "mucho",
-        "aunque",
-        "incluso",
-        "también",
-        "tambien",
-        "está",
-        "estoy",
-        "tengo",
-        "pasó",
-        "hoy",
-        "aprendizajes",
-        "aprendizajes:",
-        "hoy:",
-        "sin",
-        "cada",
-        "una",
-        "esto",
-        "este",
-        "estos",
-        "estive",
-        "estaba",
-    }
-    tokens_filtrados = [
-        t for t in tokens if t not in conectores and t not in STOPWORDS_ANALISIS
-    ]
+    tokens_filtrados = _filter_keyword_tokens(tokens)
 
     counts = Counter(tokens_filtrados).most_common(50)
+    if not counts:
+        return []
 
+    max_freq = counts[0][1]
     result = []
     for word, freq in counts:
         # Detectar sentimiento de la palabra individual
         sentiment_data = regex_analyzer.analyze_emotion(word)
         result.append(
-            {"word": word, "frequency": freq, "sentiment": sentiment_data["emotion"]}
+            {
+                "word": word,
+                "frequency": freq,
+                "weight": round(freq / max_freq * 100, 1) if max_freq else 0,
+                "is_dominant": freq == max_freq,
+                "sentiment": sentiment_data["emotion"],
+            }
         )
 
     return result
@@ -89,27 +369,31 @@ def get_word_cloud(
 def get_phrase_cloud(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_current_user),
+    date: Optional[date] = Query(
+        None, description="Filtrar y agrupar por día (formato YYYY-MM-DD)."
+    ),
 ) -> Any:
     """
-    Generar nube de frases (bigramas) a partir del historial de diarios con sentimiento.
-    """
-    entries = (
-        db.query(models.EmotionalDiary)
-        .filter(models.EmotionalDiary.user_id == current_user.id)
-        .all()
-    )
+    Generar nube de frases (bigramas) a partir del historial de diarios.
 
-    text = " ".join([e.experience for e in entries if e.experience])
+    Acepta el mismo filtro ``date`` de agrupación diaria que /wordcloud.
+    """
+    query = db.query(models.EmotionalDiary).filter(
+        models.EmotionalDiary.user_id == current_user.id
+    )
+    if date:
+        query = query.filter(models.EmotionalDiary.date == date)
+    entries = query.all()
+
+    text = _collect_entries_text(entries)
     if not text:
         return []
-
-    # Limpiar encabezados estructurales del diario antes del análisis
-    text = text.replace("PASÓ HOY:", "").replace("APRENDIZAJES:", "")
 
     regex_analyzer = get_regex_emotion_analyzer()
     tokens = regex_analyzer.clean_and_tokenize(text)
     bigrams_counts = regex_analyzer.extract_bigrams(tokens, top_n=30)
 
+    max_freq = max(bigrams_counts.values()) if bigrams_counts else 0
     result = []
     for phrase, freq in bigrams_counts.items():
         # Detectar sentimiento de la frase (conjunto)
@@ -118,6 +402,8 @@ def get_phrase_cloud(
             {
                 "phrase": phrase,
                 "frequency": freq,
+                "weight": round(freq / max_freq * 100, 1) if max_freq else 0,
+                "is_dominant": freq == max_freq,
                 "sentiment": sentiment_data["emotion"],
             }
         )

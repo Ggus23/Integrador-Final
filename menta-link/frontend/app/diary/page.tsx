@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Layout } from '@/components/layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -102,6 +102,7 @@ export default function DiaryPage() {
 
   const [todayEntry, setTodayEntry] = useState<DiaryEntry | null>(null);
   const [wordCloud, setWordCloud] = useState<WordCloudItem[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [analysisData, setAnalysisData] = useState<{
     relevant_phrases: { phrase: string; count: number }[];
     recurrent_patterns: { phrase: string; frequency: number; sentiment: string }[];
@@ -141,39 +142,66 @@ export default function DiaryPage() {
     return filteredEntries.length;
   }, [filteredEntries]);
 
-  const fetchVisualizations = async () => {
-    const [words, phrases, analysis] = await Promise.allSettled([
-      apiClient.getWordCloud(),
-      apiClient.getPhraseCloud(),
-      apiClient.getAnalysis(),
-    ]);
+  const dateOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const dates: string[] = [];
+    entries.forEach((entry) => {
+      const d = entry.date || (entry.created_at ? entry.created_at.slice(0, 10) : '');
+      if (d && !seen.has(d)) {
+        seen.add(d);
+        dates.push(d);
+      }
+    });
+    return dates.sort().reverse();
+  }, [entries]);
 
-    if (words.status === 'fulfilled') {
-      setWordCloud(Array.isArray(words.value) ? words.value : []);
-    } else {
-      console.error('Error fetching word cloud:', words.reason);
-    }
-
-    if (phrases.status === 'fulfilled') {
-      setPhraseCloud(Array.isArray(phrases.value) ? phrases.value : []);
-    } else {
-      console.error('Error fetching phrase cloud:', phrases.reason);
-    }
-
-    if (analysis.status === 'fulfilled') {
-      const a = analysis.value;
-      setAnalysisData(
-        a && a.relevant_phrases
-          ? {
-              relevant_phrases: a.relevant_phrases || [],
-              recurrent_patterns: a.recurrent_patterns || [],
-            }
-          : { relevant_phrases: [], recurrent_patterns: [] }
-      );
-    } else {
-      console.error('Error fetching analysis:', analysis.reason);
-    }
+  const formatDayLabel = (dateStr: string) => {
+    const d = new Date(`${dateStr}T00:00:00`);
+    if (Number.isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('es-ES', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
   };
+
+  const fetchVisualizations = useCallback(
+    async (targetDate: string | null = selectedDate) => {
+      const [words, phrases, analysis] = await Promise.allSettled([
+        apiClient.getWordCloud(targetDate ?? undefined),
+        apiClient.getPhraseCloud(targetDate ?? undefined),
+        apiClient.getAnalysis(),
+      ]);
+
+      if (words.status === 'fulfilled') {
+        setWordCloud(Array.isArray(words.value) ? words.value : []);
+      } else {
+        console.error('Error fetching word cloud:', words.reason);
+      }
+
+      if (phrases.status === 'fulfilled') {
+        setPhraseCloud(Array.isArray(phrases.value) ? phrases.value : []);
+      } else {
+        console.error('Error fetching phrase cloud:', phrases.reason);
+      }
+
+      if (analysis.status === 'fulfilled') {
+        const a = analysis.value;
+        setAnalysisData(
+          a && a.relevant_phrases
+            ? {
+                relevant_phrases: a.relevant_phrases || [],
+                recurrent_patterns: a.recurrent_patterns || [],
+              }
+            : { relevant_phrases: [], recurrent_patterns: [] }
+        );
+      } else {
+        console.error('Error fetching analysis:', analysis.reason);
+      }
+    },
+    [selectedDate]
+  );
 
   const toggleActivity = (label: string) => {
     setFormData((prev) => ({
@@ -191,7 +219,6 @@ export default function DiaryPage() {
       try {
         const history = await apiClient.getMyDiaryHistory();
         setEntries(Array.isArray(history) ? history : []);
-        await fetchVisualizations();
         setTodayEntry(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error al cargar el diario');
@@ -202,6 +229,11 @@ export default function DiaryPage() {
 
     fetchData();
   }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    fetchVisualizations(selectedDate);
+  }, [user, selectedDate, fetchVisualizations]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -231,7 +263,7 @@ export default function DiaryPage() {
         wellbeing_level: 3,
       });
 
-      fetchVisualizations();
+      fetchVisualizations(selectedDate);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar el registro');
     } finally {
@@ -513,6 +545,31 @@ export default function DiaryPage() {
                 <h2 className="text-2xl font-black tracking-tighter uppercase italic">
                   Análisis Emocional AI
                 </h2>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-muted-foreground text-[9px] font-black tracking-widest uppercase">
+                  Nube por día:
+                </span>
+                <Button
+                  size="sm"
+                  variant={selectedDate === null ? 'default' : 'outline'}
+                  onClick={() => setSelectedDate(null)}
+                  className="h-8 rounded-full px-4 text-[10px] font-black tracking-widest uppercase"
+                >
+                  Todo el historial
+                </Button>
+                {dateOptions.map((d) => (
+                  <Button
+                    key={d}
+                    size="sm"
+                    variant={selectedDate === d ? 'default' : 'outline'}
+                    onClick={() => setSelectedDate(d)}
+                    className="h-8 rounded-full px-4 text-[10px] font-black tracking-widest uppercase"
+                  >
+                    {formatDayLabel(d)}
+                  </Button>
+                ))}
               </div>
 
               <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2">
