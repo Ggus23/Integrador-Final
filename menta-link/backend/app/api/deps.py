@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Generator, List
 
 from fastapi import Depends, HTTPException, status
@@ -54,6 +55,31 @@ def get_current_user(
             "USER_NOT_FOUND", f"User with ID {token_data.sub} not in database"
         )
         raise HTTPException(status_code=404, detail="User not found")
+    issued_at = payload.get("iat")
+    if not issued_at:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session must be renewed",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    try:
+        issued_datetime = datetime.fromtimestamp(float(issued_at), tz=timezone.utc)
+    except (TypeError, ValueError, OverflowError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if user.updated_at:
+        updated_datetime = user.updated_at
+        if updated_datetime.tzinfo is None:
+            updated_datetime = updated_datetime.replace(tzinfo=timezone.utc)
+        if issued_datetime <= updated_datetime:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Session expired",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
     if not user.is_active:
         log_security_event(
             "INACTIVE_USER", f"User {user.email} attempted access while inactive"

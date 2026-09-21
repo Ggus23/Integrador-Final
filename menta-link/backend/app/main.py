@@ -118,8 +118,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
 )
 # ---------------------------------------
 
@@ -141,8 +141,9 @@ async def health_check():
         db.execute(text("SELECT 1"))
         db.close()
         return JSONResponse(content={"status": "healthy", "database": "connected"})
-    except Exception as e:
+    except Exception:
+        logger.exception("Health check failed")
         return JSONResponse(
             status_code=503,
-            content={"status": "unhealthy", "database": str(e)},
+            content={"status": "unhealthy", "database": "unavailable"},
         )

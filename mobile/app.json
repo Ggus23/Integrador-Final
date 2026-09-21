@@ -37,7 +37,8 @@
           "color": "#ffffff"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-status-bar"
     ],
     "extra": {
       "eas": {

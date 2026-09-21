@@ -1,6 +1,4 @@
-"""
-Script to change the admin password to 12345678.
-"""
+"""Change the admin password using the ADMIN_PASSWORD environment variable."""
 
 import os
 import sys
@@ -20,7 +18,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def main():
     email = "admin@unifranz.edu.bo"
-    password = "12345678"
+    password = os.environ.get("ADMIN_PASSWORD")
+    if not password:
+        print("ADMIN_PASSWORD must be set before running this script.")
+        sys.exit(2)
     hashed_password = pwd_context.hash(password)
 
     try:
@@ -56,7 +57,7 @@ def main():
                 print("-" * 60)
                 print(f"👤 User:       {full_name} ({role})")
                 print(f"📧 Email:      {email}")
-                print(f"🔑 Password:   {password}")
+                print("Password updated without printing the new password.")
                 print("=" * 60)
 
     except Exception as e:

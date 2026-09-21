@@ -4,7 +4,11 @@ import os
 
 import cv2
 import numpy as np
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
+
+from app.api import deps
+from app.core.limiter import limiter
+from app.models.user import User
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -111,17 +115,33 @@ def get_emotion_model():
 
 
 @router.post("/analyze-frame")
-async def analyze_frame(image: str = Body(..., embed=True)):
+@limiter.limit("30/minute")
+async def analyze_frame(
+    request: Request,
+    image: str = Body(..., embed=True),
+    current_user: User = Depends(deps.get_current_user),
+):
     """
     Receives a Base64 encoded image frame from the assessment camera.
     Returns the dominant facial emotion using the YOLOv8-classify model.
     Primary: HuggingFace hosted model. Fallback: local best.pt.
     """
     try:
+        if len(image) > 10_000_000:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="Image exceeds the maximum allowed size",
+            )
+
         if "," in image:
             image = image.split(",")[1]
 
-        img_data = base64.b64decode(image)
+        img_data = base64.b64decode(image, validate=True)
+        if len(img_data) > 8_000_000:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="Image exceeds the maximum allowed size",
+            )
         nparr = np.frombuffer(img_data, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
@@ -131,6 +151,13 @@ async def analyze_frame(image: str = Body(..., embed=True)):
                 "confidence": 0.0,
                 "error": "Invalid image format",
             }
+
+        height, width = img.shape[:2]
+        if width > 1920 or height > 1920:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="Image dimensions exceed the maximum allowed size",
+            )
 
         model = get_emotion_model()
         if model is None:
@@ -209,6 +236,12 @@ async def analyze_frame(image: str = Body(..., embed=True)):
             "confidence": confidence,
             "scores": filtered_scores,
         }
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
         logger.exception("Error in analyze_frame")
-        return {"emotion": "neutral", "confidence": 0.0, "error": str(e)}
+        return {
+            "emotion": "neutral",
+            "confidence": 0.0,
+            "error": "Unable to analyze image",
+        }

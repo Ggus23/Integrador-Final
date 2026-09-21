@@ -1,4 +1,5 @@
 import json
+import secrets
 from typing import List, Union
 
 from pydantic import ValidationInfo, field_validator
@@ -12,8 +13,9 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str = "MENTALINK"
     API_V1_STR: str = "/api/v1"
+    APP_ENV: str = "development"
 
-    SECRET_KEY: str = "your-secret-key-change-it-in-production"
+    SECRET_KEY: str = secrets.token_urlsafe(64)
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -97,6 +99,15 @@ class Settings(BaseSettings):
     TWILIO_AUTH_TOKEN: str = ""
     TWILIO_FROM_NUMBER: str = ""
     OTP_EXPIRE_MINUTES: int = 10
+
+    @field_validator("SECRET_KEY")
+    @classmethod
+    def validate_secret_key(cls, value: str, info: ValidationInfo) -> str:
+        if len(value) < 32:
+            raise ValueError("SECRET_KEY must contain at least 32 characters")
+        if value == "your-secret-key-change-it-in-production":
+            raise ValueError("SECRET_KEY must be replaced before deployment")
+        return value
 
 
 settings = Settings()

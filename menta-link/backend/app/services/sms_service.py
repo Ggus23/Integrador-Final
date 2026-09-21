@@ -23,10 +23,7 @@ class MockSmsService(SmsService):
     """
 
     def send_otp(self, phone_number: str, code: str) -> bool:
-        logger.warning(f"SMS_MOCK: Sending OTP {code} to {phone_number}")
-        print(
-            f"SMS_MOCK: Codigo de verificacion para {phone_number}: {code}", flush=True
-        )
+        logger.warning("SMS mock enabled; OTP delivery is not suitable for production")
         return True
 
 
