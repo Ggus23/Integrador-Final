@@ -45,6 +45,8 @@ interface User {
   email: string;
   role: string;
   is_active: boolean;
+  phone_number?: string | null;
+  is_phone_verified?: boolean;
 }
 
 export default function AdminUsersPage() {
@@ -144,6 +146,16 @@ export default function AdminUsersPage() {
       fetchUsers();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al cambiar estado');
+    }
+  };
+
+  const handleVerifyPhone = async (userId: string) => {
+    try {
+      await apiClient.verifyUserPhone(userId);
+      toast.success('Número de teléfono confirmado');
+      fetchUsers();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al confirmar teléfono');
     }
   };
 
@@ -313,6 +325,15 @@ export default function AdminUsersPage() {
                           {u.full_name}
                         </div>
                         <div className="text-muted-foreground text-xs">{u.email}</div>
+                        <div className="text-muted-foreground mt-1 text-xs">
+                          Teléfono: {u.phone_number || 'No registrado'}
+                          {u.phone_number && (
+                            <span className={u.is_phone_verified ? 'text-green-600' : 'text-amber-600'}>
+                              {' '}
+                              {u.is_phone_verified ? '(confirmado)' : '(pendiente)'}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-5">
                         <Badge
@@ -396,6 +417,16 @@ export default function AdminUsersPage() {
                                   Ver Gráficos
                                 </Button>
                               </Link>
+                            )}
+                            {u.phone_number && !u.is_phone_verified && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-4 text-[10px] font-black uppercase transition-all hover:border-green-200 hover:bg-green-50 hover:text-green-600"
+                                onClick={() => handleVerifyPhone(u.id)}
+                              >
+                                Confirmar teléfono
+                              </Button>
                             )}
                             <Button
                               size="sm"

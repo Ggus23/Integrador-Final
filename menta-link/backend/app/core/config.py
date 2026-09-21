@@ -95,9 +95,13 @@ class Settings(BaseSettings):
     # SMS / OTP (verificación por celular)
     # ----------------------------------------------------------------
     SMS_ENABLED: bool = False
+    SMS_PROVIDER: str = "infobip"
     TWILIO_ACCOUNT_SID: str = ""
     TWILIO_AUTH_TOKEN: str = ""
     TWILIO_FROM_NUMBER: str = ""
+    INFOBIP_BASE_URL: str = ""
+    INFOBIP_API_KEY: str = ""
+    INFOBIP_FROM_NUMBER: str = "MENTALINK"
     OTP_EXPIRE_MINUTES: int = 10
 
     @field_validator("SECRET_KEY")

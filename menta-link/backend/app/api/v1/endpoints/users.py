@@ -18,7 +18,8 @@ def create_user(
 ) -> Any:
     """
     Este endpoint permite que un usuario se registre en el sistema.
-    El registro exige un número de celular verificado vía SMS/OTP.
+    El registro exige un número de celular válido para contacto.
+    La verificación por SMS/OTP es opcional.
     """
     # Busca si el correo ya existe en la base de datos
     # Si existe, lanza un error 409 Conflict
@@ -41,7 +42,7 @@ def create_user(
                 detail="Debes usar tu correo institucional (@unifranz.edu.bo) para registrarte.",
             )
 
-    # El número de celular es obligatorio y debe estar previamente verificado
+    # El número de celular es obligatorio para permitir el contacto clínico.
     phone_number = normalize_phone_number(user_in.phone_number or "")
     if not phone_number:
         raise HTTPException(
@@ -60,22 +61,19 @@ def create_user(
             detail="Ya existe un usuario registrado con este número de teléfono.",
         )
 
-    if not user_in.phone_verified_token:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Debes verificar tu número de teléfono antes de crear la cuenta.",
-        )
+    phone_verified = False
+    if user_in.phone_verified_token:
+        from app.services.auth_service import auth_service
 
-    from app.services.auth_service import auth_service
-
-    phone_claims = auth_service.verify_phone_verification_token(
-        user_in.phone_verified_token
-    )
-    if not phone_claims or phone_claims.get("sub") != phone_number:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="La verificación del número de teléfono es inválida o expiró.",
+        phone_claims = auth_service.verify_phone_verification_token(
+            user_in.phone_verified_token
         )
+        if not phone_claims or phone_claims.get("sub") != phone_number:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La verificación del número de teléfono es inválida o expiró.",
+            )
+        phone_verified = True
 
     # Crea el usuario, hashea la contraseña y la guarda en la DB
     db_obj = models.user.User(
@@ -84,7 +82,7 @@ def create_user(
         full_name=user_in.full_name,
         role=user_in.role,
         phone_number=phone_number,
-        is_phone_verified=True,
+        is_phone_verified=phone_verified,
     )
 
     # Aquí el usuario se guarda físicamente en la tabla users
@@ -309,6 +307,29 @@ def toggle_user_status(
             alert.resolved_at = datetime.now(timezone.utc)
 
     # Guarda la actualización del usuario en la DB
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.patch("/{user_id}/phone-verification", response_model=schemas.user.User)
+def verify_user_phone_manually(
+    user_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user: models.user.User = Depends(deps.get_admin_user),
+) -> Any:
+    """Permite a un administrador confirmar manualmente el teléfono de un usuario."""
+    user = db.query(models.user.User).filter(models.user.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    if not user.phone_number:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El usuario no tiene un número de teléfono registrado",
+        )
+
+    user.is_phone_verified = True
     db.add(user)
     db.commit()
     db.refresh(user)

@@ -1,4 +1,5 @@
 import base64
+import json
 import logging
 import urllib.error
 import urllib.request
@@ -18,13 +19,13 @@ class SmsService(ABC):
 
 class MockSmsService(SmsService):
     """
-    En desarrollo sin proveedor SMS configurado, imprime el código OTP en
-    consola/logs para que el flujo completo pueda probarse localmente.
+    Servicio de desarrollo que falla de forma explícita cuando no hay proveedor
+    SMS configurado. Nunca debe simular un envío exitoso en producción.
     """
 
     def send_otp(self, phone_number: str, code: str) -> bool:
-        logger.warning("SMS mock enabled; OTP delivery is not suitable for production")
-        return True
+        logger.error("SMS provider is not configured; OTP was not sent")
+        return False
 
 
 class TwilioSmsService(SmsService):
@@ -83,9 +84,66 @@ class TwilioSmsService(SmsService):
             return False
 
 
+class InfobipSmsService(SmsService):
+    """Envío de SMS mediante la API HTTP de Infobip."""
+
+    def send_otp(self, phone_number: str, code: str) -> bool:
+        base_url = settings.INFOBIP_BASE_URL.rstrip("/")
+        api_key = settings.INFOBIP_API_KEY
+        sender = settings.INFOBIP_FROM_NUMBER
+
+        if not (base_url and api_key and sender):
+            logger.error("Infobip no está configurado correctamente.")
+            return False
+
+        payload = json.dumps(
+            {
+                "messages": [
+                    {
+                        "from": sender,
+                        "destinations": [{"to": phone_number}],
+                        "text": (
+                            f"MENTA-LINK: tu código de verificación es {code}. "
+                            f"Válido por {settings.OTP_EXPIRE_MINUTES} minutos."
+                        ),
+                    }
+                ]
+            }
+        ).encode("utf-8")
+        headers = {
+            "Authorization": f"App {api_key}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+
+        try:
+            request = urllib.request.Request(
+                f"{base_url}/sms/2/text/advanced",
+                data=payload,
+                headers=headers,
+                method="POST",
+            )
+            with urllib.request.urlopen(request, timeout=10) as response:
+                if response.status in (200, 201, 202):
+                    logger.info("SMS OTP enviado mediante Infobip")
+                    return True
+                logger.error("Infobip devolvió estado HTTP: %s", response.status)
+                return False
+        except urllib.error.HTTPError as error:
+            logger.error("Infobip rechazó el SMS: HTTP %s", error.code)
+            return False
+        except Exception:
+            logger.exception("Error enviando SMS mediante Infobip")
+            return False
+
+
 def get_sms_service() -> SmsService:
-    if settings.SMS_ENABLED:
+    if settings.SMS_ENABLED and settings.SMS_PROVIDER.lower() == "twilio":
         return TwilioSmsService()
+    if settings.SMS_ENABLED and settings.SMS_PROVIDER.lower() == "infobip":
+        return InfobipSmsService()
+    if settings.SMS_ENABLED:
+        logger.error("Proveedor SMS no soportado: %s", settings.SMS_PROVIDER)
     return MockSmsService()
 
 
