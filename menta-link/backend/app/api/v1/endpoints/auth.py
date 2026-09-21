@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -103,7 +103,9 @@ def login_access_token(
 
 # Aqui no usamos depends(get_current_user) porque se espera un access_token en el body
 @router.post("/refresh", response_model=schemas.auth.Token)
+@limiter.limit("10/minute")
 def refresh_token(
+    request: Request,
     refresh_token: str,
     db: Session = Depends(deps.get_db),
 ) -> Any:
@@ -135,6 +137,22 @@ def refresh_token(
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    issued_at = payload.get("iat")
+    if not issued_at:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session must be renewed")
+    try:
+        issued_datetime = datetime.fromtimestamp(float(issued_at), tz=timezone.utc)
+    except (TypeError, ValueError, OverflowError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+        )
+    if user.updated_at:
+        updated_datetime = user.updated_at
+        if updated_datetime.tzinfo is None:
+            updated_datetime = updated_datetime.replace(tzinfo=timezone.utc)
+        if issued_datetime <= updated_datetime:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired")
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
@@ -152,7 +170,9 @@ def refresh_token(
 
 
 @router.post("/verify-email")
+@limiter.limit("10/minute")
 def verify_email(
+    request: Request,
     token: str,
     db: Session = Depends(deps.get_db),
 ) -> Any:
@@ -173,8 +193,10 @@ def verify_email(
 
 
 @router.post("/recover-password")
+@limiter.limit("3/hour")
 def recover_password(
     email_in: schemas.auth.PasswordRecovery,
+    request: Request,
     db: Session = Depends(deps.get_db),
 ) -> Any:
     """
@@ -196,9 +218,11 @@ def recover_password(
 
 # El def reset_password es el final para recuperar la contraseña
 @router.post("/reset-password")
+@limiter.limit("10/hour")
 def reset_password(
     # El reset_in contiene el token y el new_password
     reset_in: schemas.auth.PasswordReset,
+    request: Request,
     db: Session = Depends(deps.get_db),
 ) -> Any:
 

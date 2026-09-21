@@ -11,20 +11,21 @@
   "dependencies": {
     "@expo-google-fonts/manrope": "*",
     "@expo-google-fonts/noto-serif": "*",
-    "expo": "^57.0.23",
-    "expo-blur": "~14.1.5",
+    "buffer": "^6.0.3",
+    "expo": "~57.0.24",
+    "expo-blur": "~57.0.3",
     "expo-constants": "^57.0.18",
-    "expo-device": "~7.1.4",
-    "expo-haptics": "~14.1.4",
-    "expo-linear-gradient": "~14.1.5",
-    "expo-notifications": "^57.0.19",
-    "expo-secure-store": "~14.2.4",
-    "expo-status-bar": "~2.2.3",
+    "expo-device": "~57.0.2",
+    "expo-haptics": "~57.0.3",
+    "expo-linear-gradient": "~57.0.2",
+    "expo-notifications": "~57.0.20",
+    "expo-secure-store": "~57.0.4",
+    "expo-status-bar": "~57.0.1",
     "lucide-react-native": "^0.400.0",
-    "react": "19.0.0",
-    "react-native": "^0.87.1",
-    "react-native-safe-area-context": "5.4.0",
-    "react-native-svg": "15.11.2"
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-svg": "15.15.4"
   },
   "overrides": {
     "react": "$react"
