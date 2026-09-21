@@ -6,6 +6,10 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
+# Alembic only needs database settings; it must not require frontend settings
+# while importing the shared production configuration.
+os.environ["ALEMBIC_RUNNING"] = "true"
+
 # Add the project directory to the python path so 'app' can be imported
 sys.path.append(os.getcwd())
 
