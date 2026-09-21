@@ -15,6 +15,7 @@ htmlcov/
 coverage/
 *.log
 tests/
+!scripts/create_admin_user.py
 docs/
 *.md
 docker/*
