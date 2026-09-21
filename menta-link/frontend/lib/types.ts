@@ -15,6 +15,8 @@ export interface User {
 export interface WordCloudItem {
   word: string;
   frequency: number;
+  weight?: number;
+  is_dominant?: boolean;
   sentiment?: string;
 }
 

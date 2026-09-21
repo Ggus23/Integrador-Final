@@ -389,12 +389,12 @@ class APIClient {
     return this.request('PATCH', `/diary/${id}`, data);
   }
 
-  async getWordCloud() {
-    return this.request('GET', '/visualizations/wordcloud');
+  async getWordCloud(date?: string) {
+    return this.request('GET', `/visualizations/wordcloud${date ? `?date=${date}` : ''}`);
   }
 
-  async getPhraseCloud() {
-    return this.request('GET', '/visualizations/phrasecloud');
+  async getPhraseCloud(date?: string) {
+    return this.request('GET', `/visualizations/phrasecloud${date ? `?date=${date}` : ''}`);
   }
 
   async getAnalysis() {

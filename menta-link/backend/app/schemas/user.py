@@ -16,6 +16,7 @@ class UserBase(BaseModel):
     expo_push_token: Optional[str] = None
     phone_number: Optional[str] = None
     is_phone_verified: Optional[bool] = False
+    is_email_verified: Optional[bool] = False
     avatar_url: Optional[str] = None
 
 

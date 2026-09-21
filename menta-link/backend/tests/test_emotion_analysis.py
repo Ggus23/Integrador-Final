@@ -94,6 +94,7 @@ def prueba_visualizaciones_se_actualizan_por_insercion(client, db_session):
         hashed_password=get_password_hash("password123"),
         full_name="Refresh Test",
         is_active=True,
+        is_email_verified=True,
         role=UserRole.STUDENT,
     )
     db_session.add(user)

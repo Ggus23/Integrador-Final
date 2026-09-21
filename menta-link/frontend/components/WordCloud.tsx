@@ -6,17 +6,8 @@ import type { WordCloudItem } from '@/lib/types';
 
 const FONT_FAMILY = '"DM Sans", sans-serif';
 const FONT_WEIGHT = 700;
-
-const SILENCIO_COLOR = '#FF1F1F'; // Rojo brillante
-const TONE_CLASSES = [
-  'text-foreground',
-  'text-primary',
-  'text-muted-foreground',
-  'text-foreground/80',
-];
-const SILENCIO_FONT = 92;
 const MIN_FONT_SIZE = 18;
-const MAX_FONT_SIZE = 60;
+const MAX_FONT_SIZE = 64;
 const GAP = 3;
 const GRID_CELL = 8;
 const AREA_PADDING = 10;
@@ -28,11 +19,10 @@ type PlacedWord = {
   word: string;
   fontSize: number;
   toneClass: string;
-  vertical: boolean;
-  isSilencio: boolean;
+  isDominant: boolean;
   natural: { width: number; height: number };
-  center: { x: number; y: number };
   box: { width: number; height: number };
+  center: { x: number; y: number };
 };
 
 type CloudPlacement = {
@@ -40,8 +30,12 @@ type CloudPlacement = {
   height: number;
 };
 
-const normalize = (w: string) => w.trim().toLocaleLowerCase('es');
-const isSilencio = (w: string) => normalize(w) === 'silencio';
+function toneForWeight(weight: number, isDominant: boolean): string {
+  if (isDominant) return 'text-primary';
+  if (weight >= 60) return 'text-foreground';
+  if (weight >= 30) return 'text-foreground/75';
+  return 'text-muted-foreground';
+}
 
 function hashString(str: string): number {
   let h = 5381;
@@ -88,30 +82,35 @@ function buildCloud(
   const maxF = Math.max(...frequencies);
   const range = maxF - minF;
 
+  const getWeight = (item: WordCloudItem): number => {
+    if (typeof item.weight === 'number' && item.weight > 0) return item.weight;
+    if (range === 0) return 50;
+    return ((item.frequency - minF) / range) * 100;
+  };
+
+  const weights = items.map(getWeight);
+  const dominantWeight = Math.max(...weights);
+
   const nodes = items.map((item, idx) => {
     const word = item.word;
-    const silencio = isSilencio(word);
+    const weight = weights[idx];
+    const isDominant = item.is_dominant === true || weight === dominantWeight;
 
     let fontSize: number;
-    if (silencio) fontSize = SILENCIO_FONT;
-    else if (range === 0) fontSize = (minFontSize + maxFontSize) / 2;
-    else fontSize = minFontSize + ((item.frequency - minF) / range) * (maxFontSize - minFontSize);
+    if (range === 0 && typeof item.weight !== 'number') fontSize = (minFontSize + maxFontSize) / 2;
+    else fontSize = minFontSize + (weight / 100) * (maxFontSize - minFontSize);
 
-    const vertical = silencio || (hashString(`${word}-${idx}`) % 3 === 0 && fontSize >= 20);
     const natural = measureWord(word, fontSize);
-    const box = vertical
-      ? { width: natural.height + GAP, height: natural.width + GAP }
-      : { width: natural.width + GAP, height: natural.height + GAP };
+    const box = { width: natural.width + GAP, height: natural.height + GAP };
 
     return {
       key: `${word}-${idx}`,
       word,
-      isSilencio: silencio,
+      isDominant,
       fontSize,
-      vertical,
       natural,
       box,
-      toneClass: silencio ? '' : TONE_CLASSES[hashString(word) % TONE_CLASSES.length],
+      toneClass: toneForWeight(weight, isDominant),
     };
   });
 
@@ -177,8 +176,7 @@ function buildCloud(
           word: node.word,
           fontSize: node.fontSize,
           toneClass: node.toneClass,
-          vertical: node.vertical,
-          isSilencio: node.isSilencio,
+          isDominant: node.isDominant,
           natural: node.natural,
           box: node.box,
           center: { x, y },
@@ -261,7 +259,7 @@ export function WordCloud({
           <motion.div
             key={w.key}
             className="absolute"
-            style={{ left: w.center.x, top: w.center.y, zIndex: w.isSilencio ? 10 : 1 }}
+            style={{ left: w.center.x, top: w.center.y, zIndex: w.isDominant ? 10 : 1 }}
             initial={{ opacity: 0, scale: 0.6 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.02, type: 'spring', stiffness: 260, damping: 22 }}
@@ -271,7 +269,7 @@ export function WordCloud({
               style={{
                 width: w.natural.width,
                 height: w.natural.height,
-                transform: `translate(-50%, -50%) ${w.vertical ? 'rotate(-90deg)' : ''}`,
+                transform: 'translate(-50%, -50%)',
               }}
             >
               <span
@@ -280,11 +278,10 @@ export function WordCloud({
                 style={{
                   fontSize: `${w.fontSize}px`,
                   lineHeight: 1.12,
-                  color: w.isSilencio ? SILENCIO_COLOR : undefined,
-                  fontWeight: w.isSilencio ? 900 : FONT_WEIGHT,
+                  fontWeight: w.isDominant ? 900 : FONT_WEIGHT,
                   fontFamily: FONT_FAMILY,
-                  textShadow: w.isSilencio
-                    ? '0 0 22px rgba(255,31,31,0.5), 0 2px 6px rgba(0,0,0,0.35)'
+                  textShadow: w.isDominant
+                    ? '0 0 26px rgba(224, 154, 112, 0.4), 0 2px 6px rgba(0,0,0,0.25)'
                     : undefined,
                   letterSpacing: '-0.01em',
                 }}

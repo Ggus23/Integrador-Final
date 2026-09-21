@@ -64,6 +64,20 @@ def login_access_token(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Usuario inactivo",
         )
+    # El login queda bloqueado hasta que el usuario haga clic en el enlace de
+    # verificación enviado a su correo. Evita que cuentas sin verificar accedan.
+    elif not user.is_email_verified:
+        log_security_event(
+            "LOGIN_EMAIL_UNVERIFIED",
+            f"Login attempt for unverified email: {user.email}",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Debes verificar tu correo electrónico antes de iniciar sesión. "
+                "Revisa el enlace de verificación enviado a tu bandeja de entrada."
+            ),
+        )
     """
     Si el hash es viejo, se actualiza, para mejor la seguridad en el login
     Si todo es correcto el access_token se genera para peticiones get_current_user y
