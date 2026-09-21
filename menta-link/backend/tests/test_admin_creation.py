@@ -54,3 +54,37 @@ def prueba_registro_publico_bloquea_psicologo(client):
     response = client.post("/api/v1/users/", json=payload)
     assert response.status_code == 422
     assert "Solo se permite el registro de estudiantes" in response.text
+
+
+def prueba_admin_confirma_telefono_de_usuario(client, db_session):
+    admin = User(
+        email="phone_admin@gmail.com",
+        hashed_password=get_password_hash("AdminPass123"),
+        full_name="Phone Admin",
+        role=UserRole.ADMIN,
+        is_active=True,
+        is_email_verified=True,
+    )
+    patient = User(
+        email="phone_patient@unifranz.edu.bo",
+        hashed_password=get_password_hash("PatientPass123"),
+        full_name="Phone Patient",
+        role=UserRole.STUDENT,
+        phone_number="+59179717725",
+        is_phone_verified=False,
+    )
+    db_session.add_all([admin, patient])
+    db_session.commit()
+
+    login_res = client.post(
+        "/api/v1/auth/login",
+        data={"username": admin.email, "password": "AdminPass123"},
+    )
+    headers = {"Authorization": f"Bearer {login_res.json()['access_token']}"}
+
+    response = client.patch(
+        f"/api/v1/users/{patient.id}/phone-verification", headers=headers
+    )
+
+    assert response.status_code == 200
+    assert response.json()["is_phone_verified"] is True

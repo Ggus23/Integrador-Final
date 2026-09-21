@@ -69,7 +69,7 @@ def prueba_registro_requiere_telefono(client):
     response = client.post("/api/v1/users/", json=payload_sin_phone)
     assert response.status_code == 422
 
-    # Con teléfono pero sin token de verificación → 400
+    # Con teléfono pero sin token SMS → se permite el registro.
     payload_sin_token = {
         "full_name": "Sin Token",
         "email": "sintoken@unifranz.edu.bo",
@@ -78,8 +78,8 @@ def prueba_registro_requiere_telefono(client):
         "phone_number": "71234567",
     }
     response_no_token = client.post("/api/v1/users/", json=payload_sin_token)
-    assert response_no_token.status_code == 400
-    assert "verificar" in response_no_token.json()["detail"].lower()
+    assert response_no_token.status_code == 201
+    assert response_no_token.json()["is_phone_verified"] is False
 
 
 def prueba_token_verificacion_tel_incorrecto(client, sms_codes):

@@ -284,6 +284,10 @@ class APIClient {
     return this.request('PATCH', `/users/${userId}/status`);
   }
 
+  async verifyUserPhone(userId: string) {
+    return this.request('PATCH', `/users/${userId}/phone-verification`);
+  }
+
   async getStudentDetails(studentId: string) {
     return this.request('GET', `/students/${studentId}`);
   }
