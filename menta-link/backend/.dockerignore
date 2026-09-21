@@ -19,7 +19,6 @@ docs/
 *.md
 docker/*
 !docker/start.sh
-scripts/
 *.sqlite3
 alembic/versions/
 .vscode/
