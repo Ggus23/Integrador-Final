@@ -47,6 +47,7 @@ interface User {
   is_active: boolean;
   phone_number?: string | null;
   is_phone_verified?: boolean;
+  phone_verification_status?: string;
 }
 
 export default function AdminUsersPage() {
@@ -418,14 +419,15 @@ export default function AdminUsersPage() {
                                 </Button>
                               </Link>
                             )}
-                            {u.phone_number && !u.is_phone_verified && (
+                            {u.phone_number &&
+                              u.phone_verification_status === 'psychologist_reviewed' && (
                               <Button
                                 size="sm"
                                 variant="outline"
                                 className="h-8 px-4 text-[10px] font-black uppercase transition-all hover:border-green-200 hover:bg-green-50 hover:text-green-600"
                                 onClick={() => handleVerifyPhone(u.id)}
                               >
-                                Confirmar teléfono
+                                Aprobar teléfono
                               </Button>
                             )}
                             <Button

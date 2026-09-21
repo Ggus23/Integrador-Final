@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
-from app.models.user import UserRole
+from app.models.user import PhoneVerificationStatus, UserRole
 from app.utils.phones import normalize_phone_number
 
 
@@ -16,6 +16,12 @@ class UserBase(BaseModel):
     expo_push_token: Optional[str] = None
     phone_number: Optional[str] = None
     is_phone_verified: Optional[bool] = False
+    phone_verification_status: PhoneVerificationStatus = PhoneVerificationStatus.PENDING
+    phone_reviewed_by_id: Optional[int] = None
+    phone_reviewed_at: Optional[object] = None
+    phone_review_note: Optional[str] = None
+    phone_approved_by_id: Optional[int] = None
+    phone_approved_at: Optional[object] = None
     is_email_verified: Optional[bool] = False
     avatar_url: Optional[str] = None
 
@@ -91,6 +97,11 @@ class UserCreateAdmin(UserCreateBase):
 
 class UserUpdate(UserBase):
     password: Optional[str] = None
+
+
+class PhoneReview(BaseModel):
+    approved: bool
+    note: Optional[str] = None
 
 
 class UserInDBBase(UserBase):

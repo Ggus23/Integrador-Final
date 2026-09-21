@@ -15,6 +15,21 @@ export default function AdminStudentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const reviewPhone = async (studentId: string) => {
+    try {
+      await apiClient.reviewUserPhone(studentId, true);
+      setStudents((current) =>
+        current.map((student) =>
+          student.id === studentId
+            ? { ...student, phone_verification_status: 'psychologist_reviewed' }
+            : student
+        )
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo revisar el teléfono');
+    }
+  };
+
   useEffect(() => {
     if (!user || !['psychologist', 'tutor', 'admin'].includes(user.role)) return;
 
@@ -112,6 +127,12 @@ export default function AdminStudentsPage() {
                       {student.phone_number && (
                         <p className="text-muted-foreground mt-1 text-xs">
                           📞 {student.phone_number}
+                          {' - '}
+                          {student.phone_verification_status === 'psychologist_reviewed'
+                            ? 'Revisado por psicólogo'
+                            : student.phone_verification_status === 'verified'
+                              ? 'Verificado'
+                              : 'Pendiente de revisión'}
                         </p>
                       )}
                     </div>
@@ -134,6 +155,17 @@ export default function AdminStudentsPage() {
                         Ver Detalles
                       </Button>
                     </Link>
+                    {student.phone_number &&
+                      student.phone_verification_status !== 'psychologist_reviewed' &&
+                      student.phone_verification_status !== 'verified' && (
+                        <Button
+                          variant="outline"
+                          className="mt-2 w-full"
+                          onClick={() => reviewPhone(student.id)}
+                        >
+                          Dar luz verde al administrador
+                        </Button>
+                      )}
                   </div>
                 </div>
               </Card>

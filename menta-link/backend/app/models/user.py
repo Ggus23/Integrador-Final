@@ -18,6 +18,13 @@ class UserRole(str, enum.Enum):
     ADMIN = "admin"
 
 
+class PhoneVerificationStatus(str, enum.Enum):
+    PENDING = "pending"
+    PSYCHOLOGIST_REVIEWED = "psychologist_reviewed"
+    VERIFIED = "verified"
+    REJECTED = "rejected"
+
+
 class User(Base):
     """
     SQLAlchemy model representing a User in the database.
@@ -39,6 +46,16 @@ class User(Base):
     # Phone verification (SMS / OTP)
     phone_number = Column(String, index=True, nullable=True)
     is_phone_verified = Column(Boolean(), default=False)
+    phone_verification_status = Column(
+        String,
+        default=PhoneVerificationStatus.PENDING.value,
+        nullable=False,
+    )
+    phone_reviewed_by_id = Column(Integer, nullable=True)
+    phone_reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    phone_review_note = Column(String, nullable=True)
+    phone_approved_by_id = Column(Integer, nullable=True)
+    phone_approved_at = Column(DateTime(timezone=True), nullable=True)
     avatar_url = Column(String, nullable=True)
 
     # Relationships with Full Cascade Delete

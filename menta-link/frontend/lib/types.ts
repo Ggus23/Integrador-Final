@@ -9,6 +9,11 @@ export interface User {
   must_change_password?: boolean;
   phone_number?: string;
   is_phone_verified?: boolean;
+  phone_verification_status?:
+    | 'pending'
+    | 'psychologist_reviewed'
+    | 'verified'
+    | 'rejected';
   avatar_url?: string;
 }
 
@@ -96,6 +101,7 @@ export interface StudentSummary {
   active_alerts: number;
   last_assessment_date?: string;
   phone_number?: string;
+  phone_verification_status?: 'pending' | 'psychologist_reviewed' | 'verified' | 'rejected';
 }
 
 export interface AcademicRecord {
