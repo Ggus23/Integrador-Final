@@ -2,10 +2,27 @@ import json
 import logging
 import urllib.request
 from abc import ABC, abstractmethod
+from html import escape
+from urllib.parse import quote
 
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+def _frontend_base_url() -> str:
+    return (
+        settings.FRONTEND_BASE_URL
+        or (
+            settings.BACKEND_CORS_ORIGINS[0]
+            if settings.BACKEND_CORS_ORIGINS
+            else "http://localhost:3000"
+        )
+    ).rstrip("/")
+
+
+def _verification_url(path: str, token: str) -> str:
+    return f"{_frontend_base_url()}/{path}?token={quote(token, safe='')}"
 
 
 class EmailService(ABC):
@@ -20,27 +37,17 @@ class EmailService(ABC):
 
 class MockEmailService(EmailService):
     def send_verification_email(self, to_email: str, token: str):
-        base_url = (
-            settings.BACKEND_CORS_ORIGINS[0]
-            if settings.BACKEND_CORS_ORIGINS
-            else "http://localhost:3000"
-        )
         logger.warning(
-            f"EMAIL_MOCK: Verification Link -> {base_url}/auth/verify-email?"
-            f"token={token}"
+            "EMAIL_MOCK: Verification Link -> %s",
+            _verification_url("auth/verify-email", token),
         )
         print(
             f"EMAIL_MOCK: Sending Verification Token to {to_email}: {token}", flush=True
         )
 
     def send_password_reset_email(self, to_email: str, token: str):
-        base_url = (
-            settings.BACKEND_CORS_ORIGINS[0]
-            if settings.BACKEND_CORS_ORIGINS
-            else "http://localhost:3000"
-        )
         logger.warning(
-            f"EMAIL_MOCK: Reset Link -> {base_url}/reset-password?token={token}"
+            "EMAIL_MOCK: Reset Link -> %s", _verification_url("reset-password", token)
         )
         print(
             f"EMAIL_MOCK: Sending Password Reset Token to {to_email}: {token}",
@@ -50,8 +57,7 @@ class MockEmailService(EmailService):
 
 class BrevoEmailService(EmailService):
     def _send_email(self, to_email: str, subject: str, html_content: str) -> bool:
-        # Clave API de Brevo (extraída de SMTP_PASSWORD o BREVO_API_KEY)
-        api_key = getattr(settings, "BREVO_API_KEY", None) or settings.SMTP_PASSWORD
+        api_key = settings.BREVO_API_KEY or settings.SMTP_PASSWORD
 
         if not api_key:
             logger.error("Brevo API Key no configurada.")
@@ -107,20 +113,16 @@ class BrevoEmailService(EmailService):
             return False
 
     def send_verification_email(self, to_email: str, token: str):
-        base_url = (
-            settings.BACKEND_CORS_ORIGINS[0]
-            if settings.BACKEND_CORS_ORIGINS
-            else "http://localhost:3000"
-        )
-        link = f"{base_url}/auth/verify-email?token={token}"
+        link = _verification_url("auth/verify-email", token)
+        safe_link = escape(link, quote=True)
 
         subject = "Verifica tu cuenta en MENTA-LINK"
         html = f"""
         <h1>Bienvenido a MENTA-LINK</h1>
         <p>Por favor verifica tu correo haciendo clic en el siguiente enlace:</p>
-        <p><a href="{link}">Verificar Cuenta</a></p>
+        <p><a href="{safe_link}">Verificar Cuenta</a></p>
         <p>Si no puedes hacer clic, copia este enlace:</p>
-        <p>{link}</p>
+        <p>{safe_link}</p>
         """
         success = self._send_email(to_email, subject, html)
 
@@ -128,18 +130,14 @@ class BrevoEmailService(EmailService):
             MockEmailService().send_verification_email(to_email, token)
 
     def send_password_reset_email(self, to_email: str, token: str):
-        base_url = (
-            settings.BACKEND_CORS_ORIGINS[0]
-            if settings.BACKEND_CORS_ORIGINS
-            else "http://localhost:3000"
-        )
-        link = f"{base_url}/reset-password?token={token}"
+        link = _verification_url("reset-password", token)
+        safe_link = escape(link, quote=True)
 
         subject = "Recuperación de Contraseña - MENTA-LINK"
         html = f"""
         <h1>Restablecer Contraseña</h1>
         <p>Has solicitado restablecer tu contraseña. Haz clic aquí:</p>
-        <p><a href="{link}">Restablecer Contraseña</a></p>
+        <p><a href="{safe_link}">Restablecer Contraseña</a></p>
         <p>Este enlace expira en 15 minutos.</p>
         """
         success = self._send_email(to_email, subject, html)
