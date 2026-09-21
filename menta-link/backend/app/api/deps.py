@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Generator, List
 
 from fastapi import Depends, HTTPException, status
@@ -74,7 +74,9 @@ def get_current_user(
         updated_datetime = user.updated_at
         if updated_datetime.tzinfo is None:
             updated_datetime = updated_datetime.replace(tzinfo=timezone.utc)
-        if issued_datetime <= updated_datetime:
+        # JWT `iat` is represented with second precision, while the database
+        # timestamp may include microseconds from the same login transaction.
+        if issued_datetime + timedelta(seconds=1) < updated_datetime:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Session expired",

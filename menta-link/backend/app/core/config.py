@@ -69,6 +69,16 @@ class Settings(BaseSettings):
 
         return url
 
+    @field_validator("FRONTEND_BASE_URL", mode="before")
+    @classmethod
+    def normalize_frontend_base_url(cls, value: str | None) -> str | None:
+        if not value:
+            return value
+        normalized = value.strip().rstrip("/")
+        if not normalized.startswith(("http://", "https://")):
+            normalized = f"https://{normalized}"
+        return normalized
+
     # Se usa List[str] para evitar fallos estrictos de validación con barras finales o puertos
     BACKEND_CORS_ORIGINS: Union[List[str], str] = []
 
