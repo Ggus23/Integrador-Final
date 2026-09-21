@@ -18,13 +18,13 @@ class SmsService(ABC):
 
 class MockSmsService(SmsService):
     """
-    En desarrollo sin proveedor SMS configurado, imprime el código OTP en
-    consola/logs para que el flujo completo pueda probarse localmente.
+    Servicio de desarrollo que falla de forma explícita cuando no hay proveedor
+    SMS configurado. Nunca debe simular un envío exitoso en producción.
     """
 
     def send_otp(self, phone_number: str, code: str) -> bool:
-        logger.warning("SMS mock enabled; OTP delivery is not suitable for production")
-        return True
+        logger.error("SMS provider is not configured; OTP was not sent")
+        return False
 
 
 class TwilioSmsService(SmsService):
