@@ -139,7 +139,9 @@ def refresh_token(
         raise HTTPException(status_code=400, detail="Inactive user")
     issued_at = payload.get("iat")
     if not issued_at:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session must be renewed")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Session must be renewed"
+        )
     try:
         issued_datetime = datetime.fromtimestamp(float(issued_at), tz=timezone.utc)
     except (TypeError, ValueError, OverflowError):
@@ -152,7 +154,9 @@ def refresh_token(
         if updated_datetime.tzinfo is None:
             updated_datetime = updated_datetime.replace(tzinfo=timezone.utc)
         if issued_datetime <= updated_datetime:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired"
+            )
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 

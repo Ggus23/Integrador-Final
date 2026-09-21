@@ -7,8 +7,8 @@ import numpy as np
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
 
 from app.api import deps
-from app.models.user import User
 from app.core.limiter import limiter
+from app.models.user import User
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
