@@ -153,7 +153,7 @@ def refresh_token(
         updated_datetime = user.updated_at
         if updated_datetime.tzinfo is None:
             updated_datetime = updated_datetime.replace(tzinfo=timezone.utc)
-        if issued_datetime <= updated_datetime:
+        if issued_datetime + timedelta(seconds=1) < updated_datetime:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired"
             )
