@@ -1,8 +1,13 @@
 import json
-import secrets
 from typing import List, Union
 
-from pydantic import ValidationInfo, field_validator
+from pydantic import (
+    AliasChoices,
+    Field,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,12 +16,20 @@ class Settings(BaseSettings):
         env_file=".env", case_sensitive=True, extra="ignore"
     )
 
-    PROJECT_NAME: str = "MENTALINK"
+    PROJECT_NAME: str = Field(
+        default="MENTALINK", validation_alias=AliasChoices("PROJECT_NAME", "APP_NAME")
+    )
     API_V1_STR: str = "/api/v1"
     APP_ENV: str = "development"
+    FRONTEND_BASE_URL: str | None = None
 
-    SECRET_KEY: str = secrets.token_urlsafe(64)
-    ALGORITHM: str = "HS256"
+    SECRET_KEY: str = Field(
+        default="development-only-secret-key-change-in-production",
+        validation_alias=AliasChoices("SECRET_KEY", "JWT_SECRET_KEY"),
+    )
+    ALGORITHM: str = Field(
+        default="HS256", validation_alias=AliasChoices("ALGORITHM", "JWT_ALGORITHM")
+    )
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
@@ -83,6 +96,7 @@ class Settings(BaseSettings):
     SMTP_HOST: str | None = None
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
+    BREVO_API_KEY: str | None = None
     EMAILS_FROM_EMAIL: str | None = None
     EMAILS_FROM_NAME: str = "MENTA-LINK"
     EMAILS_CABINET_EMAIL: str = "cabinet@unifranz.edu.bo"
@@ -109,9 +123,16 @@ class Settings(BaseSettings):
     def validate_secret_key(cls, value: str, info: ValidationInfo) -> str:
         if len(value) < 32:
             raise ValueError("SECRET_KEY must contain at least 32 characters")
-        if value == "your-secret-key-change-it-in-production":
-            raise ValueError("SECRET_KEY must be replaced before deployment")
         return value
+
+    @model_validator(mode="after")
+    def validate_production_secrets(self) -> "Settings":
+        if self.APP_ENV.lower() == "production":
+            if self.SECRET_KEY == "development-only-secret-key-change-in-production":
+                raise ValueError("SECRET_KEY must be configured in production")
+            if not self.FRONTEND_BASE_URL:
+                raise ValueError("FRONTEND_BASE_URL must be configured in production")
+        return self
 
 
 settings = Settings()
