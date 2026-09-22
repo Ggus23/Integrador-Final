@@ -36,8 +36,7 @@ from app.core.errors import (
     not_found_handler,
 )
 from app.core.limiter import limiter
-from app.db.base import Base
-from app.db.session import SessionLocal, engine
+from app.db.session import SessionLocal
 from app.services.reminders import check_all_reminders
 
 logger = logging.getLogger(__name__)
@@ -63,8 +62,6 @@ def run_scheduled_reminders():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
-
     # Iniciar el planificador en segundo plano
     scheduler = BackgroundScheduler()
     # Ejecuta cada hora en punto (minute=0)
