@@ -150,16 +150,6 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleVerifyPhone = async (userId: string) => {
-    try {
-      await apiClient.verifyUserPhone(userId);
-      toast.success('Número de teléfono confirmado');
-      fetchUsers();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al confirmar teléfono');
-    }
-  };
-
   const executeDeleteUser = async () => {
     if (!confirmDelete) return;
     try {
@@ -293,7 +283,7 @@ export default function AdminUsersPage() {
 
         <Card className="border-border animate-slide-up overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px] text-left">
+            <table className="w-full min-w-175 text-left">
               <thead className="bg-muted/50 text-muted-foreground text-[10px] font-black tracking-widest uppercase">
                 <tr>
                   <th className="px-6 py-5">Identidad del Usuario</th>
@@ -392,7 +382,7 @@ export default function AdminUsersPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-8 px-4 text-[10px] font-black font-bold uppercase transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                                className="h-8 px-4 text-[10px] font-black uppercase transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
                                 onClick={() => handleRoleChange(u.id, 'psychologist')}
                               >
                                 Hacer Psicólogo
@@ -402,7 +392,7 @@ export default function AdminUsersPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-8 px-4 text-[10px] font-black font-bold uppercase transition-all hover:bg-slate-50 hover:text-slate-600"
+                                className="h-8 px-4 text-[10px] font-black uppercase transition-all hover:bg-slate-50 hover:text-slate-600"
                                 onClick={() => handleRoleChange(u.id, 'student')}
                               >
                                 Hacer Estudiante
@@ -413,22 +403,11 @@ export default function AdminUsersPage() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="h-8 px-4 text-[10px] font-black font-bold uppercase transition-all border-purple-200 hover:bg-purple-50 hover:text-purple-650"
+                                  className="h-8 px-4 text-[10px] font-black uppercase transition-all border-purple-200 hover:bg-purple-50 hover:text-purple-650"
                                 >
                                   Ver Gráficos
                                 </Button>
                               </Link>
-                            )}
-                            {u.phone_number &&
-                              u.phone_verification_status === 'psychologist_reviewed' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 px-4 text-[10px] font-black uppercase transition-all hover:border-green-200 hover:bg-green-50 hover:text-green-600"
-                                onClick={() => handleVerifyPhone(u.id)}
-                              >
-                                Aprobar teléfono
-                              </Button>
                             )}
                             <Button
                               size="sm"
