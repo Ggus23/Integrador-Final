@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Layout } from '@/components/layout';
 import { useProtected } from '@/hooks/useProtected';
@@ -33,16 +33,7 @@ export default function StudentAnalyticsPage() {
     error: '',
   });
 
-  useEffect(() => {
-    if (loading) return;
-    if (!currentUser || currentUser.role !== 'admin') {
-      router.push('/dashboard');
-      return;
-    }
-    fetchStudent();
-  }, [currentUser, loading, studentId]);
-
-  const fetchStudent = async () => {
+  const fetchStudent = useCallback(async () => {
     try {
       setPageLoading(true);
       const details = await apiClient.getStudentDetails(studentId);
@@ -59,7 +50,16 @@ export default function StudentAnalyticsPage() {
     } finally {
       setPageLoading(false);
     }
-  };
+  }, [studentId]);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!currentUser || currentUser.role !== 'admin') {
+      router.push('/dashboard');
+      return;
+    }
+    fetchStudent();
+  }, [currentUser, fetchStudent, loading, router]);
 
   if (loading || pageLoading) {
     return (

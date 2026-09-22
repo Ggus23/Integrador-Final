@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
@@ -319,7 +320,7 @@ def verify_user_phone_manually(
     db: Session = Depends(deps.get_db),
     current_user: models.user.User = Depends(deps.get_admin_user),
 ) -> Any:
-    """Permite a un administrador confirmar manualmente el teléfono de un usuario."""
+    """Aprueba un teléfono previamente revisado por un psicólogo."""
     user = db.query(models.user.User).filter(models.user.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
@@ -328,8 +329,51 @@ def verify_user_phone_manually(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="El usuario no tiene un número de teléfono registrado",
         )
+    if (
+        user.phone_verification_status
+        != models.user.PhoneVerificationStatus.PSYCHOLOGIST_REVIEWED
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="El teléfono debe ser revisado por un psicólogo antes de aprobarlo",
+        )
 
     user.is_phone_verified = True
+    user.phone_verification_status = models.user.PhoneVerificationStatus.VERIFIED
+    user.phone_approved_by_id = current_user.id
+    user.phone_approved_at = datetime.now(timezone.utc)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.patch("/{user_id}/phone-review", response_model=schemas.user.User)
+def review_user_phone(
+    user_id: int,
+    review: schemas.user.PhoneReview,
+    db: Session = Depends(deps.get_db),
+    current_user: models.user.User = Depends(deps.get_psychologist_user),
+) -> Any:
+    """Revisa un teléfono y lo envía a aprobación administrativa."""
+    user = db.query(models.user.User).filter(models.user.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    if user.role != models.user.UserRole.STUDENT or not user.phone_number:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Solo se pueden revisar teléfonos de estudiantes registrados",
+        )
+
+    user.phone_reviewed_by_id = current_user.id
+    user.phone_reviewed_at = datetime.now(timezone.utc)
+    user.phone_review_note = review.note
+    user.is_phone_verified = False
+    user.phone_verification_status = (
+        models.user.PhoneVerificationStatus.PSYCHOLOGIST_REVIEWED
+        if review.approved
+        else models.user.PhoneVerificationStatus.REJECTED
+    )
     db.add(user)
     db.commit()
     db.refresh(user)

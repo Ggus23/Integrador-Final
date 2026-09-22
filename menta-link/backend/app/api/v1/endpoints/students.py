@@ -77,6 +77,7 @@ def read_students(
                     in [models.user.UserRole.PSYCHOLOGIST, models.user.UserRole.ADMIN]
                     else None
                 ),
+                "phone_verification_status": student.phone_verification_status,
             }
         )
 

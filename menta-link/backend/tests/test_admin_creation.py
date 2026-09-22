@@ -73,8 +73,33 @@ def prueba_admin_confirma_telefono_de_usuario(client, db_session):
         phone_number="+59179717725",
         is_phone_verified=False,
     )
-    db_session.add_all([admin, patient])
+    psychologist = User(
+        email="phone_psychologist@gmail.com",
+        hashed_password=get_password_hash("PsychPass123"),
+        full_name="Phone Psychologist",
+        role=UserRole.PSYCHOLOGIST,
+        is_active=True,
+        is_email_verified=True,
+    )
+    db_session.add_all([admin, psychologist, patient])
     db_session.commit()
+
+    psychologist_login = client.post(
+        "/api/v1/auth/login",
+        data={"username": psychologist.email, "password": "PsychPass123"},
+    )
+    psychologist_headers = {
+        "Authorization": f"Bearer {psychologist_login.json()['access_token']}"
+    }
+    review_response = client.patch(
+        f"/api/v1/users/{patient.id}/phone-review",
+        json={"approved": True, "note": "Número confirmado por llamada."},
+        headers=psychologist_headers,
+    )
+    assert review_response.status_code == 200
+    assert (
+        review_response.json()["phone_verification_status"] == "psychologist_reviewed"
+    )
 
     login_res = client.post(
         "/api/v1/auth/login",
