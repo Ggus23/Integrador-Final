@@ -20,6 +20,5 @@ docs/
 docker/*
 !docker/start.sh
 *.sqlite3
-alembic/versions/
 .vscode/
 .idea/
