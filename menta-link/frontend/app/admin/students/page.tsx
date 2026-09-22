@@ -15,14 +15,12 @@ export default function AdminStudentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const reviewPhone = async (studentId: string) => {
+  const verifyPhoneAfterCall = async (studentId: string) => {
     try {
-      await apiClient.reviewUserPhone(studentId, true);
+      await apiClient.verifyUserPhone(studentId);
       setStudents((current) =>
         current.map((student) =>
-          student.id === studentId
-            ? { ...student, phone_verification_status: 'psychologist_reviewed' }
-            : student
+          student.id === studentId ? { ...student, phone_verification_status: 'verified' } : student
         )
       );
     } catch (err) {
@@ -129,10 +127,8 @@ export default function AdminStudentsPage() {
                           📞 {student.phone_number}
                           {' - '}
                           {student.phone_verification_status === 'psychologist_reviewed'
-                            ? 'Revisado por psicólogo'
-                            : student.phone_verification_status === 'verified'
-                              ? 'Verificado'
-                              : 'Pendiente de revisión'}
+                            ? 'Verificado'
+                            : 'Pendiente de WhatsApp'}
                         </p>
                       )}
                     </div>
@@ -155,15 +151,15 @@ export default function AdminStudentsPage() {
                         Ver Detalles
                       </Button>
                     </Link>
-                    {student.phone_number &&
-                      student.phone_verification_status !== 'psychologist_reviewed' &&
+                    {user?.role === 'psychologist' &&
+                      student.phone_number &&
                       student.phone_verification_status !== 'verified' && (
                         <Button
                           variant="outline"
                           className="mt-2 w-full"
-                          onClick={() => reviewPhone(student.id)}
+                          onClick={() => verifyPhoneAfterCall(student.id)}
                         >
-                          Dar luz verde al administrador
+                          Confirmar teléfono tras WhatsApp
                         </Button>
                       )}
                   </div>

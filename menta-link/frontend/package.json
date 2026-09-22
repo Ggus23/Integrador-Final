@@ -4,15 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build",
-    "dev": "next dev -H 0.0.0.0",
+    "build": "node init && next build",
+    "dev": "node init && next dev -H 0.0.0.0",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "start": "next start",
+    "start": "node init && next start",
     "prepare": "husky"
   },
   "dependencies": {
