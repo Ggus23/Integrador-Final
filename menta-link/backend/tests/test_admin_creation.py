@@ -92,24 +92,54 @@ def prueba_admin_confirma_telefono_de_usuario(client, db_session):
         "Authorization": f"Bearer {psychologist_login.json()['access_token']}"
     }
     review_response = client.patch(
-        f"/api/v1/users/{patient.id}/phone-review",
-        json={"approved": True, "note": "Número confirmado por llamada."},
+        f"/api/v1/users/{patient.id}/phone-verification",
         headers=psychologist_headers,
     )
     assert review_response.status_code == 200
-    assert (
-        review_response.json()["phone_verification_status"] == "psychologist_reviewed"
+    assert review_response.json()["phone_verification_status"] == "verified"
+    assert review_response.json()["phone_reviewed_by_id"] == psychologist.id
+
+
+def prueba_psicologo_agenda_cita_para_estudiante(client, db_session):
+    from app.models.appointment import AppointmentStatus
+
+    psychologist = User(
+        email="appointment_psychologist@gmail.com",
+        hashed_password=get_password_hash("PsychPass123"),
+        full_name="Appointment Psychologist",
+        role=UserRole.PSYCHOLOGIST,
+        is_active=True,
+        is_email_verified=True,
     )
+    student = User(
+        email="appointment_student@unifranz.edu.bo",
+        hashed_password=get_password_hash("StudentPass123"),
+        full_name="Appointment Student",
+        role=UserRole.STUDENT,
+        is_active=True,
+        is_email_verified=True,
+    )
+    db_session.add_all([psychologist, student])
+    db_session.commit()
 
     login_res = client.post(
         "/api/v1/auth/login",
-        data={"username": admin.email, "password": "AdminPass123"},
+        data={
+            "username": psychologist.email,
+            "password": "PsychPass123",
+        },
     )
     headers = {"Authorization": f"Bearer {login_res.json()['access_token']}"}
-
-    response = client.patch(
-        f"/api/v1/users/{patient.id}/phone-verification", headers=headers
+    response = client.post(
+        f"/api/v1/appointments/student/{student.id}",
+        json={
+            "appointment_date": "2030-01-15T15:00:00Z",
+            "reason": "Seguimiento acordado por llamada",
+        },
+        headers=headers,
     )
 
-    assert response.status_code == 200
-    assert response.json()["is_phone_verified"] is True
+    assert response.status_code == 201
+    assert response.json()["user_id"] == student.id
+    assert response.json()["psychologist_id"] == psychologist.id
+    assert response.json()["status"] == AppointmentStatus.CONFIRMED.value
