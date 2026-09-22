@@ -34,6 +34,41 @@ def create_appointment(
     return appointment
 
 
+@router.post(
+    "/student/{student_id}",
+    response_model=schemas.appointment.Appointment,
+    status_code=status.HTTP_201_CREATED,
+)
+def schedule_student_appointment(
+    student_id: int,
+    appointment_in: schemas.appointment.AppointmentCreate,
+    db: Session = Depends(deps.get_db),
+    current_user: models.user.User = Depends(deps.get_psychologist_only),
+) -> Any:
+    """Agenda una cita para un estudiante después del contacto telefónico."""
+    student = (
+        db.query(models.user.User)
+        .filter(
+            models.user.User.id == student_id,
+            models.user.User.role == models.user.UserRole.STUDENT,
+        )
+        .first()
+    )
+    if not student:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    appointment = models.appointment.Appointment(
+        **appointment_in.model_dump(),
+        user_id=student.id,
+        psychologist_id=current_user.id,
+        status=models.appointment.AppointmentStatus.CONFIRMED,
+    )
+    db.add(appointment)
+    db.commit()
+    db.refresh(appointment)
+    return appointment
+
+
 @router.get("/me", response_model=List[schemas.appointment.Appointment])
 def read_my_appointments(
     db: Session = Depends(deps.get_db),

@@ -288,10 +288,6 @@ class APIClient {
     return this.request('PATCH', `/users/${userId}/phone-verification`);
   }
 
-  async reviewUserPhone(userId: string, approved: boolean, note?: string) {
-    return this.request('PATCH', `/users/${userId}/phone-review`, { approved, note });
-  }
-
   async getStudentDetails(studentId: string) {
     return this.request('GET', `/students/${studentId}`);
   }
@@ -359,6 +355,13 @@ class APIClient {
   // Appointments
   async createAppointment(data: { appointment_date: string; reason?: string }) {
     return this.request('POST', '/appointments/', data);
+  }
+
+  async scheduleStudentAppointment(
+    studentId: string,
+    data: { appointment_date: string; reason?: string }
+  ) {
+    return this.request('POST', `/appointments/student/${studentId}`, data);
   }
 
   async getMyAppointments() {
