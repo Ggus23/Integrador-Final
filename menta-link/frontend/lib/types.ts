@@ -9,11 +9,7 @@ export interface User {
   must_change_password?: boolean;
   phone_number?: string;
   is_phone_verified?: boolean;
-  phone_verification_status?:
-    | 'pending'
-    | 'psychologist_reviewed'
-    | 'verified'
-    | 'rejected';
+  phone_verification_status?: 'pending' | 'psychologist_reviewed' | 'verified' | 'rejected';
   avatar_url?: string;
 }
 
