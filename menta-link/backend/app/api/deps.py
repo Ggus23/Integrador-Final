@@ -115,5 +115,6 @@ class RoleChecker:
 
 
 get_admin_user = RoleChecker([UserRole.ADMIN])
+get_psychologist_only = RoleChecker([UserRole.PSYCHOLOGIST])
 get_psychologist_user = RoleChecker([UserRole.ADMIN, UserRole.PSYCHOLOGIST])
 get_staff_user = RoleChecker([UserRole.ADMIN, UserRole.PSYCHOLOGIST])
