@@ -20,9 +20,7 @@ export default function AdminStudentsPage() {
       await apiClient.verifyUserPhone(studentId);
       setStudents((current) =>
         current.map((student) =>
-          student.id === studentId
-            ? { ...student, phone_verification_status: 'verified' }
-            : student
+          student.id === studentId ? { ...student, phone_verification_status: 'verified' } : student
         )
       );
     } catch (err) {
@@ -130,7 +128,7 @@ export default function AdminStudentsPage() {
                           {' - '}
                           {student.phone_verification_status === 'psychologist_reviewed'
                             ? 'Verificado'
-                            : 'Pendiente de llamada'}
+                            : 'Pendiente de WhatsApp'}
                         </p>
                       )}
                     </div>
@@ -161,7 +159,7 @@ export default function AdminStudentsPage() {
                           className="mt-2 w-full"
                           onClick={() => verifyPhoneAfterCall(student.id)}
                         >
-                          Confirmar teléfono tras llamada
+                          Confirmar teléfono tras WhatsApp
                         </Button>
                       )}
                   </div>

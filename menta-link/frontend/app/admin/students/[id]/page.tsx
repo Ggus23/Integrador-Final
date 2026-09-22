@@ -108,6 +108,10 @@ export default function StudentDetailPage() {
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState('');
   const [noteLoading, setNoteLoading] = useState(false);
+  const [isAppointmentDialogOpen, setIsAppointmentDialogOpen] = useState(false);
+  const [appointmentDate, setAppointmentDate] = useState('');
+  const [appointmentReason, setAppointmentReason] = useState('');
+  const [appointmentLoading, setAppointmentLoading] = useState(false);
 
   // Analysis State
   const [trends, setTrends] = useState<any>(null);
@@ -174,6 +178,25 @@ export default function StudentDetailPage() {
       toast.error(err instanceof Error ? err.message : 'Error al guardar nota');
     } finally {
       setNoteLoading(false);
+    }
+  };
+
+  const handleScheduleAppointment = async () => {
+    if (!appointmentDate || !appointmentReason.trim()) return;
+    setAppointmentLoading(true);
+    try {
+      await apiClient.scheduleStudentAppointment(studentId, {
+        appointment_date: new Date(appointmentDate).toISOString(),
+        reason: appointmentReason.trim(),
+      });
+      toast.success('Cita agendada correctamente');
+      setAppointmentDate('');
+      setAppointmentReason('');
+      setIsAppointmentDialogOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al agendar la cita');
+    } finally {
+      setAppointmentLoading(false);
     }
   };
 
@@ -302,7 +325,7 @@ export default function StudentDetailPage() {
         )}
 
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="mb-8 grid w-full grid-cols-3 lg:w-[600px]">
+          <TabsList className="mb-8 grid w-full grid-cols-3 lg:w-150">
             <TabsTrigger value="overview">Resumen Ejecutivo</TabsTrigger>
             <TabsTrigger value="analytical">Perfil Analítico IA</TabsTrigger>
             <TabsTrigger value="history">Línea de Tiempo</TabsTrigger>
@@ -318,7 +341,7 @@ export default function StudentDetailPage() {
                 Visualización de los factores que más influyen en el nivel de riesgo detectado por
                 la inteligencia artificial.
               </p>
-              <div className="h-[300px] w-full">
+              <div className="h-75 w-full">
                 <RiskFactorsChart factors={student.risk_factors || {}} />
               </div>
             </Card>
@@ -336,19 +359,69 @@ export default function StudentDetailPage() {
                           <>
                             <Button
                               className="bg-primary w-full font-bold hover:opacity-90"
-                              onClick={() => (window.location.href = `tel:${student.phone_number}`)}
+                              onClick={() => {
+                                const phone = student.phone_number?.replace(/\D/g, '');
+                                const message = encodeURIComponent(
+                                  `Hola ${student.full_name}, soy tu psicólogo de MENTA-LINK.`
+                                );
+                                window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+                              }}
                             >
-                              Llamar al estudiante
+                              Contactar por WhatsApp
                             </Button>
-                            <Button
-                              variant="outline"
-                              className="border-primary text-primary hover:bg-primary/5 w-full"
-                              onClick={() =>
-                                (window.location.href = `tel:${student.phone_number}`)
-                              }
+                            <Dialog
+                              open={isAppointmentDialogOpen}
+                              onOpenChange={setIsAppointmentDialogOpen}
                             >
-                              Llamar para agendar cita
-                            </Button>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="border-primary text-primary hover:bg-primary/5 w-full"
+                                >
+                                  Agendar cita en calendario
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Agendar cita con el estudiante</DialogTitle>
+                                  <DialogDescription>
+                                    Selecciona la fecha y hora acordadas por WhatsApp.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div className="space-y-2">
+                                    <label className="text-sm font-medium">Fecha y hora</label>
+                                    <input
+                                      type="datetime-local"
+                                      value={appointmentDate}
+                                      onChange={(event) => setAppointmentDate(event.target.value)}
+                                      min={new Date().toISOString().slice(0, 16)}
+                                      className="border-input bg-background w-full rounded-md border px-3 py-2"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <label className="text-sm font-medium">Motivo</label>
+                                    <Textarea
+                                      value={appointmentReason}
+                                      onChange={(event) => setAppointmentReason(event.target.value)}
+                                      placeholder="Motivo acordado con el estudiante"
+                                    />
+                                  </div>
+                                </div>
+                                <DialogFooter>
+                                  <Button
+                                    onClick={handleScheduleAppointment}
+                                    disabled={
+                                      appointmentLoading ||
+                                      !appointmentDate ||
+                                      !appointmentReason.trim()
+                                    }
+                                  >
+                                    {appointmentLoading ? 'Agendando...' : 'Confirmar cita'}
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
                           </>
                         )}
                         <Dialog open={isNoteDialogOpen} onOpenChange={setIsNoteDialogOpen}>
@@ -430,7 +503,7 @@ export default function StudentDetailPage() {
                   </div>
                 </Card>
 
-                <Card className="border-border flex h-[400px] flex-col overflow-hidden p-6 shadow-sm">
+                <Card className="border-border flex h-100 flex-col overflow-hidden p-6 shadow-sm">
                   <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
                     📋 Notas Clínicas
                   </h3>
@@ -465,7 +538,7 @@ export default function StudentDetailPage() {
                     📝 Evaluaciones Psicométricas
                   </h3>
                   <div className="border-border overflow-x-auto rounded-xl border">
-                    <table className="w-full min-w-[500px] text-left text-sm">
+                    <table className="w-full min-w-125 text-left text-sm">
                       <thead className="text-muted-foreground bg-muted/50 text-[10px] font-black uppercase">
                         <tr>
                           <th className="px-4 py-4">Fecha</th>
@@ -540,9 +613,9 @@ export default function StudentDetailPage() {
           <TabsContent value="analytical" className="space-y-8">
             {loadingTrends ? (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                <Skeleton className="h-[400px] w-full rounded-xl md:col-span-1" />
-                <Skeleton className="h-[400px] w-full rounded-xl md:col-span-2" />
-                <Skeleton className="h-[300px] w-full rounded-xl md:col-span-3" />
+                <Skeleton className="h-100 w-full rounded-xl md:col-span-1" />
+                <Skeleton className="h-100 w-full rounded-xl md:col-span-2" />
+                <Skeleton className="h-75 w-full rounded-xl md:col-span-3" />
               </div>
             ) : trends ? (
               <EmotionalTrendsPanel data={trends} />
@@ -609,7 +682,7 @@ export default function StudentDetailPage() {
               <h3 className="mb-8 font-serif text-2xl font-bold">
                 📅 Línea de Tiempo Longitudinal
               </h3>
-              <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-teal-500 before:via-blue-500 before:to-transparent">
+              <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:h-full before:w-0.5 before:bg-linear-to-b before:from-teal-500 before:via-blue-500 before:to-transparent">
                 {loadingHistory ? (
                   <div className="space-y-6">
                     {[1, 2, 3].map((i) => (

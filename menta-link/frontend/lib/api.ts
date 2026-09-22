@@ -357,6 +357,13 @@ class APIClient {
     return this.request('POST', '/appointments/', data);
   }
 
+  async scheduleStudentAppointment(
+    studentId: string,
+    data: { appointment_date: string; reason?: string }
+  ) {
+    return this.request('POST', `/appointments/student/${studentId}`, data);
+  }
+
   async getMyAppointments() {
     return this.request('GET', '/appointments/me');
   }
