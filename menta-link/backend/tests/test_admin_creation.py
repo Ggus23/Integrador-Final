@@ -92,24 +92,9 @@ def prueba_admin_confirma_telefono_de_usuario(client, db_session):
         "Authorization": f"Bearer {psychologist_login.json()['access_token']}"
     }
     review_response = client.patch(
-        f"/api/v1/users/{patient.id}/phone-review",
-        json={"approved": True, "note": "Número confirmado por llamada."},
+        f"/api/v1/users/{patient.id}/phone-verification",
         headers=psychologist_headers,
     )
     assert review_response.status_code == 200
-    assert (
-        review_response.json()["phone_verification_status"] == "psychologist_reviewed"
-    )
-
-    login_res = client.post(
-        "/api/v1/auth/login",
-        data={"username": admin.email, "password": "AdminPass123"},
-    )
-    headers = {"Authorization": f"Bearer {login_res.json()['access_token']}"}
-
-    response = client.patch(
-        f"/api/v1/users/{patient.id}/phone-verification", headers=headers
-    )
-
-    assert response.status_code == 200
-    assert response.json()["is_phone_verified"] is True
+    assert review_response.json()["phone_verification_status"] == "verified"
+    assert review_response.json()["phone_reviewed_by_id"] == psychologist.id

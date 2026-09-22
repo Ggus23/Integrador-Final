@@ -332,21 +332,25 @@ export default function StudentDetailPage() {
                   <div className="flex flex-col gap-3">
                     {user?.role === 'psychologist' && (
                       <>
-                        <Button
-                          className="bg-primary w-full font-bold hover:opacity-90"
-                          onClick={() => (window.location.href = `mailto:${student.email}`)}
-                        >
-                          Contactar por Email
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="border-primary text-primary hover:bg-primary/5 w-full"
-                          onClick={() =>
-                            (window.location.href = `mailto:${student.email}?subject=Agendar Cita - Seguimiento Psicológico`)
-                          }
-                        >
-                          Agendar Cita
-                        </Button>
+                        {student.phone_number && (
+                          <>
+                            <Button
+                              className="bg-primary w-full font-bold hover:opacity-90"
+                              onClick={() => (window.location.href = `tel:${student.phone_number}`)}
+                            >
+                              Llamar al estudiante
+                            </Button>
+                            <Button
+                              variant="outline"
+                              className="border-primary text-primary hover:bg-primary/5 w-full"
+                              onClick={() =>
+                                (window.location.href = `tel:${student.phone_number}`)
+                              }
+                            >
+                              Llamar para agendar cita
+                            </Button>
+                          </>
+                        )}
                         <Dialog open={isNoteDialogOpen} onOpenChange={setIsNoteDialogOpen}>
                           <DialogTrigger asChild>
                             <Button variant="secondary" className="w-full font-medium">
