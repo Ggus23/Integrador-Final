@@ -48,6 +48,11 @@ backend/.env.backend
 
 # ML Data & Models (Do not commit large or generated files)
 backend/data/*.csv
+backend/data/synthetic_thesis_demo.sqlite3
+backend/data/synthetic_thesis_training.csv
+backend/data/synthetic_thesis_training.manifest.json
+backend/app/models/risk_model_synthetic_demo.joblib
+backend/app/models/risk_model_synthetic_demo.metrics.json
 
 # Downloaded HuggingFace model cache
 backend/app/models/emotion_hf.pt
