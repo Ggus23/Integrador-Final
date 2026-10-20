@@ -18,6 +18,8 @@ interface RiskFactorsChartProps {
 
 const LABELS: Record<string, string> = {
   pss_score: 'Nivel de Estrés',
+  gad7_score: 'Ansiedad (GAD-7)',
+  phq9_score: 'Depresión (PHQ-9)',
   checkin_avg: 'Estado de Ánimo',
   bad_days_freq: 'Frecuencia de Días Bajos',
   study_pressure: 'Presión Académica',
@@ -25,6 +27,8 @@ const LABELS: Record<string, string> = {
 
 const FACTOR_COLORS: Record<string, string> = {
   pss_score: '#ef4444',
+  gad7_score: '#8b5cf6',
+  phq9_score: '#ec4899',
   study_pressure: '#f59e0b',
   bad_days_freq: '#fb923c',
   checkin_avg: '#10b981',
@@ -32,6 +36,8 @@ const FACTOR_COLORS: Record<string, string> = {
 
 const FACTOR_DESCRIPTIONS: Record<string, string> = {
   pss_score: 'Impacto del estrés percibido en el riesgo',
+  gad7_score: 'Impacto del puntaje de ansiedad GAD-7',
+  phq9_score: 'Impacto del puntaje de depresión PHQ-9',
   checkin_avg: 'Influencia del estado de ánimo diario',
   bad_days_freq: 'Días con bienestar bajo (<3)',
   study_pressure: 'Presión académica registrada',
