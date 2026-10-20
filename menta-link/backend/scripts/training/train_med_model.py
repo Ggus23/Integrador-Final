@@ -1,66 +1,119 @@
+import argparse
+import math
 import os
+import sys
 
 import joblib
 import pandas as pd
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 
-# Rutas clave (Paths)
-# Definimos dónde buscar los datos y dónde guardar el modelo una vez entrenado.
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_PATH = os.path.join(BASE_DIR, "..", "data", "processed_training_data.csv")
-MODEL_DIR = os.path.join(BASE_DIR, "models")
-MODEL_PATH = os.path.join(MODEL_DIR, "risk_model.pkl")
+BACKEND_DIR = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
+sys.path.insert(0, BACKEND_DIR)
+
+from app.core.config import settings
+from app.ml.risk_features import FEATURE_COLUMNS, TARGET_COLUMN, validate_training_data
+
+DATA_PATH = os.path.join(BACKEND_DIR, "data", "processed_training_data.csv")
+MODEL_PATH = (
+    settings.ML_MODEL_PATH
+    if os.path.isabs(settings.ML_MODEL_PATH)
+    else os.path.join(BACKEND_DIR, settings.ML_MODEL_PATH)
+)
+MODEL_CANDIDATE_PATH = os.path.join(
+    os.path.dirname(MODEL_PATH),
+    f"{os.path.splitext(os.path.basename(MODEL_PATH))[0]}_candidate.pkl",
+)
 
 
-def train_model():
-    # Primero, verificamos que el archivo de datos exista. Sin datos no hay IA.
-    if not os.path.exists(DATA_PATH):
-        print(f"Error: No encontré los datos en {DATA_PATH}")
-        return
+def train_model(data_path: str = DATA_PATH, model_path: str = MODEL_PATH) -> None:
+    if not os.path.exists(data_path):
+        raise FileNotFoundError(
+            f"Verified risk training data not found: {data_path}. "
+            "Provide an anonymized dataset with verified risk_level labels."
+        )
 
-    print("Cargando datos de entrenamiento...")
-    df = pd.read_csv(DATA_PATH)
+    data = validate_training_data(pd.read_csv(data_path))
+    class_counts = data[TARGET_COLUMN].value_counts()
+    if len(class_counts) < 2 or (class_counts < 2).any():
+        raise ValueError(
+            "Training data must contain at least two risk classes with two or more "
+            "records per class for a stratified train/test split."
+        )
 
-    # Separamos las características (lo que sabe el modelo) de la variable objetivo (lo que debe predecir).
-    # X: Factores de riesgo (estrés, ánimo, días malos, presión académica).
-    # y: Nivel de riesgo real (Bajo, Medio, Alto).
-    X = df[["pss_score", "mood_avg", "bad_days_freq", "study_pressure"]]
-    y = df["risk_level"]
+    test_size = max(len(class_counts), math.ceil(len(data) * 0.2))
+    if len(data) - test_size < len(class_counts):
+        raise ValueError(
+            "Not enough records for a stratified train/test split with every "
+            "risk class represented in both partitions."
+        )
 
-    # División Entrenamiento vs Prueba
-    # Usamos el 80% de los datos para enseñar al modelo y guardamos el 20% para examinarlo después.
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+    features = data[FEATURE_COLUMNS]
+    labels = data[TARGET_COLUMN]
+    x_train, x_test, y_train, y_test = train_test_split(
+        features,
+        labels,
+        test_size=test_size,
+        random_state=42,
+        stratify=labels,
     )
 
-    print(f"Entrenando el modelo con {len(X_train)} ejemplos...")
+    base_estimator = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="median")),
+            (
+                "classifier",
+                RandomForestClassifier(
+                    n_estimators=200,
+                    max_depth=10,
+                    class_weight="balanced",
+                    random_state=42,
+                    n_jobs=-1,
+                ),
+            ),
+        ]
+    )
+    calibration_folds = min(5, int(y_train.value_counts().min()))
+    model = CalibratedClassifierCV(
+        estimator=base_estimator,
+        method="sigmoid",
+        cv=calibration_folds,
+    )
+    model.fit(x_train, y_train)
 
-    # Configuración del Modelo: Random Forest
-    # Hemos ajustado 'n_estimators' (cantidad de árboles) y 'max_depth' (profundidad)
-    # para que el modelo sea lo suficientemente complejo para entender los datos, pero no tanto como para memorizarlos.
-    clf = RandomForestClassifier(n_estimators=200, max_depth=10, random_state=42)
+    predictions = model.predict(x_test)
+    print(f"Accuracy: {accuracy_score(y_test, predictions):.4f}")
+    print(
+        classification_report(
+            y_test,
+            predictions,
+            labels=model.classes_,
+            zero_division=0,
+        )
+    )
 
-    # ¡A aprender! Aquí es donde ocurre la magia del entrenamiento.
-    clf.fit(X_train, y_train)
-
-    # Evaluación
-    # Ahora le pedimos al modelo que prediga los resultados para los datos de prueba que nunca ha visto.
-    predictions = clf.predict(X_test)
-    acc = accuracy_score(y_test, predictions)
-
-    print("\n--- Rendimiento del Modelo ---")
-    print(f"Precisión (Accuracy): {acc:.4f}")
-    print("\nReporte de Clasificación detallado:")
-    print(classification_report(y_test, predictions))
-
-    # Guardado
-    # Si el modelo es bueno, lo guardamos en un archivo .pkl para usarlo en la aplicación real.
-    os.makedirs(MODEL_DIR, exist_ok=True)
-    joblib.dump(clf, MODEL_PATH)
-    print(f"\nModelo guardado exitosamente en: {MODEL_PATH}")
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
+    joblib.dump(model, model_path)
+    print(f"Model saved to: {model_path}")
 
 
 if __name__ == "__main__":
-    train_model()
+    parser = argparse.ArgumentParser(
+        description=(
+            "Train RiskClassifier from anonymized, verified Low/Medium/High labels."
+        )
+    )
+    parser.add_argument("--data", default=DATA_PATH, help="Training CSV path")
+    parser.add_argument(
+        "--output",
+        default=MODEL_CANDIDATE_PATH,
+        help="Candidate model path; promote manually only after reviewing metrics",
+    )
+    arguments = parser.parse_args()
+    train_model(arguments.data, arguments.output)

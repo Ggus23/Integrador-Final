@@ -65,6 +65,8 @@ class AIPrediction(Base):
     gad_score = Column(Float, nullable=True)  # Escala GAD-7 (Ansiedad)
     phq_score = Column(Float, nullable=True)  # Escala PHQ-9 (Depresión)
     mood_avg = Column(Float, nullable=True)  # promedio de humor
+    bad_days_count = Column(Integer, nullable=True)
+    academic_pressure_avg = Column(Float, nullable=True)
     confidence = Column(Float, nullable=True)  # confianza de la predicción
 
     # Resultado de la predicción

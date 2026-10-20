@@ -97,6 +97,21 @@ class AssessmentService:
         avg_pressure = sum(pressures) / len(pressures) if pressures else 3.0
         return avg_mood, bad_days, avg_pressure
 
+    @staticmethod
+    def _collect_assessment_scores(
+        history_rows: list[tuple[str, float]],
+        current_assessment_type: str,
+        current_score: float,
+    ) -> Dict[str, float]:
+        assessment_types = ("PSS-10", "GAD-7", "PHQ-9")
+        scores: Dict[str, float] = {}
+        for assessment_type, score in history_rows:
+            if assessment_type in assessment_types:
+                scores.setdefault(assessment_type, float(score))
+        if current_assessment_type in assessment_types:
+            scores[current_assessment_type] = float(current_score)
+        return scores
+
     async def process_response(
         self,
         db: Session,
@@ -175,7 +190,25 @@ class AssessmentService:
 
         avg_mood, bad_days, avg_pressure = self._get_checkin_context(db, user_id)
 
-        # Normalize score based on assessment type for ML model compatibility
+        history_rows = (
+            db.query(Assessment.type, AssessmentResponse.total_score)
+            .join(Assessment, AssessmentResponse.assessment_id == Assessment.id)
+            .filter(
+                AssessmentResponse.user_id == user_id,
+                Assessment.type.in_(("PSS-10", "GAD-7", "PHQ-9")),
+            )
+            .order_by(
+                AssessmentResponse.created_at.desc(),
+                AssessmentResponse.id.desc(),
+            )
+            .all()
+        )
+        assessment_scores = self._collect_assessment_scores(
+            history_rows,
+            assessment_type,
+            score,
+        )
+
         if assessment_type == "PSS-10":
             norm_emotional_score = score / 40.0
         elif assessment_type == "GAD-7":
@@ -198,10 +231,12 @@ class AssessmentService:
         )
 
         ml_risk_str, confidence = risk_classifier.predict_risk(
-            norm_emotional_score,
-            avg_mood,
-            bad_days,
-            avg_pressure,
+            pss_score=assessment_scores.get("PSS-10"),
+            gad7_score=assessment_scores.get("GAD-7"),
+            phq9_score=assessment_scores.get("PHQ-9"),
+            checkin_avg=avg_mood,
+            bad_days_count=bad_days,
+            academic_pressure_avg=avg_pressure,
             student_id=str(user_id),
             faculty=faculty_name,
         )
@@ -257,9 +292,9 @@ class AssessmentService:
         )
         if phq9_critical:
             effective_risk = RiskLevel.CRITICAL
+            risk_summary.prediction_confidence = 1.0
+        risk_summary.current_risk_level = effective_risk.value
 
-        # ONLY update recommendations if the current test is PSS-10
-        # This follows the requirement: "solo debe brindarme consejos para el test pss 10 no para todos"
         if assessment_type == "PSS-10":
             recs = await recommendation_service.generate(
                 risk_level=emotional_risk,  # Use only the test result, not ML context
@@ -275,15 +310,12 @@ class AssessmentService:
             )
             risk_summary.recommendations = recs
 
-        # Determine if we should notify the cabinet based on user consent
-        # We use effective_risk here because for ALERTS we DO want the most severe risk
         source = (
             "PHQ-9 ítem 9 (pensamientos de autolesión)"
             if phq9_critical
             else f"{assessment.title} + Contexto ML"
         )
 
-        # Determine if we should notify the cabinet based on user consent
         await alert_service.process_risk_alert(
             db=db,
             user_id=user_id,

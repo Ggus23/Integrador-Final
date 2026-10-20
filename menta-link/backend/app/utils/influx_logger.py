@@ -32,7 +32,7 @@ Fecha de Migración: 2026-05-28
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from threading import Thread
 from typing import Any, Dict, Optional
 
@@ -94,13 +94,15 @@ def _save_to_postgres(
         prediction_data = {
             "model_name": model_name,
             "user_id": user_id,
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
             # Resultados de la predicción (fields)
             "confidence": fields.get("confidence"),
             "pss_score": fields.get("pss_score"),
             "gad_score": fields.get("gad_score"),
             "phq_score": fields.get("phq_score"),
             "mood_avg": fields.get("mood_avg"),
+            "bad_days_count": fields.get("bad_days_count"),
+            "academic_pressure_avg": fields.get("academic_pressure_avg"),
             "heuristic_score": fields.get("heuristic_score"),
             "dropout_probability": fields.get("dropout_probability"),
             # Metadatos para filtrado en Grafana (tags)

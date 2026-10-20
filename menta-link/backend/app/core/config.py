@@ -113,6 +113,7 @@ class Settings(BaseSettings):
     EMAILS_CABINET_EMAIL: str = "cabinet@unifranz.edu.bo"
 
     ML_MODEL_PATH: str = "app/models/risk_model.pkl"
+    ALLOW_SYNTHETIC_RISK_MODEL: bool = False
     GEMINI_API_KEY: str = ""
     HF_TOKEN: str = ""
 

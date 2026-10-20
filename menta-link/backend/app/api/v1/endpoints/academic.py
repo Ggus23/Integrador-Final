@@ -5,7 +5,7 @@ from typing import Any
 import joblib
 import numpy as np
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -295,8 +295,7 @@ class PredictionResponse(BaseModel):
     dropout_probability: float
     prediction_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ── Endpoint ───────────────────────────────────────────────────────────────

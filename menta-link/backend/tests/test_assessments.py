@@ -30,6 +30,25 @@ def prueba_puntaje_pss_10_con_inversion():
     assert score == 5.0
 
 
+def prueba_puntaje_gad7_y_phq9_es_suma_directa():
+    answers = {"q1": 2, "q2": 3, "q3": 1}
+    assert (
+        assessment_service.assessment_service.calculate_score("GAD-7", answers) == 6.0
+    )
+    assert (
+        assessment_service.assessment_service.calculate_score("PHQ-9", answers) == 6.0
+    )
+
+
+def prueba_phq9_item_9_positivo_es_critico():
+    assert assessment_service.assessment_service._check_phq9_critical_item(
+        "PHQ-9", {"q9": 1}
+    )
+    assert not assessment_service.assessment_service._check_phq9_critical_item(
+        "PHQ-9", {"q9": 0}
+    )
+
+
 def prueba_mapeo_riesgo_pss_10():
     assert (
         assessment_service.assessment_service.get_risk_level("PSS-10", 10)

@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -10,7 +12,7 @@ from app.main import app
 
 # Use SQLite in-memory for tests
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-
+os.environ["LOKY_MAX_CPU_COUNT"] = "4"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},
